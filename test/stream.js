@@ -41,7 +41,7 @@ describe('probeStream', function () {
 
     probe(fs.createReadStream(file), function (err, size) {
       assert.ifError(err);
-      assert.deepEqual(size, { width: 367, height: 187, type: 'jpeg', mime: 'image/jpeg' });
+      assert.deepEqual(size, { width: 367, height: 187, type: 'jpg', mime: 'image/jpeg' });
 
       callback();
     });
