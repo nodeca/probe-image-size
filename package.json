@@ -1,0 +1,25 @@
+{
+  "name": "probe-image-size",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "repository": "nodeca/probe-image-size",
+  "license": "MIT",
+  "files": [
+    "index.js",
+    "lib/"
+  ],
+  "scripts": {
+    "test": "make test"
+  },
+  "dependencies": {
+    "async": "^1.4.2",
+    "request": "^2.60.0",
+    "stream-parser": "~0.3.1"
+  },
+  "devDependencies": {
+    "eslint": "0.24.0",
+    "eslint-plugin-nodeca": "^1.0.3",
+    "mocha": "^2.2.5"
+  }
+}
