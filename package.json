@@ -1,8 +1,19 @@
 {
   "name": "probe-image-size",
   "version": "1.0.0",
-  "description": "",
-  "keywords": [],
+  "description": "Get image size without full download (JPG, GIF, PNG, WebP, BMP, TIFF, PSD)",
+  "keywords": [
+    "image",
+    "size",
+    "jpg",
+    "jpeg",
+    "gif",
+    "png",
+    "webp",
+    "tiff",
+    "bmp",
+    "psd"
+  ],
   "repository": "nodeca/probe-image-size",
   "license": "MIT",
   "files": [

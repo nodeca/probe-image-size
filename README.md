@@ -4,10 +4,8 @@ probe-image-size
 [![Build Status](https://img.shields.io/travis/nodeca/probe-image-size/master.svg?style=flat)](https://travis-ci.org/nodeca/probe-image-size)
 [![NPM version](https://img.shields.io/npm/v/probe-image-size.svg?style=flat)](https://www.npmjs.org/package/probe-image-size)
 
-
-> Get image size without full download
-
-Supported image types: JPG, GIF, PNG, BMP.
+> Get image size without full download. Supported image types:
+> JPG, GIF, PNG, WebP, BMP, TIFF, PSD.
 
 
 Install
@@ -26,16 +24,16 @@ var probe = require('probe-image-size');
 // Get by URL
 //
 probe('http://example.com/image.jpg', function (err, result) {
-  console.log(result); // => { width: xx, height: yy, type: 'jpg', mime: 'image/jpg' }
+  console.log(result); // => { width: xx, height: yy, type: 'jpg', mime: 'image/jpeg' }
 });
 
 // By URL with options
 //
 probe({ url: 'http://example.com/image.jpg', timeout: 5000 }, function (err, result) {
-  console.log(result); // => { width: xx, height: yy, type: 'jpg', mime: 'image/jpg' }
+  console.log(result); // => { width: xx, height: yy, type: 'jpg', mime: 'image/jpeg' }
 });
 
-// From stream
+// From the stream
 //
 var input = require('fs').createReadStream('image.jpg');
 
@@ -66,7 +64,7 @@ API
 {
   width: XX,
   height: YY,
-  type: ..., // image type
+  type: ..., // image 'type' (usual file name extention)
   mime: ...  // mime type
 }
 ```
