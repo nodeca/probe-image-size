@@ -55,7 +55,8 @@ API
 `src` can be of this types:
 
 - __String__ - URL to fetch
-- __Object__ - options for [request](https://github.com/request/request)
+- __Object__ - options for [request](https://github.com/request/request),
+  defaults are `{ timeout: 5000, maxRedirects: 2 }`
 - __Stream__ - readable stream
 
 `result` contains:
