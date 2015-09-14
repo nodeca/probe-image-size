@@ -30,7 +30,7 @@ probe('http://example.com/image.jpg', function (err, result) {
 // By URL with options
 //
 probe({ url: 'http://example.com/image.jpg', timeout: 5000 }, function (err, result) {
-  console.log(result); // => { width: xx, height: yy, type: 'jpg', mime: 'image/jpeg' }
+  console.log(result); // => { width: xx, height: yy, length: zz, type: 'jpg', mime: 'image/jpeg' }
 });
 
 // From the stream
@@ -65,6 +65,7 @@ API
 {
   width: XX,
   height: YY,
+  length: ZZ, // byte length of the file (if available, HTTP only)
   type: ..., // image 'type' (usual file name extention)
   mime: ...  // mime type
 }
