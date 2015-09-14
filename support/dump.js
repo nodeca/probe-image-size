@@ -13,14 +13,20 @@ if (!files.length) {
 }
 
 files.forEach(function (file) {
-  var input = require('fs').createReadStream(file);
+  if (file.match(/^https?:\/\//)) {
+    require('../')(file, function (err, result) {
+      console.log(file + ':', err || result);
+    });
+  } else {
+    var input = require('fs').createReadStream(file);
 
-  input.on('error', function (err) {
-    console.log(file + ':', err);
-  });
+    input.on('error', function (err) {
+      console.log(file + ':', err);
+    });
 
-  require('../')(input, function (err, result) {
-    console.log(file + ':', err || result);
-    input.destroy();
-  });
+    require('../')(input, function (err, result) {
+      console.log(file + ':', err || result);
+      input.destroy();
+    });
+  }
 });
