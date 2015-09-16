@@ -71,7 +71,10 @@ API
 }
 ```
 
-`err` is extended with `status` field on bad server response.
+`err` is an error, which is extended with:
+
+ - `code` - equals to `ECONTENT` if the library failed to parse the file;
+ - `status` - equals to a HTTP status code if it receives a non-200 response.
 
 __Note.__ If you use stream as source, it's your responsibility to terminate
 reading in callback. That will release resources as soon as possible. On
