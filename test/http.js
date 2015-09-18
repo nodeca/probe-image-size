@@ -77,4 +77,12 @@ describe('probeHttp', function () {
       callback();
     });
   });
+
+  it('should return error if url is invalid', function (callback) {
+    probe('badurl', function (err, size) {
+      assert(err.message.match(/Invalid URI/));
+
+      callback();
+    });
+  });
 });
