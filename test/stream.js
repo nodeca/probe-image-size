@@ -48,6 +48,19 @@ describe('probeStream', function () {
   });
 
 
+  // regression test
+  it('should not fail on empty JPEG markers', function (callback) {
+    var file = path.join(__dirname, 'fixtures', 'empty_comment.jpg');
+
+    probe(fs.createReadStream(file), function (err, size) {
+      assert.ifError(err);
+      assert.deepEqual(size, { width: 40, height: 20, type: 'jpg', mime: 'image/jpeg' });
+
+      callback();
+    });
+  });
+
+
   it('should detect TIFF', function (callback) {
     var file = path.join(__dirname, 'fixtures', 'iojs_logo.tiff');
 
