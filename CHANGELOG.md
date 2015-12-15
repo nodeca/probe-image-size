@@ -1,3 +1,10 @@
+1.0.5 / 2015-12-15
+------------------
+
+- Increased http request timeout to 30 seconds.
+- Don't check SSL sertificates.
+
+
 1.0.4 / 2015-09-22
 ------------------
 
