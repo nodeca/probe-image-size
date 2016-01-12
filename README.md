@@ -38,7 +38,7 @@ probe({ url: 'http://example.com/image.jpg', timeout: 5000 }, function (err, res
 var input = require('fs').createReadStream('image.jpg');
 
 probe(input, function (err, result) {
-  console.log(result); // => { width: xx, height: yy, type: 'jpg', mime: 'image/jpg' }
+  console.log(result); // => { width: xx, height: yy, type: 'jpg', mime: 'image/jpeg' }
 
   // terminate input, depends on stream type,
   // this example is for fs streams only.
