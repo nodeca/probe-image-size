@@ -1,3 +1,9 @@
+1.0.6 / 2016-04-13
+------------------
+
+- Fixed parser crashes on zero length data & offsets.
+
+
 1.0.5 / 2015-12-15
 ------------------
 
