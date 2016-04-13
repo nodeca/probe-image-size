@@ -5,6 +5,7 @@
 var assert = require('assert');
 var fs     = require('fs');
 var path   = require('path');
+var from2  = require('from2');
 var probe  = require('../');
 
 
@@ -67,6 +68,43 @@ describe('probeStream', function () {
     probe(fs.createReadStream(file), function (err, size) {
       assert.ifError(err);
       assert.deepEqual(size, { width: 367, height: 187, type: 'tiff', mime: 'image/tiff' });
+
+      callback();
+    });
+  });
+
+
+  it('should not fail when TIFF IFD is first in the file', function (callback) {
+    var file = path.join(__dirname, 'fixtures', 'meta_before_image.tiff');
+
+    probe(fs.createReadStream(file), function (err, size) {
+      assert.ifError(err);
+      assert.deepEqual(size, { width: 15, height: 15, type: 'tiff', mime: 'image/tiff' });
+
+      callback();
+    });
+  });
+
+
+  it('should not fail on bad TIFF', function (callback) {
+    // zero entries in 1st ifd, invalid TIFF
+    //                     sig     off  count next
+    var buf = new Buffer('49492a00 0800 0000 00000000'.replace(/ /g, ''), 'hex');
+
+    probe(from2([ buf ]), function (err, size) {
+      assert.equal(err.message, 'unrecognized file format');
+
+      callback();
+    });
+  });
+
+
+  it('should not fail on bad JPEG', function (callback) {
+    // length of C0 is less than needed (should be 5+ bytes)
+    var buf = new Buffer('FFD8 FFC0 0004 00112233 FFD9'.replace(/ /g, ''), 'hex');
+
+    probe(from2([ buf ]), function (err, size) {
+      assert.equal(err.message, 'unrecognized file format');
 
       callback();
     });

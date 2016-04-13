@@ -31,6 +31,7 @@
   "devDependencies": {
     "eslint": "0.24.0",
     "eslint-plugin-nodeca": "^1.0.3",
+    "from2": "^2.1",
     "istanbul": "^0.4.1",
     "mocha": "^2.2.5"
   }
