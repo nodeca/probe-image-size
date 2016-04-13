@@ -57,7 +57,7 @@ describe('probeHttp', function () {
       // response never ends
     };
 
-    probe(url, function (err, size) {
+    probe(url, function (err) {
       assert.equal(err.message, 'unrecognized file format');
 
       callback();
@@ -71,7 +71,7 @@ describe('probeHttp', function () {
       // response never ends
     };
 
-    probe(url, function (err, size) {
+    probe(url, function (err) {
       assert.equal(err.status, 404);
 
       callback();
@@ -79,7 +79,7 @@ describe('probeHttp', function () {
   });
 
   it('should return error if url is invalid', function (callback) {
-    probe('badurl', function (err, size) {
+    probe('badurl', function (err) {
       assert(err.message.match(/Invalid URI/));
 
       callback();

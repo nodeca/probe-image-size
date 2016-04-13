@@ -91,7 +91,7 @@ describe('probeStream', function () {
     //                     sig     off  count next
     var buf = new Buffer('49492a00 0800 0000 00000000'.replace(/ /g, ''), 'hex');
 
-    probe(from2([ buf ]), function (err, size) {
+    probe(from2([ buf ]), function (err) {
       assert.equal(err.message, 'unrecognized file format');
 
       callback();
@@ -103,7 +103,7 @@ describe('probeStream', function () {
     // length of C0 is less than needed (should be 5+ bytes)
     var buf = new Buffer('FFD8 FFC0 0004 00112233 FFD9'.replace(/ /g, ''), 'hex');
 
-    probe(from2([ buf ]), function (err, size) {
+    probe(from2([ buf ]), function (err) {
       assert.equal(err.message, 'unrecognized file format');
 
       callback();
@@ -150,7 +150,7 @@ describe('probeStream', function () {
   it('should skip unrecognized files', function (callback) {
     var file = path.join(__dirname, 'fixtures', 'text_file.txt');
 
-    probe(fs.createReadStream(file), function (err, size) {
+    probe(fs.createReadStream(file), function (err) {
       assert.equal(err.message, 'unrecognized file format');
 
       callback();
@@ -161,7 +161,7 @@ describe('probeStream', function () {
   it('should skip empty files', function (callback) {
     var file = path.join(__dirname, 'fixtures', 'empty.txt');
 
-    probe(fs.createReadStream(file), function (err, size) {
+    probe(fs.createReadStream(file), function (err) {
       assert.equal(err.message, 'unrecognized file format');
 
       callback();
