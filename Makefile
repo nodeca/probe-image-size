@@ -46,5 +46,5 @@ publish:
 	npm publish https://github.com/${GITHUB_PROJ}/tarball/${NPM_VERSION}
 
 
-.PHONY: publish lint test
+.PHONY: publish lint test coverage
 .SILENT: help lint test

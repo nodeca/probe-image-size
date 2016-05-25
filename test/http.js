@@ -44,6 +44,24 @@ describe('probeHttp', function () {
     });
   });
 
+  it('should process an image as promise', function () {
+    responder = function (req, res) {
+      res.writeHead(200);
+
+      // 1x1 transparent gif
+      res.write(new Buffer('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', 'base64'));
+
+      // response never ends
+    };
+
+    probe(url).then(function (size) {
+      assert.equal(size.width, 1);
+      assert.equal(size.height, 1);
+      assert.equal(size.mime, 'image/gif');
+    });
+  });
+
+
   // Check that client closes the connection after all parsers fail,
   //
   // NOTE: the server output should be large enough so all parsers
