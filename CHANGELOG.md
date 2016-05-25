@@ -1,3 +1,11 @@
+1.1.0 / 2016-05-25
+------------------
+
+- Added promise support.
+- Use `readable-stream` instead of `stream`.
+- Reorganised internal files structure & tests.
+
+
 1.0.6 / 2016-04-13
 ------------------
 

@@ -33,6 +33,12 @@ probe({ url: 'http://example.com/image.jpg', timeout: 5000 }, function (err, res
   console.log(result); // => { width: xx, height: yy, length: zz, type: 'jpg', mime: 'image/jpeg' }
 });
 
+// With Promise
+//
+probe('http://example.com/image.jpg').then(function (result) {
+  console.log(result); // => { width: xx, height: yy, type: 'jpg', mime: 'image/jpeg' }
+});
+
 // From the stream
 //
 var input = require('fs').createReadStream('image.jpg');
@@ -50,7 +56,7 @@ probe(input, function (err, result) {
 API
 ---
 
-### probe(src, callback(err, result))
+### probe(src [, callback(err, result)])
 
 `src` can be of this types:
 
@@ -75,6 +81,8 @@ API
 
  - `code` - equals to `ECONTENT` if the library failed to parse the file;
  - `status` - equals to a HTTP status code if it receives a non-200 response.
+
+If callback not provided, `Promise` will be returned.
 
 __Note.__ If you use stream as source, it's your responsibility to terminate
 reading in callback. That will release resources as soon as possible. On
