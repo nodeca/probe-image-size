@@ -61,6 +61,24 @@ describe('probeHttp', function () {
     });
   });
 
+  it('should return content-length', function (callback) {
+    responder = function (req, res) {
+      res.writeHead(200, { 'Content-Length': 1234 });
+
+      // 1x1 transparent gif
+      res.end(new Buffer('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', 'base64'));
+    };
+
+    probe(url, function (err, size) {
+      assert.ifError(err);
+      assert.equal(size.width, 1);
+      assert.equal(size.height, 1);
+      assert.equal(size.length, 1234);
+      assert.equal(size.mime, 'image/gif');
+
+      callback();
+    });
+  });
 
   // Check that client closes the connection after all parsers fail,
   //
