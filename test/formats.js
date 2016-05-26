@@ -24,6 +24,16 @@ describe('File formats', function () {
   });
 
 
+  describe('BMP (sync)', function () {
+    it('should detect BMP', function () {
+      var file = path.join(__dirname, 'fixtures', 'iojs_logo.bmp');
+      var size = probe.sync(fs.readFileSync(file));
+
+      assert.deepEqual(size, { width: 367, height: 187, type: 'bmp', mime: 'image/bmp' });
+    });
+  });
+
+
   describe('GIF', function () {
     it('should detect GIF', function (callback) {
       var file = path.join(__dirname, 'fixtures', 'iojs_logo.gif');
@@ -34,6 +44,16 @@ describe('File formats', function () {
 
         callback();
       });
+    });
+  });
+
+
+  describe('GIF (sync)', function () {
+    it('should detect GIF', function () {
+      var file = path.join(__dirname, 'fixtures', 'iojs_logo.gif');
+      var size = probe.sync(fs.readFileSync(file));
+
+      assert.deepEqual(size, { width: 367, height: 187, type: 'gif', mime: 'image/gif' });
     });
   });
 
@@ -77,6 +97,34 @@ describe('File formats', function () {
   });
 
 
+  describe.skip('JPEG (sync)', function () {
+    it('should detect JPEG', function () {
+      var file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
+      var size = probe.sync(fs.readFileSync(file));
+
+      assert.deepEqual(size, { width: 367, height: 187, type: 'jpg', mime: 'image/jpeg' });
+    });
+
+
+    it('should not fail on empty JPEG markers', function () {
+      var file = path.join(__dirname, 'fixtures', 'empty_comment.jpg');
+      var size = probe.sync(fs.readFileSync(file));
+
+      assert.deepEqual(size, { width: 40, height: 20, type: 'jpg', mime: 'image/jpeg' });
+    });
+
+
+    it('should not fail on bad JPEG', function () {
+      // length of C0 is less than needed (should be 5+ bytes)
+      var buf = new Buffer('FFD8 FFC0 0004 00112233 FFD9'.replace(/ /g, ''), 'hex');
+
+      assert.throws(function () {
+        probe.sync(buf);
+      }, /unrecognized file format/);
+    });
+  });
+
+
   describe('PNG', function () {
     it('should detect PNG', function (callback) {
       var file = path.join(__dirname, 'fixtures', 'iojs_logo.png');
@@ -91,6 +139,16 @@ describe('File formats', function () {
   });
 
 
+  describe('PNG (sync)', function () {
+    it('should detect PNG', function () {
+      var file = path.join(__dirname, 'fixtures', 'iojs_logo.png');
+      var size = probe.sync(fs.readFileSync(file));
+
+      assert.deepEqual(size, { width: 367, height: 187, type: 'png', mime: 'image/png' });
+    });
+  });
+
+
   describe('PSD', function () {
     it('should detect PSD', function (callback) {
       var file = path.join(__dirname, 'fixtures', 'empty.psd');
@@ -101,6 +159,16 @@ describe('File formats', function () {
 
         callback();
       });
+    });
+  });
+
+
+  describe('PSD (sync)', function () {
+    it('should detect PSD', function () {
+      var file = path.join(__dirname, 'fixtures', 'empty.psd');
+      var size = probe.sync(fs.readFileSync(file));
+
+      assert.deepEqual(size, { width: 640, height: 400, type: 'psd', mime: 'image/vnd.adobe.photoshop' });
     });
   });
 
@@ -178,6 +246,64 @@ describe('File formats', function () {
   });
 
 
+  describe.skip('TIFF (sync)', function () {
+    it('real image', function () {
+      var file = path.join(__dirname, 'fixtures', 'iojs_logo.tiff');
+      var size = probe.sync(fs.readFileSync(file));
+
+      assert.deepEqual(size, { width: 367, height: 187, type: 'tiff', mime: 'image/tiff' });
+    });
+
+
+    it('TIFF IFD is first in the file', function () {
+      var file = path.join(__dirname, 'fixtures', 'meta_before_image.tiff');
+      var size = probe.sync(fs.readFileSync(file));
+
+      assert.deepEqual(size, { width: 15, height: 15, type: 'tiff', mime: 'image/tiff' });
+    });
+
+
+    it('bad TIFF IFD', function () {
+      // zero entries in 1st ifd, invalid TIFF
+      //                     sig     off      count next
+      var buf = new Buffer('49492a00 08000000 0000 00000000'.replace(/ /g, ''), 'hex');
+
+      assert.throws(function () {
+        probe.sync(buf);
+      }, /unrecognized file format/);
+    });
+
+
+    it('bad TIFF IFD offset', function () {
+      // invalid 1st tiff offset
+      //                     sig     off      count next
+      var buf = new Buffer('49492a00 00000000 0000 00000000'.replace(/ /g, ''), 'hex');
+
+      assert.throws(function () {
+        probe.sync(buf);
+      }, /unrecognized file format/);
+    });
+
+
+    it('bad TIFF IFD value', function () {
+      // invalid ifd type (FF instead of 03 or 04)
+      //                     sig     off  count next
+      var buf = new Buffer((
+        '49492A00 08000000 0400' + // sig, off, count
+        '0001 0000 01000000 2a000000' + // this should be ignored
+        '0001 0400 01000000 2a000000' +
+        '0001 0000 01000000 2a000000' + // this should be ignored
+        '0101 0400 01000000 2a000000' +
+        '00000000' // next
+      ).replace(/ /g, ''), 'hex');
+
+      var size = probe.sync(buf);
+
+      assert.deepEqual(size, { width: 42, height: 42, type: 'tiff', mime: 'image/tiff' });
+    });
+  });
+
+
   describe('WEBP', function () {
     it('should detect VP8', function (callback) {
       var file = path.join(__dirname, 'fixtures', 'webp-vp8.webp');
@@ -212,6 +338,32 @@ describe('File formats', function () {
 
         callback();
       });
+    });
+  });
+
+
+  describe('WEBP (sync)', function () {
+    it('should detect VP8', function () {
+      var file = path.join(__dirname, 'fixtures', 'webp-vp8.webp');
+      var size = probe.sync(fs.readFileSync(file));
+
+      assert.deepEqual(size, { width: 1, height: 1, type: 'webp', mime: 'image/webp' });
+    });
+
+
+    it('should detect VP8X', function () {
+      var file = path.join(__dirname, 'fixtures', 'webp-vp8x.webp');
+      var size = probe.sync(fs.readFileSync(file));
+
+      assert.deepEqual(size, { width: 367, height: 187, type: 'webp', mime: 'image/webp' });
+    });
+
+
+    it('should detect VP8L (lossless)', function () {
+      var file = path.join(__dirname, 'fixtures', 'webp-vp8l.webp');
+      var size = probe.sync(fs.readFileSync(file));
+
+      assert.deepEqual(size, { width: 367, height: 187, type: 'webp', mime: 'image/webp' });
     });
   });
 });

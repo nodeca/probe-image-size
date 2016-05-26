@@ -50,6 +50,12 @@ probe(input, function (err, result) {
   // this example is for fs streams only.
   input.destroy();
 });
+
+// From a Buffer
+//
+var data = require('fs').readFileSync('image.jpg');
+
+console.log(probe.sync(data)); // => { width: xx, height: yy, type: 'jpg', mime: 'image/jpeg' }
 ```
 
 
