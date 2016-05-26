@@ -246,7 +246,7 @@ describe('File formats', function () {
   });
 
 
-  describe.skip('TIFF (sync)', function () {
+  describe('TIFF (sync)', function () {
     it('real image', function () {
       var file = path.join(__dirname, 'fixtures', 'iojs_logo.tiff');
       var size = probe.sync(fs.readFileSync(file));
