@@ -148,6 +148,18 @@ describe('File formats', function () {
         callback();
       });
     });
+
+
+    it('should skip PNG start pattern without IHDR', function (callback) {
+      var buf = new Buffer('\x89PNG\r\n\x1a\n                  ');
+      console.log(buf);
+
+      probe(from2([ buf ]), function (err) {
+        assert.equal(err.message, 'unrecognized file format');
+
+        callback();
+      });
+    });
   });
 
 
@@ -157,6 +169,13 @@ describe('File formats', function () {
       var size = probe.sync(toArray(fs.readFileSync(file)));
 
       assert.deepEqual(size, { width: 367, height: 187, type: 'png', mime: 'image/png' });
+    });
+
+
+    it('should skip PNG start pattern without IHDR', function () {
+      var size = probe.sync(str2arr('\x89PNG\r\n\x1a\n                  '));
+
+      assert.equal(size, null);
     });
   });
 
@@ -300,9 +319,7 @@ describe('File formats', function () {
       //                     sig     off      count next
       var buf = str2arr('49492a00 08000000 0000 00000000'.replace(/ /g, ''), 'hex');
 
-      assert.throws(function () {
-        probe.sync(buf);
-      }, /unrecognized file format/);
+      assert.equal(probe.sync(buf), null);
     });
 
 
@@ -311,9 +328,7 @@ describe('File formats', function () {
       //                     sig     off      count next
       var buf = str2arr('49492a00 00000000 0000 00000000'.replace(/ /g, ''), 'hex');
 
-      assert.throws(function () {
-        probe.sync(buf);
-      }, /unrecognized file format/);
+      assert.equal(probe.sync(buf), null);
     });
 
 
