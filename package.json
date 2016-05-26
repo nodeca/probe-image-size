@@ -18,6 +18,9 @@
   "license": "MIT",
   "files": [
     "index.js",
+    "http.js",
+    "stream.js",
+    "sync.js",
     "lib/"
   ],
   "scripts": {
