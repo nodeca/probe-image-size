@@ -151,8 +151,7 @@ describe('File formats', function () {
 
 
     it('should skip PNG start pattern without IHDR', function (callback) {
-      var buf = new Buffer('\x89PNG\r\n\x1a\n                  ');
-      console.log(buf);
+      var buf = new Buffer(str2arr('\x89PNG\r\n\x1a\n                  '));
 
       probe(from2([ buf ]), function (err) {
         assert.equal(err.message, 'unrecognized file format');
@@ -364,6 +363,17 @@ describe('File formats', function () {
     });
 
 
+    it('should skip VP8 header with bad code block', function (callback) {
+      var buf = new Buffer(str2arr('RIFF....WEBPVP8 ........................'));
+
+      probe(from2([ buf ]), function (err) {
+        assert.equal(err.message, 'unrecognized file format');
+
+        callback();
+      });
+    });
+
+
     it('should detect VP8X', function (callback) {
       var file = path.join(__dirname, 'fixtures', 'webp-vp8x.webp');
 
@@ -386,6 +396,17 @@ describe('File formats', function () {
         callback();
       });
     });
+
+
+    it('should skip VP8L header with bad code block', function (callback) {
+      var buf = new Buffer(str2arr('RIFF....WEBPVP8L........................'));
+
+      probe(from2([ buf ]), function (err) {
+        assert.equal(err.message, 'unrecognized file format');
+
+        callback();
+      });
+    });
   });
 
 
@@ -395,6 +416,13 @@ describe('File formats', function () {
       var size = probe.sync(toArray(fs.readFileSync(file)));
 
       assert.deepEqual(size, { width: 1, height: 1, type: 'webp', mime: 'image/webp' });
+    });
+
+
+    it('should skip VP8 header with bad code block', function () {
+      var size = probe.sync(str2arr('RIFF....WEBPVP8 ........................'));
+
+      assert.equal(size, null);
     });
 
 
@@ -411,6 +439,13 @@ describe('File formats', function () {
       var size = probe.sync(toArray(fs.readFileSync(file)));
 
       assert.deepEqual(size, { width: 367, height: 187, type: 'webp', mime: 'image/webp' });
+    });
+
+
+    it('should skip VP8L header with bad code block', function () {
+      var size = probe.sync(str2arr('RIFF....WEBPVP8L........................'));
+
+      assert.equal(size, null);
     });
   });
 });
