@@ -198,6 +198,18 @@ describe('File formats', function () {
     });
 
 
+    it('real image, Big Endian', function (callback) {
+      var file = path.join(__dirname, 'fixtures', 'iojs_logo_be.tiff');
+
+      probe(fs.createReadStream(file), function (err, size) {
+        assert.ifError(err);
+        assert.deepEqual(size, { width: 367, height: 187, type: 'tiff', mime: 'image/tiff' });
+
+        callback();
+      });
+    });
+
+
     it('TIFF IFD is first in the file', function (callback) {
       var file = path.join(__dirname, 'fixtures', 'meta_before_image.tiff');
 
@@ -261,6 +273,14 @@ describe('File formats', function () {
   describe('TIFF (sync)', function () {
     it('real image', function () {
       var file = path.join(__dirname, 'fixtures', 'iojs_logo.tiff');
+      var size = probe.sync(toArray(fs.readFileSync(file)));
+
+      assert.deepEqual(size, { width: 367, height: 187, type: 'tiff', mime: 'image/tiff' });
+    });
+
+
+    it('real image, Big Endian', function () {
+      var file = path.join(__dirname, 'fixtures', 'iojs_logo_be.tiff');
       var size = probe.sync(toArray(fs.readFileSync(file)));
 
       assert.deepEqual(size, { width: 367, height: 187, type: 'tiff', mime: 'image/tiff' });
