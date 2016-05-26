@@ -91,6 +91,20 @@ describe('File formats', function () {
   });
 
 
+  describe('PSD', function () {
+    it('should detect PSD', function (callback) {
+      var file = path.join(__dirname, 'fixtures', 'empty.psd');
+
+      probe(fs.createReadStream(file), function (err, size) {
+        assert.ifError(err);
+        assert.deepEqual(size, { width: 640, height: 400, type: 'psd', mime: 'image/vnd.adobe.photoshop' });
+
+        callback();
+      });
+    });
+  });
+
+
   describe('TIFF', function () {
     it('real image', function (callback) {
       var file = path.join(__dirname, 'fixtures', 'iojs_logo.tiff');
