@@ -3,6 +3,7 @@ probe-image-size
 
 [![Build Status](https://img.shields.io/travis/nodeca/probe-image-size/master.svg?style=flat)](https://travis-ci.org/nodeca/probe-image-size)
 [![NPM version](https://img.shields.io/npm/v/probe-image-size.svg?style=flat)](https://www.npmjs.org/package/probe-image-size)
+[![Coverage Status](https://coveralls.io/repos/github/nodeca/probe-image-size/badge.svg?branch=master)](https://coveralls.io/github/nodeca/probe-image-size?branch=master)
 
 > Get image size without full download. Supported image types:
 > JPG, GIF, PNG, WebP, BMP, TIFF, PSD.
