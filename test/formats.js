@@ -106,6 +106,28 @@ describe('File formats', function () {
         callback();
       });
     });
+
+
+    it('coverage - EOI before SOI', function (callback) {
+      var buf = new Buffer('FFD8 FFD0 FFD9'.replace(/ /g, ''), 'hex');
+
+      probe(from2([ buf ]), function (err) {
+        assert.equal(err.message, 'unrecognized file format');
+
+        callback();
+      });
+    });
+
+
+    it('coverage - unknown marker', function (callback) {
+      var buf = new Buffer('FFD8 FF05'.replace(/ /g, ''), 'hex');
+
+      probe(from2([ buf ]), function (err) {
+        assert.equal(err.message, 'unrecognized file format');
+
+        callback();
+      });
+    });
   });
 
 
@@ -132,6 +154,34 @@ describe('File formats', function () {
       var size = probe.sync(buf);
 
       assert.equal(size, null);
+    });
+
+
+    it('coverage - EOI before SOI', function () {
+      var buf = str2arr('FFD8 FFD0 FFD9'.replace(/ /g, ''), 'hex');
+
+      assert.equal(probe.sync(buf), null);
+    });
+
+
+    it('coverage - unknown marker', function () {
+      var buf = str2arr('FFD8 FF05'.replace(/ /g, ''), 'hex');
+
+      assert.equal(probe.sync(buf), null);
+    });
+
+
+    it('coverage - truncated JPEG', function () {
+      var buf;
+
+      buf = str2arr('FFD8 FF'.replace(/ /g, ''), 'hex');
+      assert.equal(probe.sync(buf), null);
+
+      buf = str2arr('FFD8 FFC0 00'.replace(/ /g, ''), 'hex');
+      assert.equal(probe.sync(buf), null);
+
+      buf = str2arr('FFD8 FFC0 FFFF 00'.replace(/ /g, ''), 'hex');
+      assert.equal(probe.sync(buf), null);
     });
   });
 
@@ -269,17 +319,14 @@ describe('File formats', function () {
       // invalid ifd type (FF instead of 03 or 04)
       //                     sig     off  count next
       var buf = new Buffer((
-        '49492A00 08000000 0400' + // sig, off, count
-        '0001 0000 01000000 2a000000' + // this should be ignored
-        '0001 0400 01000000 2a000000' +
-        '0001 0000 01000000 2a000000' + // this should be ignored
-        '0101 0400 01000000 2a000000' +
+        '49492A00 08000000 0200' + // sig, off, count
+        '0001 0000 01000000 FF000000' +
+        '0101 0400 01000000 2A000000' +
         '00000000' // next
       ).replace(/ /g, ''), 'hex');
 
-      probe(from2([ buf ]), function (err, size) {
-        assert.ifError(err);
-        assert.deepEqual(size, { width: 42, height: 42, type: 'tiff', mime: 'image/tiff' });
+      probe(from2([ buf ]), function (err) {
+        assert.equal(err.message, 'unrecognized file format');
 
         callback();
       });
@@ -334,17 +381,24 @@ describe('File formats', function () {
       // invalid ifd type (FF instead of 03 or 04)
       //                     sig     off  count next
       var buf = str2arr((
-        '49492A00 08000000 0400' + // sig, off, count
-        '0001 0000 01000000 2a000000' + // this should be ignored
-        '0001 0400 01000000 2a000000' +
-        '0001 0000 01000000 2a000000' + // this should be ignored
-        '0101 0400 01000000 2a000000' +
+        '49492A00 08000000 0200' + // sig, off, count
+        '0001 0000 01000000 FF000000' +
+        '0101 0400 01000000 2A000000' +
         '00000000' // next
       ).replace(/ /g, ''), 'hex');
 
-      var size = probe.sync(buf);
+      assert.equal(probe.sync(buf), null);
+    });
 
-      assert.deepEqual(size, { width: 42, height: 42, type: 'tiff', mime: 'image/tiff' });
+
+    it('coverage - truncated TIFF', function () {
+      var buf;
+
+      buf = str2arr('49492A00 08000000 02'.replace(/ /g, ''), 'hex');
+      assert.equal(probe.sync(buf), null);
+
+      buf = str2arr('49492A00 08000000 0200 00'.replace(/ /g, ''), 'hex');
+      assert.equal(probe.sync(buf), null);
     });
   });
 
@@ -445,6 +499,20 @@ describe('File formats', function () {
       var size = probe.sync(str2arr('RIFF....WEBPVP8L........................'));
 
       assert.equal(size, null);
+    });
+
+
+    it('coverage - truncated WEBP', function () {
+      var buf;
+
+      buf = str2arr('RIFF"\0\0\0WEBPVP8 ');
+      assert.equal(probe.sync(buf), null);
+
+      buf = str2arr('RIFF"\0\0\0WEBPVP8L');
+      assert.equal(probe.sync(buf), null);
+
+      buf = str2arr('RIFF"\0\0\0WEBPVP8X');
+      assert.equal(probe.sync(buf), null);
     });
   });
 });
