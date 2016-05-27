@@ -96,6 +96,17 @@ reading in callback. That will release resources as soon as possible. On
 http requests that's done automatically.
 
 
+### sync.probe(src) -> result|null
+
+Sync version can eat arrays, typed arrays and buffers. On success it returns
+the same result as async version. On fail it returns null.
+
+__Note.__ Formats like JPEG & TIFF can store size anywhere (far from the head).
+That usually does not happens, but if you need guarantees - always provide full
+file content to sync methods. We strongly recommend to use async version,
+as memory-friendly.
+
+
 Similar projects
 ----------------
 
