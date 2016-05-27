@@ -46,9 +46,7 @@ module.exports = function probeHttp(options, _callback) {
     }
   });
 
-  req.on('error', function (err) {
-    callback(err);
-  });
+  req.on('error', function (err) { callback(err); });
 };
 
 
