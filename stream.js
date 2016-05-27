@@ -2,7 +2,7 @@
 
 
 var once    = require('./lib/common').once;
-var async   = require('async');
+var error   = require('./lib/common').error;
 var parsers = require('./lib/parsers_stream');
 
 
@@ -14,24 +14,27 @@ module.exports = function probeStream(stream, _callback) {
 
   stream.on('error', function (err) { callback(err); });
 
-  async.map(parsers, function (parser, next) {
-    parser(stream, next);
-  }, function (__, results) {
-    // parsers never return error (just fail silently), no need to check
+  var pending = 0;
 
-    var result = Object.keys(results).map(function (type) {
-      return results[type];
-    }).filter(Boolean)[0];
+  Object.keys(parsers).forEach(function (type) {
+    var parser = parsers[type];
 
-    if (!result) {
-      var error = new Error('unrecognized file format');
+    pending++;
 
-      error.code = 'ECONTENT';
-      callback(error);
-      return;
-    }
+    parser(stream, function (__, result) {
+      pending--;
 
-    callback(null, result);
+      if (result) {
+        callback(null, result);
+        return;
+      }
+
+      // No more active scanners & still no positive -> fail
+      if (!pending) {
+        callback(error('unrecognized file format', 'ECONTENT'));
+        return;
+      }
+    });
   });
 };
 

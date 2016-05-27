@@ -2,6 +2,7 @@
 
 
 var once        = require('./lib/common').once;
+var error       = require('./lib/common').error;
 var request     = require('request').defaults({
   timeout: 30000,
   maxRedirects: 2,
@@ -38,9 +39,8 @@ module.exports = function probeHttp(options, _callback) {
         callback(err, result);
       });
     } else {
-      var err = new Error('bad status code: ' + res.statusCode);
+      var err = error('bad status code: ' + res.statusCode, null, res.statusCode);
 
-      err.status = res.statusCode;
       req.abort();
       callback(err);
     }
