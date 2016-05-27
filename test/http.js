@@ -44,7 +44,7 @@ describe('probeHttp', function () {
     });
   });
 
-  it('should process an image as promise', function () {
+  it('should process an image (promise)', function () {
     responder = function (req, res) {
       res.writeHead(200);
 
@@ -114,9 +114,37 @@ describe('probeHttp', function () {
     });
   });
 
+  it('should fail on 404 (promise)', function () {
+    responder = function (req, res) {
+      res.writeHead(404);
+      res.write('not found');
+      // response never ends
+    };
+
+    return probe(url).then(
+      function () {
+        throw new Error('should not succeed');
+      },
+      function (err) {
+        assert.equal(err.status, 404);
+      });
+  });
+
   it('should return error if url is invalid', function (callback) {
     probe('badurl', function (err) {
       assert(err.message.match(/Invalid URI/));
+
+      callback();
+    });
+  });
+
+  it('should return error if connection fails', function (callback) {
+    responder = function (req, res) {
+      res.destroy();
+    };
+
+    probe(url, function (err) {
+      assert.equal(err.code, 'ECONNRESET');
 
       callback();
     });
