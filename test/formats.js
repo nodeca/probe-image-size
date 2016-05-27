@@ -109,7 +109,7 @@ describe('File formats', function () {
   });
 
 
-  describe.skip('JPEG (sync)', function () {
+  describe('JPEG (sync)', function () {
     it('should detect JPEG', function () {
       var file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
       var size = probe.sync(toArray(fs.readFileSync(file)));
@@ -129,10 +129,9 @@ describe('File formats', function () {
     it('should not fail on bad JPEG', function () {
       // length of C0 is less than needed (should be 5+ bytes)
       var buf = str2arr('FFD8 FFC0 0004 00112233 FFD9'.replace(/ /g, ''), 'hex');
+      var size = probe.sync(buf);
 
-      assert.throws(function () {
-        probe.sync(buf);
-      }, /unrecognized file format/);
+      assert.equal(size, null);
     });
   });
 
