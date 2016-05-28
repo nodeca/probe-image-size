@@ -91,9 +91,10 @@ API
 
 If callback not provided, `Promise` will be returned.
 
-__Note.__ If you use stream as source, it's your responsibility to terminate
-reading in callback. That will release resources as soon as possible. On
-http requests that's done automatically.
+__Note.__ If you use `Stream` as source, it's your responsibility to close that
+stream in callback. In other case you can get memory leak, because stream will
+be left in paused state. With http requests that's not a problem - everything
+is released automatically, as soon as possible.
 
 
 ### sync.probe(src) -> result|null
@@ -103,7 +104,7 @@ the same result as async version. On fail it returns null.
 
 __Note.__ Formats like JPEG & TIFF can store size anywhere (far from the head).
 That usually does not happens, but if you need guarantees - always provide full
-file content to sync methods. We strongly recommend to use async version,
+file content to sync methods. We strongly recommend to use async version
 as memory-friendly.
 
 
