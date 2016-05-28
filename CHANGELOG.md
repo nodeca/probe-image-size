@@ -1,3 +1,13 @@
+1.2.0 / 2016-05-28
+------------------
+
+- Added `.sync.probe()` method.
+- Splited to separate files (simplify browserification).
+- Faster return on positive result & faster resource release.
+- Fix stream error handling.
+- 100% tests coverage.
+
+
 1.1.0 / 2016-05-25
 ------------------
 
