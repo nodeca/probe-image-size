@@ -54,7 +54,7 @@ describe('probeHttp', function () {
       // response never ends
     };
 
-    probe(url).then(function (size) {
+    return probe(url).then(function (size) {
       assert.equal(size.width, 1);
       assert.equal(size.height, 1);
       assert.equal(size.mime, 'image/gif');
