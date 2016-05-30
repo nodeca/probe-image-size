@@ -1,3 +1,9 @@
+1.2.1 / 2016-05-30
+------------------
+
+- Stream: posponed callback to avoid possible races on forced stream close.
+
+
 1.2.0 / 2016-05-28
 ------------------
 

@@ -12,7 +12,17 @@ function unrecognizedFormat() {
 
 
 module.exports = function probeStream(stream, _callback) {
-  var callback = once(_callback);
+  var callback = once(function () {
+    // We should postpone callback to allow all piped parsers accept .write().
+    // In other case, if stream is closed from callback that can cause
+    // exceptions like "write after end".
+    var args = Array.prototype.slice.call(arguments);
+
+    process.nextTick(function () {
+      _callback.apply(null, args);
+    });
+  });
+
   var pending  = 0;
   var pStreams = [];
 
