@@ -21,6 +21,7 @@ function toArray(buf) {
 }
 
 
+/* eslint-disable max-len */
 describe('File formats', function () {
   describe('BMP', function () {
     it('should detect BMP', function (callback) {
@@ -28,7 +29,7 @@ describe('File formats', function () {
 
       probe(fs.createReadStream(file), function (err, size) {
         assert.ifError(err);
-        assert.deepEqual(size, { width: 367, height: 187, type: 'bmp', mime: 'image/bmp' });
+        assert.deepEqual(size, { width: 367, height: 187, type: 'bmp', mime: 'image/bmp', wUnits: 'px', hUnits: 'px' });
 
         callback();
       });
@@ -41,7 +42,7 @@ describe('File formats', function () {
       var file = path.join(__dirname, 'fixtures', 'iojs_logo.bmp');
       var size = probe.sync(toArray(fs.readFileSync(file)));
 
-      assert.deepEqual(size, { width: 367, height: 187, type: 'bmp', mime: 'image/bmp' });
+      assert.deepEqual(size, { width: 367, height: 187, type: 'bmp', mime: 'image/bmp', wUnits: 'px', hUnits: 'px' });
     });
   });
 
@@ -52,7 +53,7 @@ describe('File formats', function () {
 
       probe(fs.createReadStream(file), function (err, size) {
         assert.ifError(err);
-        assert.deepEqual(size, { width: 367, height: 187, type: 'gif', mime: 'image/gif' });
+        assert.deepEqual(size, { width: 367, height: 187, type: 'gif', mime: 'image/gif', wUnits: 'px', hUnits: 'px' });
 
         callback();
       });
@@ -65,7 +66,7 @@ describe('File formats', function () {
       var file = path.join(__dirname, 'fixtures', 'iojs_logo.gif');
       var size = probe.sync(toArray(fs.readFileSync(file)));
 
-      assert.deepEqual(size, { width: 367, height: 187, type: 'gif', mime: 'image/gif' });
+      assert.deepEqual(size, { width: 367, height: 187, type: 'gif', mime: 'image/gif', wUnits: 'px', hUnits: 'px' });
     });
   });
 
@@ -76,7 +77,7 @@ describe('File formats', function () {
 
       probe(fs.createReadStream(file), function (err, size) {
         assert.ifError(err);
-        assert.deepEqual(size, { width: 367, height: 187, type: 'jpg', mime: 'image/jpeg' });
+        assert.deepEqual(size, { width: 367, height: 187, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' });
 
         callback();
       });
@@ -89,7 +90,7 @@ describe('File formats', function () {
 
       probe(fs.createReadStream(file), function (err, size) {
         assert.ifError(err);
-        assert.deepEqual(size, { width: 40, height: 20, type: 'jpg', mime: 'image/jpeg' });
+        assert.deepEqual(size, { width: 40, height: 20, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' });
 
         callback();
       });
@@ -136,7 +137,7 @@ describe('File formats', function () {
       var file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
       var size = probe.sync(toArray(fs.readFileSync(file)));
 
-      assert.deepEqual(size, { width: 367, height: 187, type: 'jpg', mime: 'image/jpeg' });
+      assert.deepEqual(size, { width: 367, height: 187, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' });
     });
 
 
@@ -144,7 +145,7 @@ describe('File formats', function () {
       var file = path.join(__dirname, 'fixtures', 'empty_comment.jpg');
       var size = probe.sync(toArray(fs.readFileSync(file)));
 
-      assert.deepEqual(size, { width: 40, height: 20, type: 'jpg', mime: 'image/jpeg' });
+      assert.deepEqual(size, { width: 40, height: 20, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' });
     });
 
 
@@ -192,7 +193,7 @@ describe('File formats', function () {
 
       probe(fs.createReadStream(file), function (err, size) {
         assert.ifError(err);
-        assert.deepEqual(size, { width: 367, height: 187, type: 'png', mime: 'image/png' });
+        assert.deepEqual(size, { width: 367, height: 187, type: 'png', mime: 'image/png', wUnits: 'px', hUnits: 'px' });
 
         callback();
       });
@@ -216,7 +217,7 @@ describe('File formats', function () {
       var file = path.join(__dirname, 'fixtures', 'iojs_logo.png');
       var size = probe.sync(toArray(fs.readFileSync(file)));
 
-      assert.deepEqual(size, { width: 367, height: 187, type: 'png', mime: 'image/png' });
+      assert.deepEqual(size, { width: 367, height: 187, type: 'png', mime: 'image/png', wUnits: 'px', hUnits: 'px' });
     });
 
 
@@ -234,7 +235,7 @@ describe('File formats', function () {
 
       probe(fs.createReadStream(file), function (err, size) {
         assert.ifError(err);
-        assert.deepEqual(size, { width: 640, height: 400, type: 'psd', mime: 'image/vnd.adobe.photoshop' });
+        assert.deepEqual(size, { width: 640, height: 400, type: 'psd', mime: 'image/vnd.adobe.photoshop', wUnits: 'px', hUnits: 'px' });
 
         callback();
       });
@@ -247,7 +248,7 @@ describe('File formats', function () {
       var file = path.join(__dirname, 'fixtures', 'empty.psd');
       var size = probe.sync(toArray(fs.readFileSync(file)));
 
-      assert.deepEqual(size, { width: 640, height: 400, type: 'psd', mime: 'image/vnd.adobe.photoshop' });
+      assert.deepEqual(size, { width: 640, height: 400, type: 'psd', mime: 'image/vnd.adobe.photoshop', wUnits: 'px', hUnits: 'px' });
     });
   });
 
@@ -258,7 +259,7 @@ describe('File formats', function () {
 
       probe(fs.createReadStream(file), function (err, size) {
         assert.ifError(err);
-        assert.deepEqual(size, { width: 367, height: 187, type: 'tiff', mime: 'image/tiff' });
+        assert.deepEqual(size, { width: 367, height: 187, type: 'tiff', mime: 'image/tiff', wUnits: 'px', hUnits: 'px' });
 
         callback();
       });
@@ -270,7 +271,7 @@ describe('File formats', function () {
 
       probe(fs.createReadStream(file), function (err, size) {
         assert.ifError(err);
-        assert.deepEqual(size, { width: 367, height: 187, type: 'tiff', mime: 'image/tiff' });
+        assert.deepEqual(size, { width: 367, height: 187, type: 'tiff', mime: 'image/tiff', wUnits: 'px', hUnits: 'px' });
 
         callback();
       });
@@ -282,7 +283,7 @@ describe('File formats', function () {
 
       probe(fs.createReadStream(file), function (err, size) {
         assert.ifError(err);
-        assert.deepEqual(size, { width: 15, height: 15, type: 'tiff', mime: 'image/tiff' });
+        assert.deepEqual(size, { width: 15, height: 15, type: 'tiff', mime: 'image/tiff', wUnits: 'px', hUnits: 'px' });
 
         callback();
       });
@@ -339,7 +340,7 @@ describe('File formats', function () {
       var file = path.join(__dirname, 'fixtures', 'iojs_logo.tiff');
       var size = probe.sync(toArray(fs.readFileSync(file)));
 
-      assert.deepEqual(size, { width: 367, height: 187, type: 'tiff', mime: 'image/tiff' });
+      assert.deepEqual(size, { width: 367, height: 187, type: 'tiff', mime: 'image/tiff', wUnits: 'px', hUnits: 'px' });
     });
 
 
@@ -347,7 +348,7 @@ describe('File formats', function () {
       var file = path.join(__dirname, 'fixtures', 'iojs_logo_be.tiff');
       var size = probe.sync(toArray(fs.readFileSync(file)));
 
-      assert.deepEqual(size, { width: 367, height: 187, type: 'tiff', mime: 'image/tiff' });
+      assert.deepEqual(size, { width: 367, height: 187, type: 'tiff', mime: 'image/tiff', wUnits: 'px', hUnits: 'px' });
     });
 
 
@@ -355,7 +356,7 @@ describe('File formats', function () {
       var file = path.join(__dirname, 'fixtures', 'meta_before_image.tiff');
       var size = probe.sync(toArray(fs.readFileSync(file)));
 
-      assert.deepEqual(size, { width: 15, height: 15, type: 'tiff', mime: 'image/tiff' });
+      assert.deepEqual(size, { width: 15, height: 15, type: 'tiff', mime: 'image/tiff', wUnits: 'px', hUnits: 'px' });
     });
 
 
@@ -409,7 +410,7 @@ describe('File formats', function () {
 
       probe(fs.createReadStream(file), function (err, size) {
         assert.ifError(err);
-        assert.deepEqual(size, { width: 1, height: 1, type: 'webp', mime: 'image/webp' });
+        assert.deepEqual(size, { width: 1, height: 1, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' });
 
         callback();
       });
@@ -432,7 +433,7 @@ describe('File formats', function () {
 
       probe(fs.createReadStream(file), function (err, size) {
         assert.ifError(err);
-        assert.deepEqual(size, { width: 367, height: 187, type: 'webp', mime: 'image/webp' });
+        assert.deepEqual(size, { width: 367, height: 187, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' });
 
         callback();
       });
@@ -444,7 +445,7 @@ describe('File formats', function () {
 
       probe(fs.createReadStream(file), function (err, size) {
         assert.ifError(err);
-        assert.deepEqual(size, { width: 367, height: 187, type: 'webp', mime: 'image/webp' });
+        assert.deepEqual(size, { width: 367, height: 187, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' });
 
         callback();
       });
@@ -468,7 +469,7 @@ describe('File formats', function () {
       var file = path.join(__dirname, 'fixtures', 'webp-vp8.webp');
       var size = probe.sync(toArray(fs.readFileSync(file)));
 
-      assert.deepEqual(size, { width: 1, height: 1, type: 'webp', mime: 'image/webp' });
+      assert.deepEqual(size, { width: 1, height: 1, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' });
     });
 
 
@@ -483,7 +484,7 @@ describe('File formats', function () {
       var file = path.join(__dirname, 'fixtures', 'webp-vp8x.webp');
       var size = probe.sync(toArray(fs.readFileSync(file)));
 
-      assert.deepEqual(size, { width: 367, height: 187, type: 'webp', mime: 'image/webp' });
+      assert.deepEqual(size, { width: 367, height: 187, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' });
     });
 
 
@@ -491,7 +492,7 @@ describe('File formats', function () {
       var file = path.join(__dirname, 'fixtures', 'webp-vp8l.webp');
       var size = probe.sync(toArray(fs.readFileSync(file)));
 
-      assert.deepEqual(size, { width: 367, height: 187, type: 'webp', mime: 'image/webp' });
+      assert.deepEqual(size, { width: 367, height: 187, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' });
     });
 
 

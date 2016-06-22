@@ -25,19 +25,19 @@ var probe = require('probe-image-size');
 // Get by URL
 //
 probe('http://example.com/image.jpg', function (err, result) {
-  console.log(result); // => { width: xx, height: yy, type: 'jpg', mime: 'image/jpeg' }
+  console.log(result); // => { width: xx, height: yy, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' }
 });
 
 // By URL with options
 //
 probe({ url: 'http://example.com/image.jpg', timeout: 5000 }, function (err, result) {
-  console.log(result); // => { width: xx, height: yy, length: zz, type: 'jpg', mime: 'image/jpeg' }
+  console.log(result); // => { width: xx, height: yy, length: zz, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' }
 });
 
 // With Promise
 //
 probe('http://example.com/image.jpg').then(function (result) {
-  console.log(result); // => { width: xx, height: yy, type: 'jpg', mime: 'image/jpeg' }
+  console.log(result); // => { width: xx, height: yy, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' }
 });
 
 // From the stream
@@ -45,7 +45,8 @@ probe('http://example.com/image.jpg').then(function (result) {
 var input = require('fs').createReadStream('image.jpg');
 
 probe(input, function (err, result) {
-  console.log(result); // => { width: xx, height: yy, type: 'jpg', mime: 'image/jpeg' }
+  console.log(result);
+  // => { width: xx, height: yy, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' }
 
   // terminate input, depends on stream type,
   // this example is for fs streams only.
@@ -56,7 +57,7 @@ probe(input, function (err, result) {
 //
 var data = require('fs').readFileSync('image.jpg');
 
-console.log(probe.sync(data)); // => { width: xx, height: yy, type: 'jpg', mime: 'image/jpeg' }
+console.log(probe.sync(data)); // => { width: xx, height: yy, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' }
 ```
 
 
@@ -80,7 +81,9 @@ API
   height: YY,
   length: ZZ, // byte length of the file (if available, HTTP only)
   type: ..., // image 'type' (usual file name extention)
-  mime: ...  // mime type
+  mime: ...,  // mime type
+  wUnits: 'px', // width units type ('px' by default, can be different for SVG)
+  hUnits: 'px', // height units type ('px' by default, can be different for SVG)
 }
 ```
 
