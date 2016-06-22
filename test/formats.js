@@ -253,6 +253,30 @@ describe('File formats', function () {
   });
 
 
+  describe.skip('SVG', function () {
+    it('should detect SVG', function (callback) {
+      var file = path.join(__dirname, 'fixtures', 'sample.svg');
+
+      probe(fs.createReadStream(file), function (err, size) {
+        assert.ifError(err);
+        assert.deepEqual(size, { width: 367, height: 187, type: 'png', mime: 'image/png', wUnits: 'px', hUnits: 'px' });
+
+        callback();
+      });
+    });
+  });
+
+
+  describe('SVG (sync)', function () {
+    it('should detect PNG', function () {
+      var file = path.join(__dirname, 'fixtures', 'sample.svg');
+      var size = probe.sync(toArray(fs.readFileSync(file)));
+
+      assert.deepEqual(size, { width: 744.09448819, height: 1052.3622047, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
+    });
+  });
+
+
   describe('TIFF', function () {
     it('real image', function (callback) {
       var file = path.join(__dirname, 'fixtures', 'iojs_logo.tiff');
