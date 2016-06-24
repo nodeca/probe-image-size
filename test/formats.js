@@ -253,15 +253,135 @@ describe('File formats', function () {
   });
 
 
-  describe.skip('SVG', function () {
+  describe('SVG', function () {
     it('should detect SVG', function (callback) {
       var file = path.join(__dirname, 'fixtures', 'sample.svg');
 
       probe(fs.createReadStream(file), function (err, size) {
         assert.ifError(err);
-        assert.deepEqual(size, { width: 367, height: 187, type: 'png', mime: 'image/png', wUnits: 'px', hUnits: 'px' });
+        assert.deepEqual(size, { width: 744.09448819, height: 1052.3622047, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
 
         callback();
+      });
+    });
+
+    it('should work with weirdly split chunks', function (callback) {
+      probe(from2([
+        new Buffer('   '),
+        new Buffer(' <s'),
+        new Buffer('vg width="5" height="5"></svg>')
+      ]), function (err, size) {
+        assert.ifError(err);
+        assert.deepEqual(size, { width: 5, height: 5, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
+
+        callback();
+      });
+    });
+
+    it('should extract width info from viewbox', function (callback) {
+      probe(from2([
+        new Buffer('<svg viewbox="0 0 800 600"></svg>')
+      ]), function (err, size) {
+        assert.ifError(err);
+        assert.deepEqual(size, { width: 800, height: 600, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
+
+        callback();
+      });
+    });
+
+    it('should return width/height units', function (callback) {
+      probe(from2([
+        new Buffer('<svg width="5in" height="4pt"></svg>')
+      ]), function (err, size) {
+        assert.ifError(err);
+        assert.deepEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'pt' });
+
+        callback();
+      });
+    });
+
+    /* eslint-disable max-nested-callbacks */
+    describe('coverage', function () {
+      it('too much data before doctype', function (callback) {
+        var buf = new Buffer(70000);
+
+        buf.fill(0x20);
+
+        probe(from2([ buf ]), function (err) {
+          assert.equal(err.message, 'unrecognized file format');
+
+          callback();
+        });
+      });
+
+      it('too much data before svg', function (callback) {
+        var buf = new Buffer(70000);
+
+        buf.fill(0x20);
+
+        probe(from2([ new Buffer('<svg'), buf ]), function (err) {
+          assert.equal(err.message, 'unrecognized file format');
+
+          callback();
+        });
+      });
+
+      it('width, no height', function (callback) {
+        probe(from2([ new Buffer('<svg width="1in" viewbox="0 0 100 50">') ]), function (err, size) {
+          assert.ifError(err);
+          assert.deepEqual(size, { width: 1, height: 0.5, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'in' });
+
+          callback();
+        });
+      });
+
+      it('height, no width', function (callback) {
+        probe(from2([ new Buffer('<svg height="1in" viewbox="0 0 100 50">') ]), function (err, size) {
+          assert.ifError(err);
+          assert.deepEqual(size, { width: 2, height: 1, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'in' });
+
+          callback();
+        });
+      });
+
+      it('width is invalid, no height', function (callback) {
+        probe(from2([ new Buffer('<svg width="-1" viewbox="0 0 100 50">') ]), function (err) {
+          assert.equal(err.message, 'unrecognized file format');
+
+          callback();
+        });
+      });
+
+      it('height is invalid, no width', function (callback) {
+        probe(from2([ new Buffer('<svg height="foobar" viewbox="0 0 100 50">') ]), function (err) {
+          assert.equal(err.message, 'unrecognized file format');
+
+          callback();
+        });
+      });
+
+      it('width is invalid', function (callback) {
+        probe(from2([ new Buffer('<svg width="0" height="5">') ]), function (err) {
+          assert.equal(err.message, 'unrecognized file format');
+
+          callback();
+        });
+      });
+
+      it('no viewbox, no height', function (callback) {
+        probe(from2([ new Buffer('<svg width="5">') ]), function (err) {
+          assert.equal(err.message, 'unrecognized file format');
+
+          callback();
+        });
+      });
+
+      it('viewbox units are different', function (callback) {
+        probe(from2([ new Buffer('<svg width="5" viewbox="0 0 5px 3in">') ]), function (err) {
+          assert.equal(err.message, 'unrecognized file format');
+
+          callback();
+        });
       });
     });
   });
@@ -273,6 +393,68 @@ describe('File formats', function () {
       var size = probe.sync(toArray(fs.readFileSync(file)));
 
       assert.deepEqual(size, { width: 744.09448819, height: 1052.3622047, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
+    });
+
+    it('should extract width info from viewbox', function () {
+      var size = probe.sync(toArray(new Buffer('<svg viewbox="0 0 800 600"></svg>')));
+
+      assert.deepEqual(size, { width: 800, height: 600, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
+    });
+
+    it('should return width/height units', function () {
+      var size = probe.sync(toArray(new Buffer('<svg width="5in" height="4pt"></svg>')));
+
+      assert.deepEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'pt' });
+    });
+
+    describe('coverage', function () {
+      it('wrong signature', function () {
+        var size = probe.sync(toArray(new Buffer('  <not-really-svg width="1" height="1">')));
+
+        assert.equal(size, null);
+      });
+
+      it('width, no height', function () {
+        var size = probe.sync(toArray(new Buffer('<svg width="1in" viewbox="0 0 100 50">')));
+
+        assert.deepEqual(size, { width: 1, height: 0.5, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'in' });
+      });
+
+      it('height, no width', function () {
+        var size = probe.sync(toArray(new Buffer('<svg height="1in" viewbox="0 0 100 50">')));
+
+        assert.deepEqual(size, { width: 2, height: 1, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'in' });
+      });
+
+      it('width is invalid, no height', function () {
+        var size = probe.sync(toArray(new Buffer('<svg width="-1" viewbox="0 0 100 50">')));
+
+        assert.deepEqual(size, null);
+      });
+
+      it('height is invalid, no width', function () {
+        var size = probe.sync(toArray(new Buffer('<svg height="foobar" viewbox="0 0 100 50">')));
+
+        assert.deepEqual(size, null);
+      });
+
+      it('width is invalid', function () {
+        var size = probe.sync(toArray(new Buffer('<svg width="0" height="5">')));
+
+        assert.deepEqual(size, null);
+      });
+
+      it('no viewbox, no height', function () {
+        var size = probe.sync(toArray(new Buffer('<svg width="5">')));
+
+        assert.deepEqual(size, null);
+      });
+
+      it('viewbox units are different', function () {
+        var size = probe.sync(toArray(new Buffer('<svg width="5" viewbox="0 0 5px 3in">')));
+
+        assert.deepEqual(size, null);
+      });
     });
   });
 
