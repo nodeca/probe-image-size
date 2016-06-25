@@ -1,3 +1,11 @@
+2.0.0 / 2016-06-25
+------------------
+
+- SVG support
+- width/height now can be float (with fractional part)
+- Return dimention units ('px' everywhere except SVG)
+
+
 1.2.1 / 2016-05-30
 ------------------
 
