@@ -326,8 +326,17 @@ describe('File formats', function () {
         });
       });
 
-      it('width, no height', function (callback) {
-        probe(from2([ new Buffer('<svg width="1in" viewbox="0 0 100 50">') ]), function (err, size) {
+      it('single quotes (width/height)', function (callback) {
+        probe(from2([ new Buffer("<svg width='5in' height='4pt'></svg>") ]), function (err, size) {
+          assert.ifError(err);
+          assert.deepEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'pt' });
+
+          callback();
+        });
+      });
+
+      it('single quotes (viewbox)', function (callback) {
+        probe(from2([ new Buffer("<svg width='1in' viewbox='0 0 100 50'>") ]), function (err, size) {
           assert.ifError(err);
           assert.deepEqual(size, { width: 1, height: 0.5, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'in' });
 
@@ -360,8 +369,16 @@ describe('File formats', function () {
         });
       });
 
-      it('width is invalid', function (callback) {
+      it('width is invalid (non positive)', function (callback) {
         probe(from2([ new Buffer('<svg width="0" height="5">') ]), function (err) {
+          assert.equal(err.message, 'unrecognized file format');
+
+          callback();
+        });
+      });
+
+      it('width is invalid (Infinity)', function (callback) {
+        probe(from2([ new Buffer('<svg width="Infinity" height="5">') ]), function (err) {
           assert.equal(err.message, 'unrecognized file format');
 
           callback();
@@ -414,6 +431,18 @@ describe('File formats', function () {
         assert.equal(size, null);
       });
 
+      it('single quotes (width/height)', function () {
+        var size = probe.sync(toArray(new Buffer("<svg width='5in' height='4pt'></svg>")));
+
+        assert.deepEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'pt' });
+      });
+
+      it('single quotes (viewbox)', function () {
+        var size = probe.sync(toArray(new Buffer("<svg width='1in' viewbox='0 0 100 50'>")));
+
+        assert.deepEqual(size, { width: 1, height: 0.5, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'in' });
+      });
+
       it('width, no height', function () {
         var size = probe.sync(toArray(new Buffer('<svg width="1in" viewbox="0 0 100 50">')));
 
@@ -438,8 +467,14 @@ describe('File formats', function () {
         assert.deepEqual(size, null);
       });
 
-      it('width is invalid', function () {
+      it('width is invalid (non positive)', function () {
         var size = probe.sync(toArray(new Buffer('<svg width="0" height="5">')));
+
+        assert.deepEqual(size, null);
+      });
+
+      it('width is invalid (Infinity)', function () {
+        var size = probe.sync(toArray(new Buffer('<svg width="Infinity" height="5">')));
 
         assert.deepEqual(size, null);
       });
