@@ -8,6 +8,13 @@ probe-image-size
 > Get image size without full download. Supported image types:
 > JPG, GIF, PNG, WebP, BMP, TIFF, SVG, PSD.
 
+Key features:
+
+- small size, no heavy dependencies
+- works with remote and local data
+- effective with big images (speed/memory), download minimal data from remotes
+- easy to browserify (splitted to components)
+
 
 Install
 -------
