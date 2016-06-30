@@ -33,12 +33,10 @@ module.exports = function probeStream(stream, _callback) {
     var i;
 
     if (strm) {
+      stream.unpipe(strm);
+      strm.end();
       i = pStreams.indexOf(strm);
-      if (i) {
-        stream.unpipe(pStreams[i]);
-        pStreams[i].end();
-        pStreams.splice(i, 1);
-      }
+      if (i >= 0) pStreams.splice(i, 1);
       return;
     }
 
