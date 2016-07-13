@@ -23,7 +23,6 @@ module.exports = function probeStream(stream, _callback) {
     });
   });
 
-  var pending  = 0;
   var pStreams = [];
 
   // prevent "possible EventEmitter memory leak" warnings
@@ -48,29 +47,30 @@ module.exports = function probeStream(stream, _callback) {
   }
 
   stream.on('error', function (err) { cleanup(); callback(err); });
-  stream.on('end',   function ()    { cleanup(); callback(unrecognizedFormat()); });
 
   Object.keys(parsers).forEach(function (type) {
+    var pStream = parsers[type]();
 
-    pending++;
+    pStream.on('data', function (result) {
+      callback(null, result);
+      cleanup();
+    });
 
-    var pStream = parsers[type](stream, function (__, result) {
-      pending--;
+    pStream.on('error', function () {
+      // silently ignore errors because user does not need to know
+      // that something wrong is happening here
+    });
 
+    pStream.on('end', function () {
       cleanup(pStream);
 
-      if (result) {
-        callback(null, result);
-        return;
-      }
-
-      // No more active scanners & still no positive -> fail
-      if (!pending) {
+      if (pStreams.length === 0) {
         cleanup();
         callback(unrecognizedFormat());
-        return;
       }
     });
+
+    stream.pipe(pStream);
 
     pStreams.push(pStream);
   });
