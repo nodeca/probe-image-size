@@ -1,3 +1,10 @@
+2.1.0 / 2016-07-14
+------------------
+
+- Internal parsers api cleanup - switch from callbacks to events.
+- Fixed "write after end" error under heavy load.
+
+
 2.0.1 / 2016-07-01
 ------------------
 
