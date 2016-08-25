@@ -1,3 +1,9 @@
+2.1.1 / 2016-08-25
+------------------
+
+- Add default user agent to http requests (if not set by options), #8.
+
+
 2.1.0 / 2016-07-14
 ------------------
 
