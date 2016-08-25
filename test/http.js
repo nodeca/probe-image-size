@@ -149,4 +149,12 @@ describe('probeHttp', function () {
       callback();
     });
   });
+
+  it('should be ok with VS site (it drops requests without User-Agent)', function () {
+    return probe('https://dm.victoriassecret.com/product/404x539/V588032.jpg')
+      .then(function (size) {
+        assert.equal(size.width, 404);
+        assert.equal(size.height, 539);
+      });
+  });
 });

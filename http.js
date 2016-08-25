@@ -6,7 +6,10 @@ var error       = require('./lib/common').error;
 var request     = require('request').defaults({
   timeout: 30000,
   maxRedirects: 2,
-  rejectUnauthorized: false
+  rejectUnauthorized: false,
+  headers: {
+    'User-Agent': 'Image size prober https://github.com/nodeca/probe-image-size'
+  }
 });
 
 var probeStream = require('./stream');
