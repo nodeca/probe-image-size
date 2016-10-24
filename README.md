@@ -40,7 +40,8 @@ probe('http://example.com/image.jpg', function (err, result) {
       type: 'jpg',
       mime: 'image/jpeg',
       wUnits: 'px',
-      hUnits: 'px'
+      hUnits: 'px',
+      url: 'http://example.com/image.jpg'
     }
   */
 });
@@ -100,6 +101,7 @@ API
   mime: ...,  // mime type
   wUnits: 'px', // width units type ('px' by default, can be different for SVG)
   hUnits: 'px', // height units type ('px' by default, can be different for SVG)
+  url: ..., // last url for the image in chain of redirects (if no redirects, same as src) (HTTP only)
 }
 ```
 

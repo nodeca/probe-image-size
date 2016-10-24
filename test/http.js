@@ -157,4 +157,11 @@ describe('probeHttp', function () {
         assert.equal(size.height, 539);
       });
   });
+
+  it('should return url', function () {
+    return probe('https://dm.victoriassecret.com/product/404x539/V588032.jpg')
+      .then(function (size) {
+        assert.equal(size.url, 'https://dm.victoriassecret.com/product/404x539/V588032.jpg');
+      });
+  });
 });
