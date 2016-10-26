@@ -1,3 +1,9 @@
+2.2.0 / 2016-10-26
+------------------
+
+- Add `.url` with actual image address (after redirects) for remotes.
+
+
 2.1.1 / 2016-08-25
 ------------------
 
