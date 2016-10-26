@@ -37,6 +37,8 @@ module.exports = function probeHttp(options, _callback) {
           if (length && length.match(/^\d+$/)) {
             result.length = +length;
           }
+
+          result.url = res.request.uri.href;
         }
 
         callback(err, result);
