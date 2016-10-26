@@ -150,18 +150,41 @@ describe('probeHttp', function () {
     });
   });
 
-  it('should be ok with VS site (it drops requests without User-Agent)', function () {
-    return probe('https://dm.victoriassecret.com/product/404x539/V588032.jpg')
-      .then(function (size) {
-        assert.equal(size.width, 404);
-        assert.equal(size.height, 539);
+  it('should add User-Agent to http requests', function () {
+    var userAgent;
+
+    responder = function (req, res) {
+      userAgent = req.headers['user-agent'];
+
+      res.writeHead(200);
+
+      // 1x1 transparent gif
+      res.end(new Buffer('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', 'base64'));
+    };
+
+    return probe(url)
+      .then(function () {
+        assert(/probe/.test(userAgent));
       });
   });
 
-  it('should return url', function () {
-    return probe('https://dm.victoriassecret.com/product/404x539/V588032.jpg')
+  it('should return url when following redirect', function () {
+    responder = function (req, res) {
+      if (req.url === '/redirect.gif') {
+        res.writeHead(302, { Location: '/empty.gif' });
+        res.end();
+        return;
+      }
+
+      res.writeHead(200);
+
+      // 1x1 transparent gif
+      res.end(new Buffer('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', 'base64'));
+    };
+
+    return probe(url + '/redirect.gif')
       .then(function (size) {
-        assert.equal(size.url, 'https://dm.victoriassecret.com/product/404x539/V588032.jpg');
+        assert.equal(size.url, url + '/empty.gif');
       });
   });
 });
