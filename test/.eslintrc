@@ -1,5 +1,3 @@
-globals:
-  describe: false
-  it: false
-  before: false
-  after: false
+env:
+  es6: true
+  mocha: true

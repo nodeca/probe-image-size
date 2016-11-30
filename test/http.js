@@ -24,7 +24,7 @@ describe('probeHttp', function () {
     });
   });
 
-  it('should process an image', function (callback) {
+  it('should process an image (callback)', function (callback) {
     responder = function (req, res) {
       res.writeHead(200);
 
@@ -61,7 +61,7 @@ describe('probeHttp', function () {
     });
   });
 
-  it('should return content-length', function (callback) {
+  it('should return content-length', function () {
     responder = function (req, res) {
       res.writeHead(200, { 'Content-Length': 1234 });
 
@@ -69,14 +69,11 @@ describe('probeHttp', function () {
       res.end(new Buffer('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', 'base64'));
     };
 
-    probe(url, function (err, size) {
-      assert.ifError(err);
+    return probe(url).then(size => {
       assert.equal(size.width, 1);
       assert.equal(size.height, 1);
       assert.equal(size.length, 1234);
       assert.equal(size.mime, 'image/gif');
-
-      callback();
     });
   });
 
@@ -85,7 +82,7 @@ describe('probeHttp', function () {
   // NOTE: the server output should be large enough so all parsers
   //       that buffer data will have their first buffer filled
   //
-  it('should abort request ASAP', function (callback) {
+  it('should abort request ASAP', function () {
     responder = function (req, res) {
       res.writeHead(200);
       res.write('this is not an image file,');
@@ -93,14 +90,12 @@ describe('probeHttp', function () {
       // response never ends
     };
 
-    probe(url, function (err) {
-      assert.equal(err.message, 'unrecognized file format');
-
-      callback();
-    });
+    return probe(url)
+      .then(() => { throw new Error('should throw'); })
+      .catch(err => assert.equal(err.message, 'unrecognized file format'));
   });
 
-  it('should fail on 404', function (callback) {
+  it('should fail on 404 (callback)', function (callback) {
     responder = function (req, res) {
       res.writeHead(404);
       res.write('not found');
@@ -121,33 +116,25 @@ describe('probeHttp', function () {
       // response never ends
     };
 
-    return probe(url).then(
-      function () {
-        throw new Error('should not succeed');
-      },
-      function (err) {
-        assert.equal(err.status, 404);
-      });
+    return probe(url)
+      .then(() => { throw new Error('should throw'); })
+      .catch(err => assert.equal(err.status, 404));
   });
 
-  it('should return error if url is invalid', function (callback) {
-    probe('badurl', function (err) {
-      assert(err.message.match(/Invalid URI/));
-
-      callback();
-    });
+  it('should return error if url is invalid', function () {
+    return probe('badurl')
+      .then(() => { throw new Error('should throw'); })
+      .catch(err => assert(err.message.match(/Invalid URI/)));
   });
 
-  it('should return error if connection fails', function (callback) {
+  it('should return error if connection fails', function () {
     responder = function (req, res) {
       res.destroy();
     };
 
-    probe(url, function (err) {
-      assert.equal(err.code, 'ECONNRESET');
-
-      callback();
-    });
+    return probe(url)
+      .then(() => { throw new Error('should throw'); })
+      .catch(err => assert.equal(err.code, 'ECONNRESET'));
   });
 
   it('should add User-Agent to http requests', function () {
@@ -162,10 +149,7 @@ describe('probeHttp', function () {
       res.end(new Buffer('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', 'base64'));
     };
 
-    return probe(url)
-      .then(function () {
-        assert(/probe/.test(userAgent));
-      });
+    return probe(url).then(() => assert(/probe/.test(userAgent)));
   });
 
   it('should return url when following redirect', function () {

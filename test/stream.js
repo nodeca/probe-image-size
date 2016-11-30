@@ -20,33 +20,28 @@ describe('probeStream', function () {
     });
   });
 
-  it('should skip unrecognized files', function (callback) {
+  it('should skip unrecognized files', function () {
     var file = path.join(__dirname, 'fixtures', 'text_file.txt');
 
-    probe(fs.createReadStream(file), function (err) {
-      assert.equal(err.message, 'unrecognized file format');
-
-      callback();
-    });
+    return probe(fs.createReadStream(file))
+      .then(() => { throw new Error('should throw'); })
+      .catch(err => assert.equal(err.message, 'unrecognized file format'));
   });
 
 
-  it('should skip empty files', function (callback) {
+  it('should skip empty files', function () {
     var file = path.join(__dirname, 'fixtures', 'empty.txt');
 
-    probe(fs.createReadStream(file), function (err) {
-      assert.equal(err.message, 'unrecognized file format');
-
-      callback();
-    });
+    return probe(fs.createReadStream(file))
+      .then(() => { throw new Error('should throw'); })
+      .catch(err => assert.equal(err.message, 'unrecognized file format'));
   });
 
 
-  it('should fail on stream errors', function (callback) {
-    probe(require('from2')([ new Error('stream err') ]), function (err) {
-      assert.equal(err.message, 'stream err');
-      callback();
-    });
+  it('should fail on stream errors', function () {
+    return probe(require('from2')([ new Error('stream err') ]))
+      .then(() => { throw new Error('should throw'); })
+      .catch(err => assert.equal(err.message, 'stream err'));
   });
 
 
@@ -57,7 +52,7 @@ describe('probeStream', function () {
   // and WEBP parser closes immediately after first chunk. Check that it doesn't
   // error out.
   //
-  it('should not fail when processing multiple large chunks', function (callback) {
+  it('should not fail when processing multiple large chunks', function () {
     var stream = new Readable({
       read: function () {
         // > 16kB (so it will be split), < 64kB (SVG header size)
@@ -67,10 +62,8 @@ describe('probeStream', function () {
       }
     });
 
-    probe(stream, function (err) {
-      assert.equal(err.message, 'unrecognized file format');
-
-      callback();
-    });
+    return probe(stream)
+      .then(() => { throw new Error('should throw'); })
+      .catch(err => assert.equal(err.message, 'unrecognized file format'));
   });
 });
