@@ -8,7 +8,16 @@ var URL    = require('url');
 var probe  = require('../');
 
 
-var GIF1x1 = new Buffer('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', 'base64');
+function createBuffer(src, opts) {
+  if (typeof src === 'number') {
+    return Buffer.alloc ? Buffer.alloc(src, opts) : new Buffer(src, opts);
+  }
+  return Buffer.from ? Buffer.from(src, opts) : new Buffer(src, opts);
+}
+
+
+var GIF1x1 = createBuffer('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', 'base64');
+
 
 describe('probeHttp', function () {
   var responder, url, srv;
@@ -169,7 +178,7 @@ describe('probeHttp', function () {
       res.end(GIF1x1);
     };
 
-    return probe(url, { headers: { 'User-Agent': 'foobar '} })
+    return probe(url, { headers: { 'User-Agent': 'foobar ' } })
       .then(() => assert(/^foo/.test(userAgent)));
   });
 
@@ -183,7 +192,7 @@ describe('probeHttp', function () {
       res.end(GIF1x1);
     };
 
-    return probe({ url, headers: { 'User-Agent': 'foobar '} })
+    return probe({ url, headers: { 'User-Agent': 'foobar ' } })
       .then(() => assert(/^foo/.test(userAgent)));
   });
 
