@@ -7,6 +7,7 @@
 - Retry requests on network fail.
 - User-Agent string update.
 - Replaced `request` dependency with `got`.
+- Switched from `readable-stream` to native `stream`.
 
 
 2.2.0 / 2016-10-26

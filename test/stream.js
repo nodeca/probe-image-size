@@ -6,7 +6,7 @@ var assert   = require('assert');
 var fs       = require('fs');
 var path     = require('path');
 var probe    = require('../');
-var Readable = require('readable-stream').Readable;
+var Readable = require('stream').Readable;
 
 
 function createBuffer(src, opts) {
