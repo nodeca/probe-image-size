@@ -1,57 +1,78 @@
 'use strict';
 
 
-var once        = require('./lib/common').once;
-var error       = require('./lib/common').error;
-var request     = require('request').defaults({
+var error = require('./lib/common').error;
+var got   = require('got');
+var merge = require('deepmerge');
+
+
+var pkg = require('./package.json');
+
+var defaultAgent = pkg.name + '/' + pkg.version + '(+https://github.com/nodeca/probe-image-size)';
+
+
+
+var defaults = {
   timeout: 30000,
-  maxRedirects: 2,
+  retries: 1,
   rejectUnauthorized: false,
   headers: {
-    'User-Agent': 'Image size prober https://github.com/nodeca/probe-image-size'
+    'User-Agent': defaultAgent
   }
-});
+};
 
 var probeStream = require('./stream');
 
+var P;
 
-module.exports = function probeHttp(options, _callback) {
-  var callback = once(_callback);
-  var req;
 
-  try {
-    req = request(options);
-  } catch (err) {
-    callback(err);
-    return;
-  }
+module.exports = function probeHttp(src, options) {
+  // lazy Promise init
+  P = P || require('any-promise');
 
-  req.on('response', function (res) {
-    if (res.statusCode === 200) {
-      probeStream(res, function (err, result) {
-        req.abort();
+  return new P(function (resolve, reject) {
+    var request, length, finalUrl;
 
-        if (result) {
-          var length = res.headers['content-length'];
+    var stream = got.stream(src, merge.all([ {}, defaults, options ], { clone: true }));
 
-          if (length && length.match(/^\d+$/)) {
-            result.length = +length;
-          }
+    stream.on('request',  function (req) {
+      request = req;
+    });
+    stream.on('response', function (res) {
+      if (res.statusCode === 200) {
+        var len = res.headers['content-length'];
 
-          result.url = res.request.uri.href;
-        }
+        if (len && len.match(/^\d+$/)) length = +len;
+        finalUrl = res.url;
 
-        callback(err, result);
+        return;
+      }
+
+      reject(error('bad status code: ' + res.statusCode, null, res.statusCode));
+    });
+
+    stream.on('error', function (err) {
+      if (err.statusCode) {
+        reject(error('bad status code: ' + err.statusCode, null, err.statusCode));
+        return;
+      }
+      reject(err);
+    });
+
+    probeStream(stream)
+      .then(function (result) {
+        if (length) result.length = length;
+
+        result.url = finalUrl;
+
+        resolve(result);
+      })
+      .catch(reject)
+      .then(function () {
+        /* istanbul ignore else */
+        if (request) request.abort();
       });
-    } else {
-      var err = error('bad status code: ' + res.statusCode, null, res.statusCode);
-
-      req.abort();
-      callback(err);
-    }
   });
-
-  req.on('error', function (err) { callback(err); });
 };
 
 

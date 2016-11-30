@@ -6,11 +6,11 @@ var assert   = require('assert');
 var fs       = require('fs');
 var path     = require('path');
 var probe    = require('../');
-var Readable = require('readable-stream');
+var Readable = require('readable-stream').Readable;
 
 
 describe('probeStream', function () {
-  it('should process an image', function () {
+  it('should process an image (promise)', function () {
     var file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
 
     return probe(fs.createReadStream(file)).then(function (size) {
@@ -20,7 +20,19 @@ describe('probeStream', function () {
     });
   });
 
-  it('should skip unrecognized files', function () {
+  it('should process an image (callback)', function (done) {
+    var file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
+
+    probe(fs.createReadStream(file), function (err, size) {
+      assert.ifError(err);
+      assert.equal(size.width, 367);
+      assert.equal(size.height, 187);
+      assert.equal(size.mime, 'image/jpeg');
+      done();
+    });
+  });
+
+  it('should skip unrecognized files (promise)', function () {
     var file = path.join(__dirname, 'fixtures', 'text_file.txt');
 
     return probe(fs.createReadStream(file))
@@ -28,6 +40,14 @@ describe('probeStream', function () {
       .catch(err => assert.equal(err.message, 'unrecognized file format'));
   });
 
+  it('should skip unrecognized files (callback)', function (done) {
+    var file = path.join(__dirname, 'fixtures', 'text_file.txt');
+
+    probe(fs.createReadStream(file), function (err) {
+      assert.equal(err.message, 'unrecognized file format');
+      done();
+    });
+  });
 
   it('should skip empty files', function () {
     var file = path.join(__dirname, 'fixtures', 'empty.txt');
@@ -36,7 +56,6 @@ describe('probeStream', function () {
       .then(() => { throw new Error('should throw'); })
       .catch(err => assert.equal(err.message, 'unrecognized file format'));
   });
-
 
   it('should fail on stream errors', function () {
     return probe(require('from2')([ new Error('stream err') ]))

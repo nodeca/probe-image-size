@@ -48,13 +48,13 @@ probe('http://example.com/image.jpg', function (err, result) {
 
 // By URL with options
 //
-probe({ url: 'http://example.com/image.jpg', timeout: 5000 }, function (err, result) {
+probe('http://example.com/image.jpg', { timeout: 5000 }).then(function (result) {
   console.log(result);
 });
 
-// With Promise
+// With callback
 //
-probe('http://example.com/image.jpg').then(function (result) {
+probe('http://example.com/image.jpg', function (err, result) {
   console.log(result);
 });
 
@@ -81,16 +81,17 @@ console.log(probe.sync(data));
 API
 ---
 
-### probe(src [, callback(err, result)])
+### probe(src [, options, callback]) -> Promise
 
 `src` can be of this types:
 
 - __String__ - URL to fetch
-- __Object__ - options for [request](https://github.com/request/request),
-  defaults are `{ timeout: 5000, maxRedirects: 2 }`
 - __Stream__ - readable stream
 
-`result` contains:
+`options` - HTTP only. See [`got` documentation](https://github.com/sindresorhus/got).
+Defaults changed to `{ retries: 1, timeout: 30000 }`
+
+`result` (Promise) contains:
 
 ```js
 {
@@ -105,17 +106,21 @@ API
 }
 ```
 
-`err` is an error, which is extended with:
+Returned errors can be extended with 2 fields:
 
- - `code` - equals to `ECONTENT` if the library failed to parse the file;
- - `status` - equals to a HTTP status code if it receives a non-200 response.
+- `code` - equals to `ECONTENT` if the library failed to parse the file;
+- `status` - equals to a HTTP status code if it receives a non-200 response.
 
-If callback not provided, `Promise` will be returned.
+If callback (legacy node style) provided, `Promise` will not be returned.
 
-__Note.__ If you use `Stream` as source, it's your responsibility to close that
+__Note 1.__ If you use `Stream` as source, it's your responsibility to close that
 stream in callback. In other case you can get memory leak, because stream will
 be left in paused state. With http requests that's not a problem - everything
 is released automatically, as soon as possible.
+
+__Note 2.__ We still support legacy v2.x signature for http probe (`src` is
+Object as described in [request](https://github.com/request/request). But it's
+will be deprecated in next versions.
 
 
 ### sync.probe(src) -> result|null

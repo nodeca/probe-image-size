@@ -1,3 +1,14 @@
+3.0.0 / WIP
+------------------
+
+- Rewrite internals to `Promise`.
+- Separate options from url for http probe (old signature still supported
+  for compatibility).
+- Retry requests on network fail.
+- User-Agent string update.
+- Replaced `request` dependency with `got`.
+
+
 2.2.0 / 2016-10-26
 ------------------
 

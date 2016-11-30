@@ -8,6 +8,8 @@ var URL    = require('url');
 var probe  = require('../');
 
 
+var GIF1x1 = new Buffer('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', 'base64');
+
 describe('probeHttp', function () {
   var responder, url, srv;
 
@@ -27,9 +29,7 @@ describe('probeHttp', function () {
   it('should process an image (callback)', function (callback) {
     responder = function (req, res) {
       res.writeHead(200);
-
-      // 1x1 transparent gif
-      res.write(new Buffer('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', 'base64'));
+      res.write(GIF1x1);
 
       // response never ends
     };
@@ -47,9 +47,7 @@ describe('probeHttp', function () {
   it('should process an image (promise)', function () {
     responder = function (req, res) {
       res.writeHead(200);
-
-      // 1x1 transparent gif
-      res.write(new Buffer('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', 'base64'));
+      res.write(GIF1x1);
 
       // response never ends
     };
@@ -64,9 +62,7 @@ describe('probeHttp', function () {
   it('should return content-length', function () {
     responder = function (req, res) {
       res.writeHead(200, { 'Content-Length': 1234 });
-
-      // 1x1 transparent gif
-      res.end(new Buffer('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', 'base64'));
+      res.end(GIF1x1);
     };
 
     return probe(url).then(size => {
@@ -121,10 +117,22 @@ describe('probeHttp', function () {
       .catch(err => assert.equal(err.status, 404));
   });
 
+  it('should fail on status 201-299 codes', function () {
+    responder = function (req, res) {
+      res.writeHead(201);
+      res.end(GIF1x1);
+    };
+
+    return probe(url)
+      .then(() => { throw new Error('should throw'); })
+      .catch(err => assert.equal(err.status, 201));
+  });
+
+
   it('should return error if url is invalid', function () {
     return probe('badurl')
       .then(() => { throw new Error('should throw'); })
-      .catch(err => assert(err.message.match(/Invalid URI/)));
+      .catch(err => assert(err.message.match(/ENOTFOUND badurl/)));
   });
 
   it('should return error if connection fails', function () {
@@ -132,7 +140,8 @@ describe('probeHttp', function () {
       res.destroy();
     };
 
-    return probe(url)
+    //return probe({ url, retries: 0 })
+    return probe(url, { retries: 0 })
       .then(() => { throw new Error('should throw'); })
       .catch(err => assert.equal(err.code, 'ECONNRESET'));
   });
@@ -144,13 +153,40 @@ describe('probeHttp', function () {
       userAgent = req.headers['user-agent'];
 
       res.writeHead(200);
-
-      // 1x1 transparent gif
-      res.end(new Buffer('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', 'base64'));
+      res.end(GIF1x1);
     };
 
-    return probe(url).then(() => assert(/probe/.test(userAgent)));
+    return probe(url).then(() => assert(/^probe/.test(userAgent)));
   });
+
+  it('should allow customize request options', function () {
+    var userAgent;
+
+    responder = function (req, res) {
+      userAgent = req.headers['user-agent'];
+
+      res.writeHead(200);
+      res.end(GIF1x1);
+    };
+
+    return probe(url, { headers: { 'User-Agent': 'foobar '} })
+      .then(() => assert(/^foo/.test(userAgent)));
+  });
+
+  it('should allow customize request options (legacy)', function () {
+    var userAgent;
+
+    responder = function (req, res) {
+      userAgent = req.headers['user-agent'];
+
+      res.writeHead(200);
+      res.end(GIF1x1);
+    };
+
+    return probe({ url, headers: { 'User-Agent': 'foobar '} })
+      .then(() => assert(/^foo/.test(userAgent)));
+  });
+
 
   it('should return url when following redirect', function () {
     responder = function (req, res) {
@@ -161,9 +197,7 @@ describe('probeHttp', function () {
       }
 
       res.writeHead(200);
-
-      // 1x1 transparent gif
-      res.end(new Buffer('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', 'base64'));
+      res.end(GIF1x1);
     };
 
     return probe(url + '/redirect.gif')
