@@ -31,7 +31,7 @@ var probe = require('probe-image-size');
 
 // Get by URL
 //
-probe('http://example.com/image.jpg', function (err, result) {
+probe('http://example.com/image.jpg').then(result => {
   console.log(result); // =>
   /*
     {
@@ -62,7 +62,7 @@ probe('http://example.com/image.jpg', function (err, result) {
 //
 var input = require('fs').createReadStream('image.jpg');
 
-probe(input, function (err, result) {
+probe(input).then(result => {
   console.log(result);
 
   // terminate input, depends on stream type,
@@ -119,7 +119,7 @@ be left in paused state. With http requests that's not a problem - everything
 is released automatically, as soon as possible.
 
 __Note 2.__ We still support legacy v2.x signature for http probe (`src` is
-Object as described in [request](https://github.com/request/request). But it's
+Object as described in [request](https://github.com/request/request)). But it
 will be deprecated in next versions.
 
 
