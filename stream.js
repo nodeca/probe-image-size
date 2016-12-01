@@ -1,14 +1,9 @@
 'use strict';
 
 
-var error       = require('./lib/common').error;
+var ProbeError  = require('./lib/common').ProbeError;
 var parsers     = require('./lib/parsers_stream');
 var PassThrough = require('stream').PassThrough;
-
-
-function unrecognizedFormat() {
-  return error('unrecognized file format', 'ECONTENT');
-}
 
 var P;
 
@@ -31,7 +26,7 @@ module.exports = function probeStream(stream) {
       this.removeAllListeners();
       cnt--;
       // if all parsers finished without success -> fail.
-      if (!cnt) reject(unrecognizedFormat());
+      if (!cnt) reject(new ProbeError('unrecognized file format', 'ECONTENT'));
     }
 
     Object.keys(parsers).forEach(function (type) {

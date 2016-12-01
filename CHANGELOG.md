@@ -8,6 +8,7 @@
 - User-Agent string update.
 - Replaced `request` dependency with `got`.
 - Switched from `readable-stream` to native `stream`.
+- Proper class for errors.
 
 
 2.2.0 / 2016-10-26

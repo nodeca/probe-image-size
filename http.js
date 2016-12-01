@@ -1,7 +1,7 @@
 'use strict';
 
 
-var error       = require('./lib/common').error;
+var ProbeError  = require('./lib/common').ProbeError;
 var got         = require('got');
 var merge       = require('deepmerge');
 var pkg         = require('./package.json');
@@ -43,12 +43,12 @@ module.exports = function probeHttp(src, options) {
         return;
       }
 
-      reject(error('bad status code: ' + res.statusCode, null, res.statusCode));
+      reject(new ProbeError('bad status code: ' + res.statusCode, null, res.statusCode));
     });
 
     stream.on('error', function (err) {
       if (err.statusCode) {
-        reject(error('bad status code: ' + err.statusCode, null, err.statusCode));
+        reject(new ProbeError('bad status code: ' + err.statusCode, null, err.statusCode));
         return;
       }
       reject(err);
