@@ -1,8 +1,9 @@
 'use strict';
 
 
-var error   = require('./lib/common').error;
-var parsers = require('./lib/parsers_stream');
+var error       = require('./lib/common').error;
+var parsers     = require('./lib/parsers_stream');
+var PassThrough = require('stream').PassThrough;
 
 
 function unrecognizedFormat() {
@@ -16,62 +17,48 @@ module.exports = function probeStream(stream) {
   // lazy Promise init
   P = P || require('any-promise');
 
-  return new P(function (resolve, reject) {
-    var pStreams = [];
+  var proxy = new PassThrough();
+  var cnt = 0; // count of working parsers
 
-    // prevent "possible EventEmitter memory leak" warnings
-    stream.setMaxListeners(0);
+  var result = new P(function (resolve, reject) {
+    stream.on('error', reject);
+    proxy.on('error', reject);
 
-    function cleanup(strm) {
-      var i;
+    function nope() {}
 
-      if (strm) {
-        stream.unpipe(strm);
-        strm.end();
-        i = pStreams.indexOf(strm);
-        if (i >= 0) pStreams.splice(i, 1);
-        return;
-      }
-
-      for (i = 0; i < pStreams.length; i++) {
-        stream.unpipe(pStreams[i]);
-        pStreams[i].end();
-      }
-      pStreams.length = 0;
+    function parserEnd() {
+      proxy.unpipe(this);
+      this.removeAllListeners();
+      cnt--;
+      // if all parsers finished without success -> fail.
+      if (!cnt) reject(unrecognizedFormat());
     }
-
-    stream.on('error', function (err) {
-      cleanup();
-      reject(err);
-    });
 
     Object.keys(parsers).forEach(function (type) {
       var pStream = parsers[type]();
 
-      pStream.on('data', function (result) {
-        resolve(result);
-        cleanup();
-      });
+      cnt++;
 
-      pStream.on('error', function () {
-        // silently ignore errors because user does not need to know
-        // that something wrong is happening here
-      });
+      pStream.once('data', resolve);
+      pStream.once('end', parserEnd);
+      // silently ignore errors because user does not need to know
+      // that something wrong is happening here
+      pStream.on('error', nope);
 
-      pStream.on('end', function () {
-        cleanup(pStream);
-
-        if (pStreams.length === 0) {
-          cleanup();
-          reject(unrecognizedFormat());
-        }
-      });
-
-      stream.pipe(pStream);
-
-      pStreams.push(pStream);
+      proxy.pipe(pStream);
     });
   });
+
+  function cleanup() {
+    stream.unpipe(proxy);
+    proxy.end();
+  }
+
+  result.then(cleanup).catch(cleanup);
+
+  stream.pipe(proxy);
+
+  return result;
 };
 
 

@@ -1,16 +1,13 @@
 'use strict';
 
 
-var error = require('./lib/common').error;
-var got   = require('got');
-var merge = require('deepmerge');
-
-
-var pkg = require('./package.json');
+var error       = require('./lib/common').error;
+var got         = require('got');
+var merge       = require('deepmerge');
+var pkg         = require('./package.json');
+var probeStream = require('./stream');
 
 var defaultAgent = pkg.name + '/' + pkg.version + '(+https://github.com/nodeca/probe-image-size)';
-
-
 
 var defaults = {
   timeout: 30000,
@@ -20,8 +17,6 @@ var defaults = {
     'User-Agent': defaultAgent
   }
 };
-
-var probeStream = require('./stream');
 
 var P;
 
