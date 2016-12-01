@@ -262,6 +262,14 @@ describe('File formats', function () {
       });
     });
 
+    it('should extract width info from camel cased viewBox', function () {
+      return probe(from2([
+        createBuffer('<svg viewBox="0 0 800 600"></svg>')
+      ])).then(size => {
+        assert.deepEqual(size, { width: 800, height: 600, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
+      });
+    });
+
     it('should return width/height units', function () {
       return probe(from2([
         createBuffer('<svg width="5in" height="4pt"></svg>')
@@ -359,6 +367,12 @@ describe('File formats', function () {
 
     it('should extract width info from viewbox', function () {
       var size = probe.sync(toArray(createBuffer('<svg viewbox="0 0 800 600"></svg>')));
+
+      assert.deepEqual(size, { width: 800, height: 600, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
+    });
+
+    it('should extract width info from camel cased viewBox', function () {
+      var size = probe.sync(toArray(createBuffer('<svg viewBox="0 0 800 600"></svg>')));
 
       assert.deepEqual(size, { width: 800, height: 600, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
     });
