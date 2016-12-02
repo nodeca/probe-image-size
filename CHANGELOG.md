@@ -4,10 +4,11 @@
 - Rewrite internals to `Promise`.
 - Separate options from url for http probe (old signature still supported
   for compatibility).
-- Retry requests on network fail.
+- `err.status` -> `err.statusCode`
 - User-Agent string update.
-- Replaced `request` dependency with `got`.
-- Switched from `readable-stream` to native `stream`.
+- Replaced `request` dependency with `got` (read options description in doc).
+- Retry requests on network fail.
+- Switched from `readable-stream` to native `stream` (node 4+ has normal Stream3).
 - Proper class for errors.
 
 

@@ -108,7 +108,7 @@ describe('probeHttp', function () {
     };
 
     probe(url, function (err) {
-      assert.equal(err.status, 404);
+      assert.equal(err.statusCode, 404);
 
       callback();
     });
@@ -123,7 +123,7 @@ describe('probeHttp', function () {
 
     return probe(url)
       .then(() => { throw new Error('should throw'); })
-      .catch(err => assert.equal(err.status, 404));
+      .catch(err => assert.equal(err.statusCode, 404));
   });
 
   it('should fail on status 201-299 codes', function () {
@@ -134,7 +134,7 @@ describe('probeHttp', function () {
 
     return probe(url)
       .then(() => { throw new Error('should throw'); })
-      .catch(err => assert.equal(err.status, 201));
+      .catch(err => assert.equal(err.statusCode, 201));
   });
 
 
