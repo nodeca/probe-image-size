@@ -12,7 +12,6 @@ var defaultAgent = pkg.name + '/' + pkg.version + '(+https://github.com/nodeca/p
 var defaults = {
   timeout: 30000,
   retries: 1,
-  rejectUnauthorized: false,
   headers: {
     'User-Agent': defaultAgent
   }

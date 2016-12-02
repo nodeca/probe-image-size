@@ -5,6 +5,7 @@
 - Separate options from url for http probe (old signature still supported
   for compatibility).
 - `err.status` -> `err.statusCode`
+- remove `{ rejectUnauthorized: false }` from defaults.
 - User-Agent string update.
 - Replaced `request` dependency with `got` (read options description in doc).
 - Retry requests on network fail.
