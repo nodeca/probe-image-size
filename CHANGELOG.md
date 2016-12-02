@@ -1,4 +1,4 @@
-3.0.0 / WIP
+3.0.0 / 2016-12-02
 ------------------
 
 - Rewrite internals to `Promise`.
