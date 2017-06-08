@@ -1,3 +1,10 @@
+3.1.0 / 2017-06-08
+------------------
+
+- Maintenance, deps bump. `got` 6.x -> 7.x. `got` timeouts may work a bit
+  different but should affect result.
+
+
 3.0.0 / 2016-12-02
 ------------------
 
