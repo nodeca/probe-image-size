@@ -1,6 +1,8 @@
 probe-image-size
 ================
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/nodeca/probe-image-size.svg)](https://greenkeeper.io/)
+
 [![Build Status](https://img.shields.io/travis/nodeca/probe-image-size/master.svg?style=flat)](https://travis-ci.org/nodeca/probe-image-size)
 [![NPM version](https://img.shields.io/npm/v/probe-image-size.svg?style=flat)](https://www.npmjs.org/package/probe-image-size)
 [![Coverage Status](https://coveralls.io/repos/github/nodeca/probe-image-size/badge.svg?branch=master)](https://coveralls.io/github/nodeca/probe-image-size?branch=master)
