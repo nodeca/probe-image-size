@@ -2,10 +2,11 @@
 
 'use strict';
 
-/* eslint-disable no-console */
+/*eslint-env node, es6*/
+/*eslint-disable no-console*/
 
 
-var files = process.argv.slice(2);
+const files = process.argv.slice(2);
 
 if (!files.length) {
   console.error('Usage: dump.js file1 [file2 [file3 ...]]');
@@ -13,20 +14,25 @@ if (!files.length) {
 }
 
 files.forEach(function (file) {
+
   if (file.match(/^https?:\/\//)) {
-    require('../')(file, function (err, result) {
-      console.log(file + ':', err || result);
-    });
+    require('../')(file)
+      .then(result => console.log(`${file}: ${result}`))
+      .catch(err => console.log(err));
+
   } else {
-    var input = require('fs').createReadStream(file);
+    let input = require('fs').createReadStream(file);
 
-    input.on('error', function (err) {
-      console.log(file + ':', err);
-    });
+    input.on('error', err => console.log(`${file}: ${err}`));
 
-    require('../')(input, function (err, result) {
-      console.log(file + ':', err || result);
-      input.destroy();
-    });
+    require('../')(input)
+      .then(result => {
+        console.log(`${file}: ${result}`);
+        input.destroy();
+      })
+      .catch(err => {
+        console.log(err);
+        input.destroy();
+      });
   }
 });
