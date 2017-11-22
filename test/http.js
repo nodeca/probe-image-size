@@ -25,13 +25,16 @@ describe('probeHttp', function () {
   before(function (callback) {
     srv = http.createServer(function (req, res) {
       responder(req, res);
-    }).listen(callback);
+    }).listen(0, 'localhost', function (err) {
 
-    url = URL.format({
-      protocol: 'http',
-      hostname: srv.address().address,
-      port:     srv.address().port,
-      path:     '/'
+      url = URL.format({
+        protocol: 'http',
+        hostname: srv.address().address,
+        port:     srv.address().port,
+        path:     '/'
+      });
+
+      callback(err);
     });
   });
 
