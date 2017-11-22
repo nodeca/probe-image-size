@@ -1,3 +1,10 @@
+3.2.0 / 2017-11-22
+------------------
+
+- Roll back `got` to 6.x due serious regressions, see #16.
+  Next attempt will be switching to `request` and releasing 4.0.0.
+
+
 3.1.0 / 2017-06-08
 ------------------
 
