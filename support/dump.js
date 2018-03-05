@@ -17,7 +17,7 @@ files.forEach(function (file) {
 
   if (file.match(/^https?:\/\//)) {
     require('../')(file)
-      .then(result => console.log(`${file}: ${result}`))
+      .then(result => console.log(`${file}:`, result))
       .catch(err => console.log(err));
 
   } else {
@@ -27,7 +27,7 @@ files.forEach(function (file) {
 
     require('../')(input)
       .then(result => {
-        console.log(`${file}: ${result}`);
+        console.log(`${file}:`, result);
         input.destroy();
       })
       .catch(err => {
