@@ -218,4 +218,9 @@ describe('probeHttp', function () {
         assert.equal(size.url, url + '/empty.gif');
       });
   });
+
+
+  after(function () {
+    srv.close();
+  });
 });

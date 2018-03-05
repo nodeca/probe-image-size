@@ -34,7 +34,7 @@ module.exports = function get_image_size(src, options, callback) {
   } else {
     // Legacy style, `probe(object [, callback])`
     callback = options;
-    options  = merge({}, src, { clone: true });
+    options  = merge({}, src);
     src      = options.url;
     delete options.url;
   }

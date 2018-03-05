@@ -28,7 +28,7 @@ module.exports = function probeHttp(src, options) {
     var req, length, finalUrl;
 
     try {
-      req = request(merge.all([ { url: src }, defaults, options ], { clone: true }));
+      req = request(merge.all([ { url: src }, defaults, options ]));
     } catch (err) {
       reject(err);
       return;
