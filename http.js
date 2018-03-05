@@ -62,10 +62,11 @@ module.exports = function probeHttp(src, options) {
     });
 
     req.on('error', function (err) {
+      /* This check needed for `got` only, because it returns 404 as error.
       if (err.statusCode) {
         reject(new ProbeError('bad status code: ' + err.statusCode, null, err.statusCode));
         return;
-      }
+      }*/
       reject(err);
     });
   });
