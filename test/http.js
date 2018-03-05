@@ -144,7 +144,8 @@ describe('probeHttp', function () {
   it('should return error if url is invalid', function () {
     return probe('badurl')
       .then(() => { throw new Error('should throw'); })
-      .catch(err => assert(err.message.match(/ENOTFOUND badurl/)));
+      // search error text for both `request` & `got` packages
+      .catch(err => assert(err.message.match(/(ENOTFOUND badurl)|(Invalid URI)/)));
   });
 
   it('should return error if connection fails', function () {

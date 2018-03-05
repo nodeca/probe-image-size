@@ -2,7 +2,7 @@
 
 
 var ProbeError  = require('./lib/common').ProbeError;
-var got         = require('got');
+var request     = require('request');
 var merge       = require('deepmerge');
 var pkg         = require('./package.json');
 var probeStream = require('./stream');
@@ -25,47 +25,49 @@ module.exports = function probeHttp(src, options) {
   P = P || require('any-promise');
 
   return new P(function (resolve, reject) {
-    var request, length, finalUrl;
+    var req, length, finalUrl;
 
-    var stream = got.stream(src, merge.all([ {}, defaults, options ], { clone: true }));
+    try {
+      req = request(merge.all([ { url: src }, defaults, options ], { clone: true }));
+    } catch (err) {
+      reject(err);
+      return;
+    }
 
-    stream.on('request',  function (req) {
-      request = req;
-    });
-    stream.on('response', function (res) {
-      if (res.statusCode === 200) {
-        var len = res.headers['content-length'];
+    req.on('response', function (res) {
+      if (res.statusCode !== 200) {
+        var err = new ProbeError('bad status code: ' + res.statusCode, null, res.statusCode);
 
-        if (len && len.match(/^\d+$/)) length = +len;
-        finalUrl = res.url;
+        req.abort();
+        reject(err);
 
         return;
       }
 
-      reject(new ProbeError('bad status code: ' + res.statusCode, null, res.statusCode));
+      var len = res.headers['content-length'];
+
+      if (len && len.match(/^\d+$/)) length = +len;
+      finalUrl = res.request.uri.href;
+
+      probeStream(res)
+        .then(function (result) {
+          if (length) result.length = length;
+
+          result.url = finalUrl;
+
+          resolve(result);
+        })
+        .catch(reject)
+        .then(function () { req.abort(); });
     });
 
-    stream.on('error', function (err) {
+    req.on('error', function (err) {
       if (err.statusCode) {
         reject(new ProbeError('bad status code: ' + err.statusCode, null, err.statusCode));
         return;
       }
       reject(err);
     });
-
-    probeStream(stream)
-      .then(function (result) {
-        if (length) result.length = length;
-
-        result.url = finalUrl;
-
-        resolve(result);
-      })
-      .catch(reject)
-      .then(function () {
-        /* istanbul ignore else */
-        if (request) request.abort();
-      });
   });
 };
 
