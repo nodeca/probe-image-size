@@ -3,6 +3,7 @@
 
 - Roll back `got` -> `request`, see #16.
 - Default timeout 30s -> 60s.
+- Fix padding parse in jpeg, #20.
 
 
 3.2.0 / 2017-11-22
