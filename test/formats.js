@@ -103,6 +103,15 @@ describe('File formats', function () {
     });
 
 
+    it('should skip padding', function () {
+      var buf = createBuffer('FFD8 FFFFFFFFC00011 08000F000F03012200021101031101 FFFFD9'.replace(/ /g, ''), 'hex');
+
+      return probe(from2([ buf ])).then(size => {
+        assert.deepEqual(size, { width: 15, height: 15, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' });
+      });
+    });
+
+
     it('coverage - EOI before SOI', function () {
       var buf = createBuffer('FFD8 FFD0 FFD9'.replace(/ /g, ''), 'hex');
 
@@ -145,6 +154,14 @@ describe('File formats', function () {
       var size = probe.sync(buf);
 
       assert.equal(size, null);
+    });
+
+
+    it('should skip padding', function () {
+      var buf = str2arr('FFD8 FFFFFFFFC00011 08000F000F03012200021101031101 FFFFD9'.replace(/ /g, ''), 'hex');
+      var size = probe.sync(buf);
+
+      assert.deepEqual(size, { width: 15, height: 15, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' });
     });
 
 
