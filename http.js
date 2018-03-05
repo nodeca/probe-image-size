@@ -10,8 +10,8 @@ var probeStream = require('./stream');
 var defaultAgent = pkg.name + '/' + pkg.version + '(+https://github.com/nodeca/probe-image-size)';
 
 var defaults = {
-  timeout: 30000,
-  retries: 1,
+  timeout: 60000,
+  // retries: 1, // needed for `got` only, not supported by `request`
   headers: {
     'User-Agent': defaultAgent
   }
