@@ -17,14 +17,8 @@ var defaults = {
   }
 };
 
-var P;
-
-
 module.exports = function probeHttp(src, options) {
-  // lazy Promise init
-  P = P || require('any-promise');
-
-  return new P(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     var req, length, finalUrl;
 
     try {
