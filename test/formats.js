@@ -295,6 +295,14 @@ describe('File formats', function () {
       });
     });
 
+    it('should ignore stroke-width', function () {
+      return probe(from2([
+        createBuffer('<svg stroke-width="2" width="5" height="4"></svg>')
+      ])).then(size => {
+        assert.deepEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
+      });
+    });
+
     /* eslint-disable max-nested-callbacks */
     describe('coverage', function () {
       it('too much data before doctype', function () {
@@ -375,7 +383,7 @@ describe('File formats', function () {
 
 
   describe('SVG (sync)', function () {
-    it('should detect PNG', function () {
+    it('should detect SVG', function () {
       var file = path.join(__dirname, 'fixtures', 'sample.svg');
       var size = probe.sync(toArray(fs.readFileSync(file)));
 
@@ -398,6 +406,12 @@ describe('File formats', function () {
       var size = probe.sync(toArray(createBuffer('<svg width="5in" height="4pt"></svg>')));
 
       assert.deepEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'pt' });
+    });
+
+    it('should ignore stroke-width', function () {
+      var size = probe.sync(toArray(createBuffer('<svg stroke-width="2" width="5" height="4"></svg>')));
+
+      assert.deepEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
     });
 
     describe('coverage', function () {
