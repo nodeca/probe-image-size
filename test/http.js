@@ -39,7 +39,14 @@ describe('probeHttp', function () {
   });
 
   it('should process an image (callback)', function (callback) {
+    var haveResponse = false;
+
     responder = function (req, res) {
+      req.on('close', function () {
+        assert.ok(haveResponse);
+        callback();
+      });
+
       res.writeHead(200);
       res.write(GIF1x1);
 
@@ -52,7 +59,7 @@ describe('probeHttp', function () {
       assert.equal(size.height, 1);
       assert.equal(size.mime, 'image/gif');
 
-      callback();
+      haveResponse = true;
     });
   });
 

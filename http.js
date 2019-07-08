@@ -13,8 +13,20 @@ var defaults = {
   timeout: 60000,
   // retries: 1, // needed for `got` only, not supported by `request`
   headers: {
-    'User-Agent': defaultAgent
-  }
+    'User-Agent': defaultAgent,
+
+    // Override default "gzip, deflate" header that is auto-inserted when
+    // request has gzip option turned on.
+    //
+    // It's done so because gzip may have large block size, and we only need
+    // to know a first few bytes to extract image size.
+    //
+    'Accept-Encoding': 'identity'
+  },
+
+  // turn gzip decompression on in case there are misconfigured servers
+  // that always return gzip encoded content even if not requested
+  gzip: true
 };
 
 var P;
@@ -25,20 +37,20 @@ module.exports = function probeHttp(src, options) {
   P = P || require('any-promise');
 
   return new P(function (resolve, reject) {
-    var req, length, finalUrl;
+    var stream, length, finalUrl;
 
     try {
-      req = request(merge.all([ { url: src }, defaults, options ]));
+      stream = request(merge.all([ { url: src }, defaults, options ]));
     } catch (err) {
       reject(err);
       return;
     }
 
-    req.on('response', function (res) {
+    stream.on('response', function (res) {
       if (res.statusCode !== 200) {
         var err = new ProbeError('bad status code: ' + res.statusCode, null, res.statusCode);
 
-        req.abort();
+        stream.abort();
         reject(err);
 
         return;
@@ -49,7 +61,7 @@ module.exports = function probeHttp(src, options) {
       if (len && len.match(/^\d+$/)) length = +len;
       finalUrl = res.request.uri.href;
 
-      probeStream(res)
+      probeStream(stream)
         .then(function (result) {
           if (length) result.length = length;
 
@@ -58,10 +70,10 @@ module.exports = function probeHttp(src, options) {
           resolve(result);
         })
         .catch(reject)
-        .then(function () { req.abort(); });
+        .then(function () { stream.abort(); });
     });
 
-    req.on('error', function (err) {
+    stream.on('error', function (err) {
       /* This check needed for `got` only, because it returns 404 as error.
       if (err.statusCode) {
         reject(new ProbeError('bad status code: ' + err.statusCode, null, err.statusCode));

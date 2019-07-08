@@ -45,7 +45,8 @@ module.exports = function probeStream(stream) {
   });
 
   function cleanup() {
-    stream.unpipe(proxy);
+    // request stream doesn't have unpipe, https://github.com/request/request/issues/874
+    if (typeof stream.unpipe === 'function') stream.unpipe(this);
     proxy.end();
   }
 
