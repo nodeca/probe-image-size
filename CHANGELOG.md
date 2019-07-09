@@ -1,3 +1,11 @@
+4.1.0 / 2019-07-09
+------------------
+
+- Fix content ungzip from misconfigured servers, #31.
+- Deps bump.
+- Update Travis-CI node versions to actual.
+
+
 4.0.1 / 2019-07-08
 ------------------
 
