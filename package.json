@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "any-promise": "^1.3.0",
-    "deepmerge": "^2.0.1",
+    "deepmerge": "^4.0.0",
     "inherits": "^2.0.3",
     "next-tick": "^1.0.0",
     "request": "^2.83.0",
@@ -40,9 +40,9 @@
   },
   "devDependencies": {
     "coveralls": "^3.0.0",
-    "eslint": "^4.18.2",
+    "eslint": "^6.0.1",
     "from2": "^2.1",
     "istanbul": "^0.4.1",
-    "mocha": "^5.0.1"
+    "mocha": "^6.1.4"
   }
 }
