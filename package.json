@@ -1,6 +1,6 @@
 {
   "name": "probe-image-size",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "description": "Get image size without full download (JPG, GIF, PNG, WebP, BMP, TIFF, PSD)",
   "keywords": [
     "image",
