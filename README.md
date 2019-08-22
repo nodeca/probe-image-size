@@ -141,7 +141,7 @@ Similar projects
 - [imagesize](https://github.com/arnaud-lb/imagesize.js)
 
 
-License
--------
+Support probe-image-size
+------------------------
 
-[MIT](https://raw.github.com/nodeca/probe-image-size/master/LICENSE)
+You can support this project via [Tidelift subscription](https://tidelift.com/subscription/pkg/npm-probe-image-size?utm_source=npm-probe-image-size&utm_medium=referral&utm_campaign=readme).
