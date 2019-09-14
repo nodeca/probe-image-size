@@ -1,6 +1,8 @@
 env:
   node:     true
   browser:  false
+globals:
+  Promise: true
 
 rules:
   accessor-pairs:         2

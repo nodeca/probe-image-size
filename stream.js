@@ -5,17 +5,12 @@ var ProbeError  = require('./lib/common').ProbeError;
 var parsers     = require('./lib/parsers_stream');
 var PassThrough = require('stream').PassThrough;
 
-var P;
-
 
 module.exports = function probeStream(stream) {
-  // lazy Promise init
-  P = P || require('any-promise');
-
   var proxy = new PassThrough();
   var cnt = 0; // count of working parsers
 
-  var result = new P(function (resolve, reject) {
+  var result = new Promise(function (resolve, reject) {
     stream.on('error', reject);
     proxy.on('error', reject);
 
