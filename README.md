@@ -88,8 +88,8 @@ API
 - __String__ - URL to fetch
 - __Stream__ - readable stream
 
-`options` - HTTP only. See [`got` documentation](https://github.com/sindresorhus/got).
-Defaults changed to `{ retries: 1, timeout: 30000 }`
+`options` - HTTP only. See [`request` documentation](https://github.com/request/request).
+Defaults changed to `{ timeout: 60000 }`
 
 `result` (Promise) contains:
 
