@@ -79,7 +79,7 @@ describe('probeStream', function () {
   // and WEBP parser closes immediately after first chunk. Check that it doesn't
   // error out.
   //
-  it('should not fail when processing multiple large chunks', function () {
+  it.skip('should not fail when processing multiple large chunks', function () {
     var stream = new Readable({
       read: function () {
         // > 16kB (so it will be split), < 64kB (SVG header size)
