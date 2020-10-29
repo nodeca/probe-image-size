@@ -72,6 +72,26 @@ describe('File formats', function () {
     });
   });
 
+  describe('ICO', function () {
+    it('should detect ICO', function () {
+      var file = path.join(__dirname, 'fixtures', 'google.ico');
+
+      return probe(fs.createReadStream(file)).then(size => {
+        assert.deepEqual(size, { width: 128, height: 128, type: 'ico', mime: 'image/x-icon', wUnits: 'px', hUnits: 'px' });
+      });
+    });
+  });
+
+
+  describe('ICO (sync)', function () {
+    it('should detect ICO', function () {
+      var file = path.join(__dirname, 'fixtures', 'google.ico');
+      var size = probe.sync(toArray(fs.readFileSync(file)));
+
+      assert.deepEqual(size, { width: 128, height: 128, type: 'ico', mime: 'image/x-icon', wUnits: 'px', hUnits: 'px' });
+    });
+  });
+
 
   describe('JPEG', function () {
     it('should detect JPEG', function () {
