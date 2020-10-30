@@ -147,7 +147,7 @@ describe('File formats', function () {
 
       return probe(from2([ buf ]))
         .then(() => { throw new Error('should throw'); })
-        .catch(err => assert.equal(err.message, 'unrecognized file format'));
+        .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
     });
 
 
@@ -165,7 +165,7 @@ describe('File formats', function () {
 
       return probe(from2([ buf ]))
         .then(() => { throw new Error('should throw'); })
-        .catch(err => assert.equal(err.message, 'unrecognized file format'));
+        .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
     });
 
 
@@ -174,7 +174,7 @@ describe('File formats', function () {
 
       return probe(from2([ buf ]))
         .then(() => { throw new Error('should throw'); })
-        .catch(err => assert.equal(err.message, 'unrecognized file format'));
+        .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
     });
   });
 
@@ -201,7 +201,7 @@ describe('File formats', function () {
       var buf = str2arr('FFD8 FFC0 0004 00112233 FFD9'.replace(/ /g, ''), 'hex');
       var size = probe.sync(buf);
 
-      assert.equal(size, null);
+      assert.strictEqual(size, null);
     });
 
 
@@ -216,14 +216,14 @@ describe('File formats', function () {
     it('coverage - EOI before SOI', function () {
       var buf = str2arr('FFD8 FFD0 FFD9'.replace(/ /g, ''), 'hex');
 
-      assert.equal(probe.sync(buf), null);
+      assert.strictEqual(probe.sync(buf), null);
     });
 
 
     it('coverage - unknown marker', function () {
       var buf = str2arr('FFD8 FF05'.replace(/ /g, ''), 'hex');
 
-      assert.equal(probe.sync(buf), null);
+      assert.strictEqual(probe.sync(buf), null);
     });
 
 
@@ -231,13 +231,13 @@ describe('File formats', function () {
       var buf;
 
       buf = str2arr('FFD8 FF'.replace(/ /g, ''), 'hex');
-      assert.equal(probe.sync(buf), null);
+      assert.strictEqual(probe.sync(buf), null);
 
       buf = str2arr('FFD8 FFC0 00'.replace(/ /g, ''), 'hex');
-      assert.equal(probe.sync(buf), null);
+      assert.strictEqual(probe.sync(buf), null);
 
       buf = str2arr('FFD8 FFC0 FFFF 00'.replace(/ /g, ''), 'hex');
-      assert.equal(probe.sync(buf), null);
+      assert.strictEqual(probe.sync(buf), null);
     });
   });
 
@@ -257,7 +257,7 @@ describe('File formats', function () {
 
       return probe(from2([ buf ]))
         .then(() => { throw new Error('should throw'); })
-        .catch(err => assert.equal(err.message, 'unrecognized file format'));
+        .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
     });
   });
 
@@ -274,7 +274,7 @@ describe('File formats', function () {
     it('should skip PNG start pattern without IHDR', function () {
       var size = probe.sync(str2arr('\x89PNG\r\n\x1a\n                  '));
 
-      assert.equal(size, null);
+      assert.strictEqual(size, null);
     });
   });
 
@@ -360,7 +360,7 @@ describe('File formats', function () {
 
         return probe(from2([ buf ]))
           .then(() => { throw new Error('should throw'); })
-          .catch(err => assert.equal(err.message, 'unrecognized file format'));
+          .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
       });
 
       it('too much data before svg', function () {
@@ -370,7 +370,7 @@ describe('File formats', function () {
 
         return probe(from2([ createBuffer('<svg'), buf ]))
           .then(() => { throw new Error('should throw'); })
-          .catch(err => assert.equal(err.message, 'unrecognized file format'));
+          .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
       });
 
       it('single quotes (width/height)', function () {
@@ -394,37 +394,37 @@ describe('File formats', function () {
       it('width is invalid, no height', function () {
         return probe(from2([ createBuffer('<svg width="-1" viewbox="0 0 100 50">') ]))
           .then(() => { throw new Error('should throw'); })
-          .catch(err => assert.equal(err.message, 'unrecognized file format'));
+          .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
       });
 
       it('height is invalid, no width', function () {
         return probe(from2([ createBuffer('<svg height="foobar" viewbox="0 0 100 50">') ]))
           .then(() => { throw new Error('should throw'); })
-          .catch(err => assert.equal(err.message, 'unrecognized file format'));
+          .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
       });
 
       it('width is invalid (non positive)', function () {
         return probe(from2([ createBuffer('<svg width="0" height="5">') ]))
           .then(() => { throw new Error('should throw'); })
-          .catch(err => assert.equal(err.message, 'unrecognized file format'));
+          .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
       });
 
       it('width is invalid (Infinity)', function () {
         return probe(from2([ createBuffer('<svg width="Infinity" height="5">') ]))
           .then(() => { throw new Error('should throw'); })
-          .catch(err => assert.equal(err.message, 'unrecognized file format'));
+          .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
       });
 
       it('no viewbox, no height', function () {
         return probe(from2([ createBuffer('<svg width="5">') ]))
           .then(() => { throw new Error('should throw'); })
-          .catch(err => assert.equal(err.message, 'unrecognized file format'));
+          .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
       });
 
       it('viewbox units are different', function () {
         return probe(from2([ createBuffer('<svg width="5" viewbox="0 0 5px 3in">') ]))
           .then(() => { throw new Error('should throw'); })
-          .catch(err => assert.equal(err.message, 'unrecognized file format'));
+          .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
       });
     });
   });
@@ -466,7 +466,7 @@ describe('File formats', function () {
       it('wrong signature', function () {
         var size = probe.sync(toArray(createBuffer('  <not-really-svg width="1" height="1">')));
 
-        assert.equal(size, null);
+        assert.strictEqual(size, null);
       });
 
       it('single quotes (width/height)', function () {
@@ -567,7 +567,7 @@ describe('File formats', function () {
 
       return probe(from2([ buf ]))
         .then(() => { throw new Error('should throw'); })
-        .catch(err => assert.equal(err.message, 'unrecognized file format'));
+        .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
     });
 
 
@@ -578,7 +578,7 @@ describe('File formats', function () {
 
       return probe(from2([ buf ]))
         .then(() => { throw new Error('should throw'); })
-        .catch(err => assert.equal(err.message, 'unrecognized file format'));
+        .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
     });
 
 
@@ -594,7 +594,7 @@ describe('File formats', function () {
 
       return probe(from2([ buf ]))
         .then(() => { throw new Error('should throw'); })
-        .catch(err => assert.equal(err.message, 'unrecognized file format'));
+        .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
     });
   });
 
@@ -629,7 +629,7 @@ describe('File formats', function () {
       //                     sig     off      count next
       var buf = str2arr('49492a00 08000000 0000 00000000'.replace(/ /g, ''), 'hex');
 
-      assert.equal(probe.sync(buf), null);
+      assert.strictEqual(probe.sync(buf), null);
     });
 
 
@@ -638,7 +638,7 @@ describe('File formats', function () {
       //                     sig     off      count next
       var buf = str2arr('49492a00 00000000 0000 00000000'.replace(/ /g, ''), 'hex');
 
-      assert.equal(probe.sync(buf), null);
+      assert.strictEqual(probe.sync(buf), null);
     });
 
 
@@ -652,7 +652,7 @@ describe('File formats', function () {
         '00000000' // next
       ).replace(/ /g, ''), 'hex');
 
-      assert.equal(probe.sync(buf), null);
+      assert.strictEqual(probe.sync(buf), null);
     });
 
 
@@ -660,10 +660,10 @@ describe('File formats', function () {
       var buf;
 
       buf = str2arr('49492A00 08000000 02'.replace(/ /g, ''), 'hex');
-      assert.equal(probe.sync(buf), null);
+      assert.strictEqual(probe.sync(buf), null);
 
       buf = str2arr('49492A00 08000000 0200 00'.replace(/ /g, ''), 'hex');
-      assert.equal(probe.sync(buf), null);
+      assert.strictEqual(probe.sync(buf), null);
     });
   });
 
@@ -683,7 +683,7 @@ describe('File formats', function () {
 
       return probe(from2([ buf ]))
         .then(() => { throw new Error('should throw'); })
-        .catch(err => assert.equal(err.message, 'unrecognized file format'));
+        .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
     });
 
 
@@ -710,7 +710,7 @@ describe('File formats', function () {
 
       return probe(from2([ buf ]))
         .then(() => { throw new Error('should throw'); })
-        .catch(err => assert.equal(err.message, 'unrecognized file format'));
+        .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
     });
   });
 
@@ -727,7 +727,7 @@ describe('File formats', function () {
     it('should skip VP8 header with bad code block', function () {
       var size = probe.sync(str2arr('RIFF....WEBPVP8 ........................'));
 
-      assert.equal(size, null);
+      assert.strictEqual(size, null);
     });
 
 
@@ -750,7 +750,7 @@ describe('File formats', function () {
     it('should skip VP8L header with bad code block', function () {
       var size = probe.sync(str2arr('RIFF....WEBPVP8L........................'));
 
-      assert.equal(size, null);
+      assert.strictEqual(size, null);
     });
 
 
@@ -758,13 +758,13 @@ describe('File formats', function () {
       var buf;
 
       buf = str2arr('RIFF"\0\0\0WEBPVP8 ');
-      assert.equal(probe.sync(buf), null);
+      assert.strictEqual(probe.sync(buf), null);
 
       buf = str2arr('RIFF"\0\0\0WEBPVP8L');
-      assert.equal(probe.sync(buf), null);
+      assert.strictEqual(probe.sync(buf), null);
 
       buf = str2arr('RIFF"\0\0\0WEBPVP8X');
-      assert.equal(probe.sync(buf), null);
+      assert.strictEqual(probe.sync(buf), null);
     });
   });
 });

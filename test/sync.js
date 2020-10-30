@@ -24,7 +24,7 @@ describe('probeBuffer', function () {
     var file = path.join(__dirname, 'fixtures', 'text_file.txt');
     var size = probe.sync(toArray(fs.readFileSync(file)));
 
-    assert.equal(size, null);
+    assert.strictEqual(size, null);
   });
 
 
@@ -32,6 +32,6 @@ describe('probeBuffer', function () {
     var file = path.join(__dirname, 'fixtures', 'empty.txt');
     var size = probe.sync(toArray(fs.readFileSync(file)));
 
-    assert.equal(size, null);
+    assert.strictEqual(size, null);
   });
 });

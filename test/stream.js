@@ -22,9 +22,9 @@ describe('probeStream', function () {
     var file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
 
     return probe(fs.createReadStream(file)).then(function (size) {
-      assert.equal(size.width, 367);
-      assert.equal(size.height, 187);
-      assert.equal(size.mime, 'image/jpeg');
+      assert.strictEqual(size.width, 367);
+      assert.strictEqual(size.height, 187);
+      assert.strictEqual(size.mime, 'image/jpeg');
     });
   });
 
@@ -33,9 +33,9 @@ describe('probeStream', function () {
 
     probe(fs.createReadStream(file), function (err, size) {
       assert.ifError(err);
-      assert.equal(size.width, 367);
-      assert.equal(size.height, 187);
-      assert.equal(size.mime, 'image/jpeg');
+      assert.strictEqual(size.width, 367);
+      assert.strictEqual(size.height, 187);
+      assert.strictEqual(size.mime, 'image/jpeg');
       done();
     });
   });
@@ -45,14 +45,14 @@ describe('probeStream', function () {
 
     return probe(fs.createReadStream(file))
       .then(() => { throw new Error('should throw'); })
-      .catch(err => assert.equal(err.message, 'unrecognized file format'));
+      .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
   });
 
   it('should skip unrecognized files (callback)', function (done) {
     var file = path.join(__dirname, 'fixtures', 'text_file.txt');
 
     probe(fs.createReadStream(file), function (err) {
-      assert.equal(err.message, 'unrecognized file format');
+      assert.strictEqual(err.message, 'unrecognized file format');
       done();
     });
   });
@@ -62,13 +62,13 @@ describe('probeStream', function () {
 
     return probe(fs.createReadStream(file))
       .then(() => { throw new Error('should throw'); })
-      .catch(err => assert.equal(err.message, 'unrecognized file format'));
+      .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
   });
 
   it('should fail on stream errors', function () {
     return probe(require('from2')([ new Error('stream err') ]))
       .then(() => { throw new Error('should throw'); })
-      .catch(err => assert.equal(err.message, 'stream err'));
+      .catch(err => assert.strictEqual(err.message, 'stream err'));
   });
 
 
@@ -91,6 +91,6 @@ describe('probeStream', function () {
 
     return probe(stream)
       .then(() => { throw new Error('should throw'); })
-      .catch(err => assert.equal(err.message, 'unrecognized file format'));
+      .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
   });
 });

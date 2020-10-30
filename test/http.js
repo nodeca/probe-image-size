@@ -55,9 +55,9 @@ describe('probeHttp', function () {
 
     probe(url, function (err, size) {
       assert.ifError(err);
-      assert.equal(size.width, 1);
-      assert.equal(size.height, 1);
-      assert.equal(size.mime, 'image/gif');
+      assert.strictEqual(size.width, 1);
+      assert.strictEqual(size.height, 1);
+      assert.strictEqual(size.mime, 'image/gif');
 
       haveResponse = true;
     });
@@ -72,9 +72,9 @@ describe('probeHttp', function () {
     };
 
     return probe(url).then(function (size) {
-      assert.equal(size.width, 1);
-      assert.equal(size.height, 1);
-      assert.equal(size.mime, 'image/gif');
+      assert.strictEqual(size.width, 1);
+      assert.strictEqual(size.height, 1);
+      assert.strictEqual(size.mime, 'image/gif');
     });
   });
 
@@ -85,10 +85,10 @@ describe('probeHttp', function () {
     };
 
     return probe(url).then(size => {
-      assert.equal(size.width, 1);
-      assert.equal(size.height, 1);
-      assert.equal(size.length, 1234);
-      assert.equal(size.mime, 'image/gif');
+      assert.strictEqual(size.width, 1);
+      assert.strictEqual(size.height, 1);
+      assert.strictEqual(size.length, 1234);
+      assert.strictEqual(size.mime, 'image/gif');
     });
   });
 
@@ -107,7 +107,7 @@ describe('probeHttp', function () {
 
     return probe(url)
       .then(() => { throw new Error('should throw'); })
-      .catch(err => assert.equal(err.message, 'unrecognized file format'));
+      .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
   });
 
   it('should fail on 404 (callback)', function (callback) {
@@ -118,7 +118,7 @@ describe('probeHttp', function () {
     };
 
     probe(url, function (err) {
-      assert.equal(err.statusCode, 404);
+      assert.strictEqual(err.statusCode, 404);
 
       callback();
     });
@@ -133,7 +133,7 @@ describe('probeHttp', function () {
 
     return probe(url)
       .then(() => { throw new Error('should throw'); })
-      .catch(err => assert.equal(err.statusCode, 404));
+      .catch(err => assert.strictEqual(err.statusCode, 404));
   });
 
   it('should fail on status 201-299 codes', function () {
@@ -144,7 +144,7 @@ describe('probeHttp', function () {
 
     return probe(url)
       .then(() => { throw new Error('should throw'); })
-      .catch(err => assert.equal(err.statusCode, 201));
+      .catch(err => assert.strictEqual(err.statusCode, 201));
   });
 
 
@@ -163,7 +163,7 @@ describe('probeHttp', function () {
     //return probe({ url, retries: 0 })
     return probe(url, { retries: 0 })
       .then(() => { throw new Error('should throw'); })
-      .catch(err => assert.equal(err.code, 'ECONNRESET'));
+      .catch(err => assert.strictEqual(err.code, 'ECONNRESET'));
   });
 
   it('should add User-Agent to http requests', function () {
@@ -222,7 +222,7 @@ describe('probeHttp', function () {
 
     return probe(url + '/redirect.gif')
       .then(function (size) {
-        assert.equal(size.url, url + '/empty.gif');
+        assert.strictEqual(size.url, url + '/empty.gif');
       });
   });
 
