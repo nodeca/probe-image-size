@@ -10,7 +10,7 @@ module.exports = function get_image_size(src, options) {
 
   if (typeof src.on === 'function' && typeof src.emit === 'function') {
     // looks like an EventEmitter, treating it as a stream
-    return probeStream(src);
+    return probeStream(src, options);
   }
 
   // HTTP (not stream)

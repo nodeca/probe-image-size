@@ -56,7 +56,7 @@ module.exports = function probeHttp(src, options) {
       if (len && len.match(/^\d+$/)) length = +len;
       finalUrl = res.request.uri.href;
 
-      probeStream(stream)
+      probeStream(stream, true)
         .then(function (result) {
           if (length) result.length = length;
 

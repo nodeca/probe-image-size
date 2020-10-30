@@ -29,6 +29,32 @@ describe('probeStream', function () {
     );
   });
 
+  it('should close stream unless asked to keep open', async function () {
+    function delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    var filename, file;
+
+    filename = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
+    file = fs.createReadStream(filename);
+    await probe(file);
+    await delay(1);
+    assert.strictEqual(file.closed, true);
+
+    filename = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
+    file = fs.createReadStream(filename);
+    await probe(file, true);
+    await delay(1);
+    assert.strictEqual(file.closed, false);
+
+    filename = path.join(__dirname, 'fixtures', 'text_file.txt');
+    file = fs.createReadStream(filename);
+    try { await probe(file); } catch (err) {}
+    await delay(1);
+    assert.strictEqual(file.closed, true);
+  });
+
   it('should skip empty files', async function () {
     let file = path.join(__dirname, 'fixtures', 'empty.txt');
 

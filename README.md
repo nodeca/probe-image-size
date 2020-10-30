@@ -55,7 +55,6 @@ let input = require('fs').createReadStream('image.jpg');
 
 let result = await probe(input);
 console.log(result);
-input.destroy(); // terminate input
 
 
 // From a Buffer
@@ -67,13 +66,15 @@ console.log(probe.sync(data));
 API
 ---
 
-### probe(src [, options]) -> Promise
+### probe(src [, options|keepOpen]) -> Promise
 
 - `src` can be of this types:
   - _String_ - URL to fetch
   - _Stream_ - readable stream
 - `options` - HTTP only. See [`request` documentation](https://github.com/request/request).
 Defaults changed to `{ timeout: 60000 }`
+- `keepOpen` (Boolean) - stream only. Keep stream open after parser finishes
+  (input stream will be closed by default)
 
 `result` (Promise) contains:
 
@@ -96,11 +97,6 @@ Returned errors can be extended with 2 fields:
 
 - `code` - equals to `ECONTENT` if the library failed to parse the file;
 - `status` - equals to a HTTP status code if it receives a non-200 response.
-
-__Note.__ If you use `Stream` as source, it's your responsibility to close that
-stream. In other case you can get memory leak, because stream will
-be left in paused state. With http requests that's not a problem - everything
-is released automatically, as soon as possible.
 
 
 ### sync.probe(src) -> result|null

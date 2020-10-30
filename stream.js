@@ -6,7 +6,7 @@ var parsers     = require('./lib/parsers_stream');
 var PassThrough = require('stream').PassThrough;
 
 
-module.exports = function probeStream(stream) {
+module.exports = function probeStream(stream, keepOpen) {
   var proxy = new PassThrough();
   var cnt = 0; // count of working parsers
 
@@ -43,6 +43,7 @@ module.exports = function probeStream(stream) {
     // request stream doesn't have unpipe, https://github.com/request/request/issues/874
     if (typeof stream.unpipe === 'function') stream.unpipe(proxy);
     proxy.end();
+    if (!keepOpen) stream.destroy();
   }
 
   result.then(cleanup).catch(cleanup);
