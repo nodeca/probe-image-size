@@ -6,7 +6,7 @@ probe-image-size
 [![Coverage Status](https://coveralls.io/repos/github/nodeca/probe-image-size/badge.svg?branch=master)](https://coveralls.io/github/nodeca/probe-image-size?branch=master)
 
 > Get image size without full download. Supported image types:
-> JPG, GIF, PNG, WebP, BMP, TIFF, SVG, PSD.
+> JPG, GIF, PNG, WebP, BMP, TIFF, SVG, PSD, ICO.
 
 Key features:
 
