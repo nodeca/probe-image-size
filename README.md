@@ -52,12 +52,6 @@ probe('http://example.com/image.jpg', { timeout: 5000 }).then(function (result) 
   console.log(result);
 });
 
-// With callback
-//
-probe('http://example.com/image.jpg', function (err, result) {
-  console.log(result);
-});
-
 // From the stream
 //
 var input = require('fs').createReadStream('image.jpg');
@@ -81,7 +75,7 @@ console.log(probe.sync(data));
 API
 ---
 
-### probe(src [, options, callback]) -> Promise
+### probe(src [, options]) -> Promise
 
 `src` can be of this types:
 
@@ -111,10 +105,8 @@ Returned errors can be extended with 2 fields:
 - `code` - equals to `ECONTENT` if the library failed to parse the file;
 - `status` - equals to a HTTP status code if it receives a non-200 response.
 
-If callback (legacy node style) provided, `Promise` will not be returned.
-
 __Note 1.__ If you use `Stream` as source, it's your responsibility to close that
-stream in callback. In other case you can get memory leak, because stream will
+stream. In other case you can get memory leak, because stream will
 be left in paused state. With http requests that's not a problem - everything
 is released automatically, as soon as possible.
 

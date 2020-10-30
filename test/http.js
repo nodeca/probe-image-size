@@ -30,32 +30,7 @@ describe('probeHttp', function () {
     });
   });
 
-  it('should process an image (callback)', function (callback) {
-    let haveResponse = false;
-
-    responder = function (req, res) {
-      req.on('close', function () {
-        assert.ok(haveResponse);
-        callback();
-      });
-
-      res.writeHead(200);
-      res.write(GIF1x1);
-
-      // response never ends
-    };
-
-    probe(url, function (err, size) {
-      assert.ifError(err);
-      assert.strictEqual(size.width, 1);
-      assert.strictEqual(size.height, 1);
-      assert.strictEqual(size.mime, 'image/gif');
-
-      haveResponse = true;
-    });
-  });
-
-  it('should process an image (promise)', async function () {
+  it('should process an image', async function () {
     responder = function (req, res) {
       res.writeHead(200);
       res.write(GIF1x1);
@@ -103,21 +78,7 @@ describe('probeHttp', function () {
     );
   });
 
-  it('should fail on 404 (callback)', function (callback) {
-    responder = function (req, res) {
-      res.writeHead(404);
-      res.write('not found');
-      // response never ends
-    };
-
-    probe(url, function (err) {
-      assert.strictEqual(err.statusCode, 404);
-
-      callback();
-    });
-  });
-
-  it('should fail on 404 (promise)', async function () {
+  it('should fail on 404', async function () {
     responder = function (req, res) {
       res.writeHead(404);
       res.write('not found');
@@ -191,21 +152,6 @@ describe('probeHttp', function () {
 
     assert(/^foo/.test(userAgent));
   });
-
-  it('should allow customize request options (legacy)', async function () {
-    let userAgent;
-
-    responder = function (req, res) {
-      userAgent = req.headers['user-agent'];
-
-      res.writeHead(200);
-      res.end(GIF1x1);
-    };
-
-    await probe({ url, headers: { 'User-Agent': 'foobar ' } });
-    assert(/^foo/.test(userAgent));
-  });
-
 
   it('should return url when following redirect', async function () {
     responder = function (req, res) {

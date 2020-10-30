@@ -10,7 +10,7 @@ const Readable = require('stream').Readable;
 
 
 describe('probeStream', function () {
-  it('should process an image (promise)', async function () {
+  it('should process an image', async function () {
     let file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
 
     let size = await probe(fs.createReadStream(file));
@@ -20,34 +20,13 @@ describe('probeStream', function () {
     assert.strictEqual(size.mime, 'image/jpeg');
   });
 
-  it('should process an image (callback)', function (done) {
-    let file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
-
-    probe(fs.createReadStream(file), function (err, size) {
-      assert.ifError(err);
-      assert.strictEqual(size.width, 367);
-      assert.strictEqual(size.height, 187);
-      assert.strictEqual(size.mime, 'image/jpeg');
-      done();
-    });
-  });
-
-  it('should skip unrecognized files (promise)', async function () {
+  it('should skip unrecognized files', async function () {
     let file = path.join(__dirname, 'fixtures', 'text_file.txt');
 
     await assert.rejects(
       async () => probe(fs.createReadStream(file)),
       /unrecognized file format/
     );
-  });
-
-  it('should skip unrecognized files (callback)', function (done) {
-    let file = path.join(__dirname, 'fixtures', 'text_file.txt');
-
-    probe(fs.createReadStream(file), function (err) {
-      assert.strictEqual(err.message, 'unrecognized file format');
-      done();
-    });
   });
 
   it('should skip empty files', async function () {
