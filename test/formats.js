@@ -10,25 +10,6 @@ var probe   = require('../');
 var str2arr = require('../lib/common').str2arr;
 
 
-function createBuffer(src, opts) {
-  if (typeof src === 'number') {
-    return Buffer.alloc ? Buffer.alloc(src, opts) : new Buffer(src, opts);
-  }
-  return Buffer.from ? Buffer.from(src, opts) : new Buffer(src, opts);
-}
-
-
-function toArray(buf) {
-  var arr = new Array(buf.length);
-
-  for (var i = 0; i < buf.length; i++) {
-    arr[i] = buf[i];
-  }
-
-  return arr;
-}
-
-
 /* eslint-disable max-len */
 describe('File formats', function () {
   describe('BMP', function () {
@@ -45,7 +26,7 @@ describe('File formats', function () {
   describe('BMP (sync)', function () {
     it('should detect BMP', function () {
       var file = path.join(__dirname, 'fixtures', 'iojs_logo.bmp');
-      var size = probe.sync(toArray(fs.readFileSync(file)));
+      var size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 367, height: 187, type: 'bmp', mime: 'image/bmp', wUnits: 'px', hUnits: 'px' });
     });
@@ -66,7 +47,7 @@ describe('File formats', function () {
   describe('GIF (sync)', function () {
     it('should detect GIF', function () {
       var file = path.join(__dirname, 'fixtures', 'iojs_logo.gif');
-      var size = probe.sync(toArray(fs.readFileSync(file)));
+      var size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 367, height: 187, type: 'gif', mime: 'image/gif', wUnits: 'px', hUnits: 'px' });
     });
@@ -100,7 +81,7 @@ describe('File formats', function () {
   describe('ICO (sync)', function () {
     it('should detect ICO', function () {
       var file = path.join(__dirname, 'fixtures', 'google.ico');
-      var size = probe.sync(toArray(fs.readFileSync(file)));
+      var size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, {
         width: 128,
@@ -143,7 +124,7 @@ describe('File formats', function () {
 
     it('should not fail on bad JPEG', function () {
       // length of C0 is less than needed (should be 5+ bytes)
-      var buf = createBuffer('FFD8 FFC0 0004 00112233 FFD9'.replace(/ /g, ''), 'hex');
+      var buf = Buffer.from('FFD8 FFC0 0004 00112233 FFD9'.replace(/ /g, ''), 'hex');
 
       return probe(from2([ buf ]))
         .then(() => { throw new Error('should throw'); })
@@ -152,7 +133,7 @@ describe('File formats', function () {
 
 
     it('should skip padding', function () {
-      var buf = createBuffer('FFD8 FFFFFFFFC00011 08000F000F03012200021101031101 FFFFD9'.replace(/ /g, ''), 'hex');
+      var buf = Buffer.from('FFD8 FFFFFFFFC00011 08000F000F03012200021101031101 FFFFD9'.replace(/ /g, ''), 'hex');
 
       return probe(from2([ buf ])).then(size => {
         assert.deepStrictEqual(size, { width: 15, height: 15, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' });
@@ -161,7 +142,7 @@ describe('File formats', function () {
 
 
     it('coverage - EOI before SOI', function () {
-      var buf = createBuffer('FFD8 FFD0 FFD9'.replace(/ /g, ''), 'hex');
+      var buf = Buffer.from('FFD8 FFD0 FFD9'.replace(/ /g, ''), 'hex');
 
       return probe(from2([ buf ]))
         .then(() => { throw new Error('should throw'); })
@@ -170,7 +151,7 @@ describe('File formats', function () {
 
 
     it('coverage - unknown marker', function () {
-      var buf = createBuffer('FFD8 FF05'.replace(/ /g, ''), 'hex');
+      var buf = Buffer.from('FFD8 FF05'.replace(/ /g, ''), 'hex');
 
       return probe(from2([ buf ]))
         .then(() => { throw new Error('should throw'); })
@@ -182,7 +163,7 @@ describe('File formats', function () {
   describe('JPEG (sync)', function () {
     it('should detect JPEG', function () {
       var file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
-      var size = probe.sync(toArray(fs.readFileSync(file)));
+      var size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 367, height: 187, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' });
     });
@@ -190,7 +171,7 @@ describe('File formats', function () {
 
     it('should not fail on empty JPEG markers', function () {
       var file = path.join(__dirname, 'fixtures', 'empty_comment.jpg');
-      var size = probe.sync(toArray(fs.readFileSync(file)));
+      var size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 40, height: 20, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' });
     });
@@ -253,7 +234,7 @@ describe('File formats', function () {
 
 
     it('should skip PNG start pattern without IHDR', function () {
-      var buf = createBuffer(str2arr('\x89PNG\r\n\x1a\n                  '));
+      var buf = Buffer.from(str2arr('\x89PNG\r\n\x1a\n                  '));
 
       return probe(from2([ buf ]))
         .then(() => { throw new Error('should throw'); })
@@ -265,7 +246,7 @@ describe('File formats', function () {
   describe('PNG (sync)', function () {
     it('should detect PNG', function () {
       var file = path.join(__dirname, 'fixtures', 'iojs_logo.png');
-      var size = probe.sync(toArray(fs.readFileSync(file)));
+      var size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 367, height: 187, type: 'png', mime: 'image/png', wUnits: 'px', hUnits: 'px' });
     });
@@ -293,7 +274,7 @@ describe('File formats', function () {
   describe('PSD (sync)', function () {
     it('should detect PSD', function () {
       var file = path.join(__dirname, 'fixtures', 'empty.psd');
-      var size = probe.sync(toArray(fs.readFileSync(file)));
+      var size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 640, height: 400, type: 'psd', mime: 'image/vnd.adobe.photoshop', wUnits: 'px', hUnits: 'px' });
     });
@@ -311,9 +292,9 @@ describe('File formats', function () {
 
     it('should work with weirdly split chunks', function () {
       return probe(from2([
-        createBuffer('   '),
-        createBuffer(' <s'),
-        createBuffer('vg width="5" height="5"></svg>')
+        Buffer.from('   '),
+        Buffer.from(' <s'),
+        Buffer.from('vg width="5" height="5"></svg>')
       ])).then(size => {
         assert.deepStrictEqual(size, { width: 5, height: 5, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
       });
@@ -321,7 +302,7 @@ describe('File formats', function () {
 
     it('should extract width info from viewbox', function () {
       return probe(from2([
-        createBuffer('<svg viewbox="0 0 800 600"></svg>')
+        Buffer.from('<svg viewbox="0 0 800 600"></svg>')
       ])).then(size => {
         assert.deepStrictEqual(size, { width: 800, height: 600, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
       });
@@ -329,7 +310,7 @@ describe('File formats', function () {
 
     it('should extract width info from camel cased viewBox', function () {
       return probe(from2([
-        createBuffer('<svg viewBox="0 0 800 600"></svg>')
+        Buffer.from('<svg viewBox="0 0 800 600"></svg>')
       ])).then(size => {
         assert.deepStrictEqual(size, { width: 800, height: 600, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
       });
@@ -337,7 +318,7 @@ describe('File formats', function () {
 
     it('should return width/height units', function () {
       return probe(from2([
-        createBuffer('<svg width="5in" height="4pt"></svg>')
+        Buffer.from('<svg width="5in" height="4pt"></svg>')
       ])).then(size => {
         assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'pt' });
       });
@@ -345,7 +326,7 @@ describe('File formats', function () {
 
     it('should ignore stroke-width', function () {
       return probe(from2([
-        createBuffer('<svg stroke-width="2" width="5" height="4"></svg>')
+        Buffer.from('<svg stroke-width="2" width="5" height="4"></svg>')
       ])).then(size => {
         assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
       });
@@ -354,7 +335,7 @@ describe('File formats', function () {
     /* eslint-disable max-nested-callbacks */
     describe('coverage', function () {
       it('too much data before doctype', function () {
-        var buf = createBuffer(70000);
+        var buf = Buffer.alloc(70000);
 
         buf.fill(0x20);
 
@@ -364,65 +345,65 @@ describe('File formats', function () {
       });
 
       it('too much data before svg', function () {
-        var buf = createBuffer(70000);
+        var buf = Buffer.alloc(70000);
 
         buf.fill(0x20);
 
-        return probe(from2([ createBuffer('<svg'), buf ]))
+        return probe(from2([ Buffer.from('<svg'), buf ]))
           .then(() => { throw new Error('should throw'); })
           .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
       });
 
       it('single quotes (width/height)', function () {
-        return probe(from2([ createBuffer("<svg width='5in' height='4pt'></svg>") ])).then(size => {
+        return probe(from2([ Buffer.from("<svg width='5in' height='4pt'></svg>") ])).then(size => {
           assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'pt' });
         });
       });
 
       it('single quotes (viewbox)', function () {
-        return probe(from2([ createBuffer("<svg width='1in' viewbox='0 0 100 50'>") ])).then(size => {
+        return probe(from2([ Buffer.from("<svg width='1in' viewbox='0 0 100 50'>") ])).then(size => {
           assert.deepStrictEqual(size, { width: 1, height: 0.5, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'in' });
         });
       });
 
       it('height, no width', function () {
-        return probe(from2([ createBuffer('<svg height="1in" viewbox="0 0 100 50">') ])).then(size => {
+        return probe(from2([ Buffer.from('<svg height="1in" viewbox="0 0 100 50">') ])).then(size => {
           assert.deepStrictEqual(size, { width: 2, height: 1, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'in' });
         });
       });
 
       it('width is invalid, no height', function () {
-        return probe(from2([ createBuffer('<svg width="-1" viewbox="0 0 100 50">') ]))
+        return probe(from2([ Buffer.from('<svg width="-1" viewbox="0 0 100 50">') ]))
           .then(() => { throw new Error('should throw'); })
           .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
       });
 
       it('height is invalid, no width', function () {
-        return probe(from2([ createBuffer('<svg height="foobar" viewbox="0 0 100 50">') ]))
+        return probe(from2([ Buffer.from('<svg height="foobar" viewbox="0 0 100 50">') ]))
           .then(() => { throw new Error('should throw'); })
           .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
       });
 
       it('width is invalid (non positive)', function () {
-        return probe(from2([ createBuffer('<svg width="0" height="5">') ]))
+        return probe(from2([ Buffer.from('<svg width="0" height="5">') ]))
           .then(() => { throw new Error('should throw'); })
           .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
       });
 
       it('width is invalid (Infinity)', function () {
-        return probe(from2([ createBuffer('<svg width="Infinity" height="5">') ]))
+        return probe(from2([ Buffer.from('<svg width="Infinity" height="5">') ]))
           .then(() => { throw new Error('should throw'); })
           .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
       });
 
       it('no viewbox, no height', function () {
-        return probe(from2([ createBuffer('<svg width="5">') ]))
+        return probe(from2([ Buffer.from('<svg width="5">') ]))
           .then(() => { throw new Error('should throw'); })
           .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
       });
 
       it('viewbox units are different', function () {
-        return probe(from2([ createBuffer('<svg width="5" viewbox="0 0 5px 3in">') ]))
+        return probe(from2([ Buffer.from('<svg width="5" viewbox="0 0 5px 3in">') ]))
           .then(() => { throw new Error('should throw'); })
           .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
       });
@@ -433,98 +414,98 @@ describe('File formats', function () {
   describe('SVG (sync)', function () {
     it('should detect SVG', function () {
       var file = path.join(__dirname, 'fixtures', 'sample.svg');
-      var size = probe.sync(toArray(fs.readFileSync(file)));
+      var size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 744.09448819, height: 1052.3622047, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
     });
 
     it('should extract width info from viewbox', function () {
-      var size = probe.sync(toArray(createBuffer('<svg viewbox="0 0 800 600"></svg>')));
+      var size = probe.sync(Buffer.from('<svg viewbox="0 0 800 600"></svg>'));
 
       assert.deepStrictEqual(size, { width: 800, height: 600, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
     });
 
     it('should extract width info from camel cased viewBox', function () {
-      var size = probe.sync(toArray(createBuffer('<svg viewBox="0 0 800 600"></svg>')));
+      var size = probe.sync(Buffer.from('<svg viewBox="0 0 800 600"></svg>'));
 
       assert.deepStrictEqual(size, { width: 800, height: 600, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
     });
 
     it('should return width/height units', function () {
-      var size = probe.sync(toArray(createBuffer('<svg width="5in" height="4pt"></svg>')));
+      var size = probe.sync(Buffer.from('<svg width="5in" height="4pt"></svg>'));
 
       assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'pt' });
     });
 
     it('should ignore stroke-width', function () {
-      var size = probe.sync(toArray(createBuffer('<svg stroke-width="2" width="5" height="4"></svg>')));
+      var size = probe.sync(Buffer.from('<svg stroke-width="2" width="5" height="4"></svg>'));
 
       assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
     });
 
     describe('coverage', function () {
       it('wrong signature', function () {
-        var size = probe.sync(toArray(createBuffer('  <not-really-svg width="1" height="1">')));
+        var size = probe.sync(Buffer.from('  <not-really-svg width="1" height="1">'));
 
         assert.strictEqual(size, null);
       });
 
       it('single quotes (width/height)', function () {
-        var size = probe.sync(toArray(createBuffer("<svg width='5in' height='4pt'></svg>")));
+        var size = probe.sync(Buffer.from("<svg width='5in' height='4pt'></svg>"));
 
         assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'pt' });
       });
 
       it('single quotes (viewbox)', function () {
-        var size = probe.sync(toArray(createBuffer("<svg width='1in' viewbox='0 0 100 50'>")));
+        var size = probe.sync(Buffer.from("<svg width='1in' viewbox='0 0 100 50'>"));
 
         assert.deepStrictEqual(size, { width: 1, height: 0.5, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'in' });
       });
 
       it('width, no height', function () {
-        var size = probe.sync(toArray(createBuffer('<svg width="1in" viewbox="0 0 100 50">')));
+        var size = probe.sync(Buffer.from('<svg width="1in" viewbox="0 0 100 50">'));
 
         assert.deepStrictEqual(size, { width: 1, height: 0.5, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'in' });
       });
 
       it('height, no width', function () {
-        var size = probe.sync(toArray(createBuffer('<svg height="1in" viewbox="0 0 100 50">')));
+        var size = probe.sync(Buffer.from('<svg height="1in" viewbox="0 0 100 50">'));
 
         assert.deepStrictEqual(size, { width: 2, height: 1, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'in' });
       });
 
       it('width is invalid, no height', function () {
-        var size = probe.sync(toArray(createBuffer('<svg width="-1" viewbox="0 0 100 50">')));
+        var size = probe.sync(Buffer.from('<svg width="-1" viewbox="0 0 100 50">'));
 
         assert.deepStrictEqual(size, null);
       });
 
       it('height is invalid, no width', function () {
-        var size = probe.sync(toArray(createBuffer('<svg height="foobar" viewbox="0 0 100 50">')));
+        var size = probe.sync(Buffer.from('<svg height="foobar" viewbox="0 0 100 50">'));
 
         assert.deepStrictEqual(size, null);
       });
 
       it('width is invalid (non positive)', function () {
-        var size = probe.sync(toArray(createBuffer('<svg width="0" height="5">')));
+        var size = probe.sync(Buffer.from('<svg width="0" height="5">'));
 
         assert.deepStrictEqual(size, null);
       });
 
       it('width is invalid (Infinity)', function () {
-        var size = probe.sync(toArray(createBuffer('<svg width="Infinity" height="5">')));
+        var size = probe.sync(Buffer.from('<svg width="Infinity" height="5">'));
 
         assert.deepStrictEqual(size, null);
       });
 
       it('no viewbox, no height', function () {
-        var size = probe.sync(toArray(createBuffer('<svg width="5">')));
+        var size = probe.sync(Buffer.from('<svg width="5">'));
 
         assert.deepStrictEqual(size, null);
       });
 
       it('viewbox units are different', function () {
-        var size = probe.sync(toArray(createBuffer('<svg width="5" viewbox="0 0 5px 3in">')));
+        var size = probe.sync(Buffer.from('<svg width="5" viewbox="0 0 5px 3in">'));
 
         assert.deepStrictEqual(size, null);
       });
@@ -563,7 +544,7 @@ describe('File formats', function () {
     it('bad TIFF IFD', function () {
       // zero entries in 1st ifd, invalid TIFF
       //                     sig     off      count next
-      var buf = createBuffer('49492a00 08000000 0000 00000000'.replace(/ /g, ''), 'hex');
+      var buf = Buffer.from('49492a00 08000000 0000 00000000'.replace(/ /g, ''), 'hex');
 
       return probe(from2([ buf ]))
         .then(() => { throw new Error('should throw'); })
@@ -574,7 +555,7 @@ describe('File formats', function () {
     it('bad TIFF IFD offset', function () {
       // invalid 1st tiff offset
       //                     sig     off      count next
-      var buf = createBuffer('49492a00 00000000 0000 00000000'.replace(/ /g, ''), 'hex');
+      var buf = Buffer.from('49492a00 00000000 0000 00000000'.replace(/ /g, ''), 'hex');
 
       return probe(from2([ buf ]))
         .then(() => { throw new Error('should throw'); })
@@ -585,7 +566,7 @@ describe('File formats', function () {
     it('bad TIFF IFD value', function () {
       // invalid ifd type (FF instead of 03 or 04)
       //                     sig     off  count next
-      var buf = createBuffer((
+      var buf = Buffer.from((
         '49492A00 08000000 0200' + // sig, off, count
         '0001 0000 01000000 FF000000' +
         '0101 0400 01000000 2A000000' +
@@ -602,7 +583,7 @@ describe('File formats', function () {
   describe('TIFF (sync)', function () {
     it('real image', function () {
       var file = path.join(__dirname, 'fixtures', 'iojs_logo.tiff');
-      var size = probe.sync(toArray(fs.readFileSync(file)));
+      var size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 367, height: 187, type: 'tiff', mime: 'image/tiff', wUnits: 'px', hUnits: 'px' });
     });
@@ -610,7 +591,7 @@ describe('File formats', function () {
 
     it('real image, Big Endian', function () {
       var file = path.join(__dirname, 'fixtures', 'iojs_logo_be.tiff');
-      var size = probe.sync(toArray(fs.readFileSync(file)));
+      var size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 367, height: 187, type: 'tiff', mime: 'image/tiff', wUnits: 'px', hUnits: 'px' });
     });
@@ -618,7 +599,7 @@ describe('File formats', function () {
 
     it('TIFF IFD is first in the file', function () {
       var file = path.join(__dirname, 'fixtures', 'meta_before_image.tiff');
-      var size = probe.sync(toArray(fs.readFileSync(file)));
+      var size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 15, height: 15, type: 'tiff', mime: 'image/tiff', wUnits: 'px', hUnits: 'px' });
     });
@@ -679,7 +660,7 @@ describe('File formats', function () {
 
 
     it('should skip VP8 header with bad code block', function () {
-      var buf = createBuffer(str2arr('RIFF....WEBPVP8 ........................'));
+      var buf = Buffer.from(str2arr('RIFF....WEBPVP8 ........................'));
 
       return probe(from2([ buf ]))
         .then(() => { throw new Error('should throw'); })
@@ -706,7 +687,7 @@ describe('File formats', function () {
 
 
     it('should skip VP8L header with bad code block', function () {
-      var buf = createBuffer(str2arr('RIFF....WEBPVP8L........................'));
+      var buf = Buffer.from(str2arr('RIFF....WEBPVP8L........................'));
 
       return probe(from2([ buf ]))
         .then(() => { throw new Error('should throw'); })
@@ -718,7 +699,7 @@ describe('File formats', function () {
   describe('WEBP (sync)', function () {
     it('should detect VP8', function () {
       var file = path.join(__dirname, 'fixtures', 'webp-vp8.webp');
-      var size = probe.sync(toArray(fs.readFileSync(file)));
+      var size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 1, height: 1, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' });
     });
@@ -733,7 +714,7 @@ describe('File formats', function () {
 
     it('should detect VP8X', function () {
       var file = path.join(__dirname, 'fixtures', 'webp-vp8x.webp');
-      var size = probe.sync(toArray(fs.readFileSync(file)));
+      var size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 367, height: 187, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' });
     });
@@ -741,7 +722,7 @@ describe('File formats', function () {
 
     it('should detect VP8L (lossless)', function () {
       var file = path.join(__dirname, 'fixtures', 'webp-vp8l.webp');
-      var size = probe.sync(toArray(fs.readFileSync(file)));
+      var size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 367, height: 187, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' });
     });

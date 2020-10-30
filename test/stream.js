@@ -9,14 +9,6 @@ var probe    = require('../');
 var Readable = require('stream').Readable;
 
 
-function createBuffer(src, opts) {
-  if (typeof src === 'number') {
-    return Buffer.alloc ? Buffer.alloc(src, opts) : new Buffer(src, opts);
-  }
-  return Buffer.from ? Buffer.from(src, opts) : new Buffer(src, opts);
-}
-
-
 describe('probeStream', function () {
   it('should process an image (promise)', function () {
     var file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
@@ -83,7 +75,7 @@ describe('probeStream', function () {
     var stream = new Readable({
       read: function () {
         // > 16kB (so it will be split), < 64kB (SVG header size)
-        var x = createBuffer(20000);
+        var x = Buffer.alloc(20000);
         x.fill(0x20);
         this.push(x);
       }

@@ -8,15 +8,7 @@ var URL    = require('url');
 var probe  = require('../');
 
 
-function createBuffer(src, opts) {
-  if (typeof src === 'number') {
-    return Buffer.alloc ? Buffer.alloc(src, opts) : new Buffer(src, opts);
-  }
-  return Buffer.from ? Buffer.from(src, opts) : new Buffer(src, opts);
-}
-
-
-var GIF1x1 = createBuffer('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', 'base64');
+var GIF1x1 = Buffer.from('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', 'base64');
 
 
 describe('probeHttp', function () {
