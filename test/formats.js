@@ -5,9 +5,9 @@
 const assert  = require('assert');
 const fs      = require('fs');
 const path    = require('path');
-const from2   = require('from2');
 const probe   = require('../');
 const str2arr = require('../lib/common').str2arr;
+const { Readable } = require('stream');
 
 
 /* eslint-disable max-len */
@@ -128,7 +128,7 @@ describe('File formats', function () {
       let buf = Buffer.from('FFD8 FFC0 0004 00112233 FFD9'.replace(/ /g, ''), 'hex');
 
       await assert.rejects(
-        async () => probe(from2([ buf ])),
+        async () => probe(Readable.from([ buf ])),
         /unrecognized file format/
       );
     });
@@ -137,7 +137,7 @@ describe('File formats', function () {
     it('should skip padding', async function () {
       let buf = Buffer.from('FFD8 FFFFFFFFC00011 08000F000F03012200021101031101 FFFFD9'.replace(/ /g, ''), 'hex');
 
-      let size = await probe(from2([ buf ]));
+      let size = await probe(Readable.from([ buf ]));
 
       assert.deepStrictEqual(size, { width: 15, height: 15, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' });
     });
@@ -147,7 +147,7 @@ describe('File formats', function () {
       let buf = Buffer.from('FFD8 FFD0 FFD9'.replace(/ /g, ''), 'hex');
 
       await assert.rejects(
-        async () => probe(from2([ buf ])),
+        async () => probe(Readable.from([ buf ])),
         /unrecognized file format/
       );
     });
@@ -157,7 +157,7 @@ describe('File formats', function () {
       let buf = Buffer.from('FFD8 FF05'.replace(/ /g, ''), 'hex');
 
       await assert.rejects(
-        async () => probe(from2([ buf ])),
+        async () => probe(Readable.from([ buf ])),
         /unrecognized file format/
       );
     });
@@ -241,7 +241,7 @@ describe('File formats', function () {
       let buf = Buffer.from(str2arr('\x89PNG\r\n\x1a\n                  '));
 
       await assert.rejects(
-        async () => probe(from2([ buf ])),
+        async () => probe(Readable.from([ buf ])),
         /unrecognized file format/
       );
     });
@@ -296,7 +296,7 @@ describe('File formats', function () {
     });
 
     it('should work with weirdly split chunks', async function () {
-      let size = await probe(from2([
+      let size = await probe(Readable.from([
         Buffer.from('   '),
         Buffer.from(' <s'),
         Buffer.from('vg width="5" height="5"></svg>')
@@ -306,25 +306,25 @@ describe('File formats', function () {
     });
 
     it('should extract width info from viewbox', async function () {
-      let size = await probe(from2([ Buffer.from('<svg viewbox="0 0 800 600"></svg>') ]));
+      let size = await probe(Readable.from([ Buffer.from('<svg viewbox="0 0 800 600"></svg>') ]));
 
       assert.deepStrictEqual(size, { width: 800, height: 600, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
     });
 
     it('should extract width info from camel cased viewBox', async function () {
-      let size = await probe(from2([ Buffer.from('<svg viewBox="0 0 800 600"></svg>') ]));
+      let size = await probe(Readable.from([ Buffer.from('<svg viewBox="0 0 800 600"></svg>') ]));
 
       assert.deepStrictEqual(size, { width: 800, height: 600, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
     });
 
     it('should return width/height units', async function () {
-      let size = await probe(from2([ Buffer.from('<svg width="5in" height="4pt"></svg>') ]));
+      let size = await probe(Readable.from([ Buffer.from('<svg width="5in" height="4pt"></svg>') ]));
 
       assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'pt' });
     });
 
     it('should ignore stroke-width', async function () {
-      let size = await probe(from2([ Buffer.from('<svg stroke-width="2" width="5" height="4"></svg>') ]));
+      let size = await probe(Readable.from([ Buffer.from('<svg stroke-width="2" width="5" height="4"></svg>') ]));
 
       assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
     });
@@ -337,7 +337,7 @@ describe('File formats', function () {
         buf.fill(0x20);
 
         await assert.rejects(
-          async () => probe(from2([ buf ])),
+          async () => probe(Readable.from([ buf ])),
           /unrecognized file format/
         );
       });
@@ -348,67 +348,67 @@ describe('File formats', function () {
         buf.fill(0x20);
 
         await assert.rejects(
-          async () => probe(from2([ Buffer.from('<svg'), buf ])),
+          async () => probe(Readable.from([ Buffer.from('<svg'), buf ])),
           /unrecognized file format/
         );
       });
 
       it('single quotes (width/height)', async function () {
-        let size = await probe(from2([ Buffer.from("<svg width='5in' height='4pt'></svg>") ]));
+        let size = await probe(Readable.from([ Buffer.from("<svg width='5in' height='4pt'></svg>") ]));
 
         assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'pt' });
       });
 
       it('single quotes (viewbox)', async function () {
-        let size = await probe(from2([ Buffer.from("<svg width='1in' viewbox='0 0 100 50'>") ]));
+        let size = await probe(Readable.from([ Buffer.from("<svg width='1in' viewbox='0 0 100 50'>") ]));
 
         assert.deepStrictEqual(size, { width: 1, height: 0.5, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'in' });
       });
 
       it('height, no width', async function () {
-        let size = await probe(from2([ Buffer.from('<svg height="1in" viewbox="0 0 100 50">') ]));
+        let size = await probe(Readable.from([ Buffer.from('<svg height="1in" viewbox="0 0 100 50">') ]));
 
         assert.deepStrictEqual(size, { width: 2, height: 1, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'in' });
       });
 
       it('width is invalid, no height', async function () {
         await assert.rejects(
-          async () => probe(from2([ Buffer.from('<svg width="-1" viewbox="0 0 100 50">') ])),
+          async () => probe(Readable.from([ Buffer.from('<svg width="-1" viewbox="0 0 100 50">') ])),
           /unrecognized file format/
         );
       });
 
       it('height is invalid, no width', async function () {
         await assert.rejects(
-          async () => probe(from2([ Buffer.from('<svg height="foobar" viewbox="0 0 100 50">') ])),
+          async () => probe(Readable.from([ Buffer.from('<svg height="foobar" viewbox="0 0 100 50">') ])),
           /unrecognized file format/
         );
       });
 
       it('width is invalid (non positive)', async function () {
         await assert.rejects(
-          async () => probe(from2([ Buffer.from('<svg width="0" height="5">') ])),
+          async () => probe(Readable.from([ Buffer.from('<svg width="0" height="5">') ])),
           /unrecognized file format/
         );
       });
 
       it('width is invalid (Infinity)', async function () {
         await assert.rejects(
-          async () => probe(from2([ Buffer.from('<svg width="Infinity" height="5">') ])),
+          async () => probe(Readable.from([ Buffer.from('<svg width="Infinity" height="5">') ])),
           /unrecognized file format/
         );
       });
 
       it('no viewbox, no height', async function () {
         await assert.rejects(
-          async () => probe(from2([ Buffer.from('<svg width="5">') ])),
+          async () => probe(Readable.from([ Buffer.from('<svg width="5">') ])),
           /unrecognized file format/
         );
       });
 
       it('viewbox units are different', async function () {
         await assert.rejects(
-          async () => probe(from2([ Buffer.from('<svg width="5" viewbox="0 0 5px 3in">') ])),
+          async () => probe(Readable.from([ Buffer.from('<svg width="5" viewbox="0 0 5px 3in">') ])),
           /unrecognized file format/
         );
       });
@@ -552,7 +552,7 @@ describe('File formats', function () {
       let buf = Buffer.from('49492a00 08000000 0000 00000000'.replace(/ /g, ''), 'hex');
 
       await assert.rejects(
-        async () => probe(from2([ buf ])),
+        async () => probe(Readable.from([ buf ])),
         /unrecognized file format/
       );
     });
@@ -564,7 +564,7 @@ describe('File formats', function () {
       let buf = Buffer.from('49492a00 00000000 0000 00000000'.replace(/ /g, ''), 'hex');
 
       await assert.rejects(
-        async () => probe(from2([ buf ])),
+        async () => probe(Readable.from([ buf ])),
         /unrecognized file format/
       );
     });
@@ -581,7 +581,7 @@ describe('File formats', function () {
       ).replace(/ /g, ''), 'hex');
 
       await assert.rejects(
-        async () => probe(from2([ buf ])),
+        async () => probe(Readable.from([ buf ])),
         /unrecognized file format/
       );
     });
@@ -671,7 +671,7 @@ describe('File formats', function () {
       let buf = Buffer.from(str2arr('RIFF....WEBPVP8 ........................'));
 
       await assert.rejects(
-        async () => probe(from2([ buf ])),
+        async () => probe(Readable.from([ buf ])),
         /unrecognized file format/
       );
     });
@@ -699,7 +699,7 @@ describe('File formats', function () {
       let buf = Buffer.from(str2arr('RIFF....WEBPVP8L........................'));
 
       await assert.rejects(
-        async () => probe(from2([ buf ])),
+        async () => probe(Readable.from([ buf ])),
         /unrecognized file format/
       );
     });

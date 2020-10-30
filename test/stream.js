@@ -6,7 +6,7 @@ const assert   = require('assert');
 const fs       = require('fs');
 const path     = require('path');
 const probe    = require('../');
-const Readable = require('stream').Readable;
+const { Readable } = require('stream');
 
 
 describe('probeStream', function () {
@@ -39,8 +39,11 @@ describe('probeStream', function () {
   });
 
   it('should fail on stream errors', async function () {
+    async function * generate() {
+      throw new Error('stream err');
+    }
     await assert.rejects(
-      async () => probe(require('from2')([ new Error('stream err') ])),
+      async () => probe(Readable.from(generate())),
       /stream err/
     );
   });
