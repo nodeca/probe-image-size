@@ -20,54 +20,46 @@ Install
 -------
 
 ```bash
-npm install probe-image-size --save
+npm install probe-image-size
 ```
 
 Example
 -------
 
 ```js
-var probe = require('probe-image-size');
+const probe = require('probe-image-size');
 
 // Get by URL
-//
-probe('http://example.com/image.jpg').then(result => {
-  console.log(result); // =>
-  /*
-    {
-      width: xx,
-      height: yy,
-      type: 'jpg',
-      mime: 'image/jpeg',
-      wUnits: 'px',
-      hUnits: 'px',
-      url: 'http://example.com/image.jpg'
-    }
-  */
-});
+let result = await probe('http://example.com/image.jpg');
+console.log(result); // =>
+/*
+  {
+    width: xx,
+    height: yy,
+    type: 'jpg',
+    mime: 'image/jpeg',
+    wUnits: 'px',
+    hUnits: 'px',
+    url: 'http://example.com/image.jpg'
+  }
+*/
+
 
 // By URL with options
-//
-probe('http://example.com/image.jpg', { timeout: 5000 }).then(function (result) {
-  console.log(result);
-});
+let result = await probe('http://example.com/image.jpg', { timeout: 5000 });
+console.log(result);
+
 
 // From the stream
-//
-var input = require('fs').createReadStream('image.jpg');
+let input = require('fs').createReadStream('image.jpg');
 
-probe(input).then(result => {
-  console.log(result);
+let result = await probe(input);
+console.log(result);
+input.destroy(); // terminate input
 
-  // terminate input, depends on stream type,
-  // this example is for fs streams only.
-  input.destroy();
-});
 
 // From a Buffer
-//
-var data = require('fs').readFileSync('image.jpg');
-
+let data = require('fs').readFileSync('image.jpg');
 console.log(probe.sync(data));
 ```
 
@@ -77,12 +69,10 @@ API
 
 ### probe(src [, options]) -> Promise
 
-`src` can be of this types:
-
-- __String__ - URL to fetch
-- __Stream__ - readable stream
-
-`options` - HTTP only. See [`request` documentation](https://github.com/request/request).
+- `src` can be of this types:
+  - _String_ - URL to fetch
+  - _Stream_ - readable stream
+- `options` - HTTP only. See [`request` documentation](https://github.com/request/request).
 Defaults changed to `{ timeout: 60000 }`
 
 `result` (Promise) contains:
@@ -91,12 +81,14 @@ Defaults changed to `{ timeout: 60000 }`
 {
   width: XX,
   height: YY,
-  length: ZZ, // byte length of the file (if available, HTTP only)
-  type: ..., // image 'type' (usual file name extention)
-  mime: ...,  // mime type
+  length: ZZ,   // byte length of the file (if available, HTTP only)
+  type: ...,    // image 'type' (usual file name extention)
+  mime: ...,    // mime type
   wUnits: 'px', // width units type ('px' by default, can be different for SVG)
   hUnits: 'px', // height units type ('px' by default, can be different for SVG)
-  url: ..., // last url for the image in chain of redirects (if no redirects, same as src) (HTTP only)
+  url: ...,     // HTTP only, last url for the image in chain of redirects
+                // (if no redirects, same as src)
+  variants: [ { width, height }, ... ] | undefined // full list of sizes for ICO
 }
 ```
 
@@ -105,14 +97,10 @@ Returned errors can be extended with 2 fields:
 - `code` - equals to `ECONTENT` if the library failed to parse the file;
 - `status` - equals to a HTTP status code if it receives a non-200 response.
 
-__Note 1.__ If you use `Stream` as source, it's your responsibility to close that
+__Note.__ If you use `Stream` as source, it's your responsibility to close that
 stream. In other case you can get memory leak, because stream will
 be left in paused state. With http requests that's not a problem - everything
 is released automatically, as soon as possible.
-
-__Note 2.__ We still support legacy v2.x signature for http probe (`src` is
-Object as described in [request](https://github.com/request/request)). But it
-will be deprecated in next versions.
 
 
 ### sync.probe(src) -> result|null
