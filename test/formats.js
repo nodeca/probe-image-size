@@ -2,31 +2,31 @@
 'use strict';
 
 
-var assert  = require('assert');
-var fs      = require('fs');
-var path    = require('path');
-var from2   = require('from2');
-var probe   = require('../');
-var str2arr = require('../lib/common').str2arr;
+const assert  = require('assert');
+const fs      = require('fs');
+const path    = require('path');
+const from2   = require('from2');
+const probe   = require('../');
+const str2arr = require('../lib/common').str2arr;
 
 
 /* eslint-disable max-len */
 describe('File formats', function () {
   describe('BMP', function () {
-    it('should detect BMP', function () {
-      var file = path.join(__dirname, 'fixtures', 'iojs_logo.bmp');
+    it('should detect BMP', async function () {
+      let file = path.join(__dirname, 'fixtures', 'iojs_logo.bmp');
 
-      return probe(fs.createReadStream(file)).then(size => {
-        assert.deepStrictEqual(size, { width: 367, height: 187, type: 'bmp', mime: 'image/bmp', wUnits: 'px', hUnits: 'px' });
-      });
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size, { width: 367, height: 187, type: 'bmp', mime: 'image/bmp', wUnits: 'px', hUnits: 'px' });
     });
   });
 
 
   describe('BMP (sync)', function () {
     it('should detect BMP', function () {
-      var file = path.join(__dirname, 'fixtures', 'iojs_logo.bmp');
-      var size = probe.sync(fs.readFileSync(file));
+      let file = path.join(__dirname, 'fixtures', 'iojs_logo.bmp');
+      let size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 367, height: 187, type: 'bmp', mime: 'image/bmp', wUnits: 'px', hUnits: 'px' });
     });
@@ -34,45 +34,46 @@ describe('File formats', function () {
 
 
   describe('GIF', function () {
-    it('should detect GIF', function () {
-      var file = path.join(__dirname, 'fixtures', 'iojs_logo.gif');
+    it('should detect GIF', async function () {
+      let file = path.join(__dirname, 'fixtures', 'iojs_logo.gif');
 
-      return probe(fs.createReadStream(file)).then(size => {
-        assert.deepStrictEqual(size, { width: 367, height: 187, type: 'gif', mime: 'image/gif', wUnits: 'px', hUnits: 'px' });
-      });
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size, { width: 367, height: 187, type: 'gif', mime: 'image/gif', wUnits: 'px', hUnits: 'px' });
     });
   });
 
 
   describe('GIF (sync)', function () {
     it('should detect GIF', function () {
-      var file = path.join(__dirname, 'fixtures', 'iojs_logo.gif');
-      var size = probe.sync(fs.readFileSync(file));
+      let file = path.join(__dirname, 'fixtures', 'iojs_logo.gif');
+      let size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 367, height: 187, type: 'gif', mime: 'image/gif', wUnits: 'px', hUnits: 'px' });
     });
   });
 
-  describe('ICO', function () {
-    it('should detect ICO', function () {
-      var file = path.join(__dirname, 'fixtures', 'google.ico');
 
-      return probe(fs.createReadStream(file)).then(size => {
-        assert.deepStrictEqual(size, {
-          width: 128,
-          height: 128,
-          variants: [
-            { height: 16, width: 16 },
-            { height: 24, width: 24 },
-            { height: 32, width: 32 },
-            { height: 48, width: 48 },
-            { height: 128, width: 128 }
-          ],
-          type: 'ico',
-          mime: 'image/x-icon',
-          wUnits: 'px',
-          hUnits: 'px'
-        });
+  describe('ICO', function () {
+    it('should detect ICO', async function () {
+      let file = path.join(__dirname, 'fixtures', 'google.ico');
+
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size, {
+        width: 128,
+        height: 128,
+        variants: [
+          { height: 16, width: 16 },
+          { height: 24, width: 24 },
+          { height: 32, width: 32 },
+          { height: 48, width: 48 },
+          { height: 128, width: 128 }
+        ],
+        type: 'ico',
+        mime: 'image/x-icon',
+        wUnits: 'px',
+        hUnits: 'px'
       });
     });
   });
@@ -80,8 +81,8 @@ describe('File formats', function () {
 
   describe('ICO (sync)', function () {
     it('should detect ICO', function () {
-      var file = path.join(__dirname, 'fixtures', 'google.ico');
-      var size = probe.sync(fs.readFileSync(file));
+      let file = path.join(__dirname, 'fixtures', 'google.ico');
+      let size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, {
         width: 128,
@@ -103,75 +104,78 @@ describe('File formats', function () {
 
 
   describe('JPEG', function () {
-    it('should detect JPEG', function () {
-      var file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
+    it('should detect JPEG', async function () {
+      let file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
 
-      return probe(fs.createReadStream(file)).then(size => {
-        assert.deepStrictEqual(size, { width: 367, height: 187, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' });
-      });
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size, { width: 367, height: 187, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' });
     });
 
 
     // regression test
-    it('should not fail on empty JPEG markers', function () {
-      var file = path.join(__dirname, 'fixtures', 'empty_comment.jpg');
+    it('should not fail on empty JPEG markers', async function () {
+      let file = path.join(__dirname, 'fixtures', 'empty_comment.jpg');
 
-      return probe(fs.createReadStream(file)).then(size => {
-        assert.deepStrictEqual(size, { width: 40, height: 20, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' });
-      });
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size, { width: 40, height: 20, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' });
     });
 
 
-    it('should not fail on bad JPEG', function () {
+    it('should not fail on bad JPEG', async function () {
       // length of C0 is less than needed (should be 5+ bytes)
-      var buf = Buffer.from('FFD8 FFC0 0004 00112233 FFD9'.replace(/ /g, ''), 'hex');
+      let buf = Buffer.from('FFD8 FFC0 0004 00112233 FFD9'.replace(/ /g, ''), 'hex');
 
-      return probe(from2([ buf ]))
-        .then(() => { throw new Error('should throw'); })
-        .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
+      await assert.rejects(
+        async () => probe(from2([ buf ])),
+        /unrecognized file format/
+      );
     });
 
 
-    it('should skip padding', function () {
-      var buf = Buffer.from('FFD8 FFFFFFFFC00011 08000F000F03012200021101031101 FFFFD9'.replace(/ /g, ''), 'hex');
+    it('should skip padding', async function () {
+      let buf = Buffer.from('FFD8 FFFFFFFFC00011 08000F000F03012200021101031101 FFFFD9'.replace(/ /g, ''), 'hex');
 
-      return probe(from2([ buf ])).then(size => {
-        assert.deepStrictEqual(size, { width: 15, height: 15, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' });
-      });
+      let size = await probe(from2([ buf ]));
+
+      assert.deepStrictEqual(size, { width: 15, height: 15, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' });
     });
 
 
-    it('coverage - EOI before SOI', function () {
-      var buf = Buffer.from('FFD8 FFD0 FFD9'.replace(/ /g, ''), 'hex');
+    it('coverage - EOI before SOI', async function () {
+      let buf = Buffer.from('FFD8 FFD0 FFD9'.replace(/ /g, ''), 'hex');
 
-      return probe(from2([ buf ]))
-        .then(() => { throw new Error('should throw'); })
-        .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
+      await assert.rejects(
+        async () => probe(from2([ buf ])),
+        /unrecognized file format/
+      );
     });
 
 
-    it('coverage - unknown marker', function () {
-      var buf = Buffer.from('FFD8 FF05'.replace(/ /g, ''), 'hex');
+    it('coverage - unknown marker', async function () {
+      let buf = Buffer.from('FFD8 FF05'.replace(/ /g, ''), 'hex');
 
-      return probe(from2([ buf ]))
-        .then(() => { throw new Error('should throw'); })
-        .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
+      await assert.rejects(
+        async () => probe(from2([ buf ])),
+        /unrecognized file format/
+      );
     });
   });
 
 
   describe('JPEG (sync)', function () {
     it('should detect JPEG', function () {
-      var file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
-      var size = probe.sync(fs.readFileSync(file));
+      let file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
+      let size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 367, height: 187, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' });
     });
 
 
     it('should not fail on empty JPEG markers', function () {
-      var file = path.join(__dirname, 'fixtures', 'empty_comment.jpg');
-      var size = probe.sync(fs.readFileSync(file));
+      let file = path.join(__dirname, 'fixtures', 'empty_comment.jpg');
+      let size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 40, height: 20, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' });
     });
@@ -179,37 +183,37 @@ describe('File formats', function () {
 
     it('should not fail on bad JPEG', function () {
       // length of C0 is less than needed (should be 5+ bytes)
-      var buf = str2arr('FFD8 FFC0 0004 00112233 FFD9'.replace(/ /g, ''), 'hex');
-      var size = probe.sync(buf);
+      let buf = str2arr('FFD8 FFC0 0004 00112233 FFD9'.replace(/ /g, ''), 'hex');
+      let size = probe.sync(buf);
 
       assert.strictEqual(size, null);
     });
 
 
     it('should skip padding', function () {
-      var buf = str2arr('FFD8 FFFFFFFFC00011 08000F000F03012200021101031101 FFFFD9'.replace(/ /g, ''), 'hex');
-      var size = probe.sync(buf);
+      let buf = str2arr('FFD8 FFFFFFFFC00011 08000F000F03012200021101031101 FFFFD9'.replace(/ /g, ''), 'hex');
+      let size = probe.sync(buf);
 
       assert.deepStrictEqual(size, { width: 15, height: 15, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' });
     });
 
 
     it('coverage - EOI before SOI', function () {
-      var buf = str2arr('FFD8 FFD0 FFD9'.replace(/ /g, ''), 'hex');
+      let buf = str2arr('FFD8 FFD0 FFD9'.replace(/ /g, ''), 'hex');
 
       assert.strictEqual(probe.sync(buf), null);
     });
 
 
     it('coverage - unknown marker', function () {
-      var buf = str2arr('FFD8 FF05'.replace(/ /g, ''), 'hex');
+      let buf = str2arr('FFD8 FF05'.replace(/ /g, ''), 'hex');
 
       assert.strictEqual(probe.sync(buf), null);
     });
 
 
     it('coverage - truncated JPEG', function () {
-      var buf;
+      let buf;
 
       buf = str2arr('FFD8 FF'.replace(/ /g, ''), 'hex');
       assert.strictEqual(probe.sync(buf), null);
@@ -224,36 +228,37 @@ describe('File formats', function () {
 
 
   describe('PNG', function () {
-    it('should detect PNG', function () {
-      var file = path.join(__dirname, 'fixtures', 'iojs_logo.png');
+    it('should detect PNG', async function () {
+      let file = path.join(__dirname, 'fixtures', 'iojs_logo.png');
 
-      return probe(fs.createReadStream(file)).then(size => {
-        assert.deepStrictEqual(size, { width: 367, height: 187, type: 'png', mime: 'image/png', wUnits: 'px', hUnits: 'px' });
-      });
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size, { width: 367, height: 187, type: 'png', mime: 'image/png', wUnits: 'px', hUnits: 'px' });
     });
 
 
-    it('should skip PNG start pattern without IHDR', function () {
-      var buf = Buffer.from(str2arr('\x89PNG\r\n\x1a\n                  '));
+    it('should skip PNG start pattern without IHDR', async function () {
+      let buf = Buffer.from(str2arr('\x89PNG\r\n\x1a\n                  '));
 
-      return probe(from2([ buf ]))
-        .then(() => { throw new Error('should throw'); })
-        .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
+      await assert.rejects(
+        async () => probe(from2([ buf ])),
+        /unrecognized file format/
+      );
     });
   });
 
 
   describe('PNG (sync)', function () {
     it('should detect PNG', function () {
-      var file = path.join(__dirname, 'fixtures', 'iojs_logo.png');
-      var size = probe.sync(fs.readFileSync(file));
+      let file = path.join(__dirname, 'fixtures', 'iojs_logo.png');
+      let size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 367, height: 187, type: 'png', mime: 'image/png', wUnits: 'px', hUnits: 'px' });
     });
 
 
     it('should skip PNG start pattern without IHDR', function () {
-      var size = probe.sync(str2arr('\x89PNG\r\n\x1a\n                  '));
+      let size = probe.sync(str2arr('\x89PNG\r\n\x1a\n                  '));
 
       assert.strictEqual(size, null);
     });
@@ -261,20 +266,20 @@ describe('File formats', function () {
 
 
   describe('PSD', function () {
-    it('should detect PSD', function () {
-      var file = path.join(__dirname, 'fixtures', 'empty.psd');
+    it('should detect PSD', async function () {
+      let file = path.join(__dirname, 'fixtures', 'empty.psd');
 
-      return probe(fs.createReadStream(file)).then(size => {
-        assert.deepStrictEqual(size, { width: 640, height: 400, type: 'psd', mime: 'image/vnd.adobe.photoshop', wUnits: 'px', hUnits: 'px' });
-      });
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size, { width: 640, height: 400, type: 'psd', mime: 'image/vnd.adobe.photoshop', wUnits: 'px', hUnits: 'px' });
     });
   });
 
 
   describe('PSD (sync)', function () {
     it('should detect PSD', function () {
-      var file = path.join(__dirname, 'fixtures', 'empty.psd');
-      var size = probe.sync(fs.readFileSync(file));
+      let file = path.join(__dirname, 'fixtures', 'empty.psd');
+      let size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 640, height: 400, type: 'psd', mime: 'image/vnd.adobe.photoshop', wUnits: 'px', hUnits: 'px' });
     });
@@ -282,130 +287,130 @@ describe('File formats', function () {
 
 
   describe('SVG', function () {
-    it('should detect SVG', function () {
-      var file = path.join(__dirname, 'fixtures', 'sample.svg');
+    it('should detect SVG', async function () {
+      let file = path.join(__dirname, 'fixtures', 'sample.svg');
 
-      return probe(fs.createReadStream(file)).then(size => {
-        assert.deepStrictEqual(size, { width: 744.09448819, height: 1052.3622047, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
-      });
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size, { width: 744.09448819, height: 1052.3622047, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
     });
 
-    it('should work with weirdly split chunks', function () {
-      return probe(from2([
+    it('should work with weirdly split chunks', async function () {
+      let size = await probe(from2([
         Buffer.from('   '),
         Buffer.from(' <s'),
         Buffer.from('vg width="5" height="5"></svg>')
-      ])).then(size => {
-        assert.deepStrictEqual(size, { width: 5, height: 5, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
-      });
+      ]));
+
+      assert.deepStrictEqual(size, { width: 5, height: 5, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
     });
 
-    it('should extract width info from viewbox', function () {
-      return probe(from2([
-        Buffer.from('<svg viewbox="0 0 800 600"></svg>')
-      ])).then(size => {
-        assert.deepStrictEqual(size, { width: 800, height: 600, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
-      });
+    it('should extract width info from viewbox', async function () {
+      let size = await probe(from2([ Buffer.from('<svg viewbox="0 0 800 600"></svg>') ]));
+
+      assert.deepStrictEqual(size, { width: 800, height: 600, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
     });
 
-    it('should extract width info from camel cased viewBox', function () {
-      return probe(from2([
-        Buffer.from('<svg viewBox="0 0 800 600"></svg>')
-      ])).then(size => {
-        assert.deepStrictEqual(size, { width: 800, height: 600, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
-      });
+    it('should extract width info from camel cased viewBox', async function () {
+      let size = await probe(from2([ Buffer.from('<svg viewBox="0 0 800 600"></svg>') ]));
+
+      assert.deepStrictEqual(size, { width: 800, height: 600, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
     });
 
-    it('should return width/height units', function () {
-      return probe(from2([
-        Buffer.from('<svg width="5in" height="4pt"></svg>')
-      ])).then(size => {
-        assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'pt' });
-      });
+    it('should return width/height units', async function () {
+      let size = await probe(from2([ Buffer.from('<svg width="5in" height="4pt"></svg>') ]));
+
+      assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'pt' });
     });
 
-    it('should ignore stroke-width', function () {
-      return probe(from2([
-        Buffer.from('<svg stroke-width="2" width="5" height="4"></svg>')
-      ])).then(size => {
-        assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
-      });
+    it('should ignore stroke-width', async function () {
+      let size = await probe(from2([ Buffer.from('<svg stroke-width="2" width="5" height="4"></svg>') ]));
+
+      assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
     });
 
     /* eslint-disable max-nested-callbacks */
     describe('coverage', function () {
-      it('too much data before doctype', function () {
-        var buf = Buffer.alloc(70000);
+      it('too much data before doctype', async function () {
+        let buf = Buffer.alloc(70000);
 
         buf.fill(0x20);
 
-        return probe(from2([ buf ]))
-          .then(() => { throw new Error('should throw'); })
-          .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
+        await assert.rejects(
+          async () => probe(from2([ buf ])),
+          /unrecognized file format/
+        );
       });
 
-      it('too much data before svg', function () {
-        var buf = Buffer.alloc(70000);
+      it('too much data before svg', async function () {
+        let buf = Buffer.alloc(70000);
 
         buf.fill(0x20);
 
-        return probe(from2([ Buffer.from('<svg'), buf ]))
-          .then(() => { throw new Error('should throw'); })
-          .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
+        await assert.rejects(
+          async () => probe(from2([ Buffer.from('<svg'), buf ])),
+          /unrecognized file format/
+        );
       });
 
-      it('single quotes (width/height)', function () {
-        return probe(from2([ Buffer.from("<svg width='5in' height='4pt'></svg>") ])).then(size => {
-          assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'pt' });
-        });
+      it('single quotes (width/height)', async function () {
+        let size = await probe(from2([ Buffer.from("<svg width='5in' height='4pt'></svg>") ]));
+
+        assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'pt' });
       });
 
-      it('single quotes (viewbox)', function () {
-        return probe(from2([ Buffer.from("<svg width='1in' viewbox='0 0 100 50'>") ])).then(size => {
-          assert.deepStrictEqual(size, { width: 1, height: 0.5, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'in' });
-        });
+      it('single quotes (viewbox)', async function () {
+        let size = await probe(from2([ Buffer.from("<svg width='1in' viewbox='0 0 100 50'>") ]));
+
+        assert.deepStrictEqual(size, { width: 1, height: 0.5, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'in' });
       });
 
-      it('height, no width', function () {
-        return probe(from2([ Buffer.from('<svg height="1in" viewbox="0 0 100 50">') ])).then(size => {
-          assert.deepStrictEqual(size, { width: 2, height: 1, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'in' });
-        });
+      it('height, no width', async function () {
+        let size = await probe(from2([ Buffer.from('<svg height="1in" viewbox="0 0 100 50">') ]));
+
+        assert.deepStrictEqual(size, { width: 2, height: 1, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'in' });
       });
 
-      it('width is invalid, no height', function () {
-        return probe(from2([ Buffer.from('<svg width="-1" viewbox="0 0 100 50">') ]))
-          .then(() => { throw new Error('should throw'); })
-          .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
+      it('width is invalid, no height', async function () {
+        await assert.rejects(
+          async () => probe(from2([ Buffer.from('<svg width="-1" viewbox="0 0 100 50">') ])),
+          /unrecognized file format/
+        );
       });
 
-      it('height is invalid, no width', function () {
-        return probe(from2([ Buffer.from('<svg height="foobar" viewbox="0 0 100 50">') ]))
-          .then(() => { throw new Error('should throw'); })
-          .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
+      it('height is invalid, no width', async function () {
+        await assert.rejects(
+          async () => probe(from2([ Buffer.from('<svg height="foobar" viewbox="0 0 100 50">') ])),
+          /unrecognized file format/
+        );
       });
 
-      it('width is invalid (non positive)', function () {
-        return probe(from2([ Buffer.from('<svg width="0" height="5">') ]))
-          .then(() => { throw new Error('should throw'); })
-          .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
+      it('width is invalid (non positive)', async function () {
+        await assert.rejects(
+          async () => probe(from2([ Buffer.from('<svg width="0" height="5">') ])),
+          /unrecognized file format/
+        );
       });
 
-      it('width is invalid (Infinity)', function () {
-        return probe(from2([ Buffer.from('<svg width="Infinity" height="5">') ]))
-          .then(() => { throw new Error('should throw'); })
-          .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
+      it('width is invalid (Infinity)', async function () {
+        await assert.rejects(
+          async () => probe(from2([ Buffer.from('<svg width="Infinity" height="5">') ])),
+          /unrecognized file format/
+        );
       });
 
-      it('no viewbox, no height', function () {
-        return probe(from2([ Buffer.from('<svg width="5">') ]))
-          .then(() => { throw new Error('should throw'); })
-          .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
+      it('no viewbox, no height', async function () {
+        await assert.rejects(
+          async () => probe(from2([ Buffer.from('<svg width="5">') ])),
+          /unrecognized file format/
+        );
       });
 
-      it('viewbox units are different', function () {
-        return probe(from2([ Buffer.from('<svg width="5" viewbox="0 0 5px 3in">') ]))
-          .then(() => { throw new Error('should throw'); })
-          .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
+      it('viewbox units are different', async function () {
+        await assert.rejects(
+          async () => probe(from2([ Buffer.from('<svg width="5" viewbox="0 0 5px 3in">') ])),
+          /unrecognized file format/
+        );
       });
     });
   });
@@ -413,99 +418,99 @@ describe('File formats', function () {
 
   describe('SVG (sync)', function () {
     it('should detect SVG', function () {
-      var file = path.join(__dirname, 'fixtures', 'sample.svg');
-      var size = probe.sync(fs.readFileSync(file));
+      let file = path.join(__dirname, 'fixtures', 'sample.svg');
+      let size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 744.09448819, height: 1052.3622047, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
     });
 
     it('should extract width info from viewbox', function () {
-      var size = probe.sync(Buffer.from('<svg viewbox="0 0 800 600"></svg>'));
+      let size = probe.sync(Buffer.from('<svg viewbox="0 0 800 600"></svg>'));
 
       assert.deepStrictEqual(size, { width: 800, height: 600, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
     });
 
     it('should extract width info from camel cased viewBox', function () {
-      var size = probe.sync(Buffer.from('<svg viewBox="0 0 800 600"></svg>'));
+      let size = probe.sync(Buffer.from('<svg viewBox="0 0 800 600"></svg>'));
 
       assert.deepStrictEqual(size, { width: 800, height: 600, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
     });
 
     it('should return width/height units', function () {
-      var size = probe.sync(Buffer.from('<svg width="5in" height="4pt"></svg>'));
+      let size = probe.sync(Buffer.from('<svg width="5in" height="4pt"></svg>'));
 
       assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'pt' });
     });
 
     it('should ignore stroke-width', function () {
-      var size = probe.sync(Buffer.from('<svg stroke-width="2" width="5" height="4"></svg>'));
+      let size = probe.sync(Buffer.from('<svg stroke-width="2" width="5" height="4"></svg>'));
 
       assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
     });
 
     describe('coverage', function () {
       it('wrong signature', function () {
-        var size = probe.sync(Buffer.from('  <not-really-svg width="1" height="1">'));
+        let size = probe.sync(Buffer.from('  <not-really-svg width="1" height="1">'));
 
         assert.strictEqual(size, null);
       });
 
       it('single quotes (width/height)', function () {
-        var size = probe.sync(Buffer.from("<svg width='5in' height='4pt'></svg>"));
+        let size = probe.sync(Buffer.from("<svg width='5in' height='4pt'></svg>"));
 
         assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'pt' });
       });
 
       it('single quotes (viewbox)', function () {
-        var size = probe.sync(Buffer.from("<svg width='1in' viewbox='0 0 100 50'>"));
+        let size = probe.sync(Buffer.from("<svg width='1in' viewbox='0 0 100 50'>"));
 
         assert.deepStrictEqual(size, { width: 1, height: 0.5, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'in' });
       });
 
       it('width, no height', function () {
-        var size = probe.sync(Buffer.from('<svg width="1in" viewbox="0 0 100 50">'));
+        let size = probe.sync(Buffer.from('<svg width="1in" viewbox="0 0 100 50">'));
 
         assert.deepStrictEqual(size, { width: 1, height: 0.5, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'in' });
       });
 
       it('height, no width', function () {
-        var size = probe.sync(Buffer.from('<svg height="1in" viewbox="0 0 100 50">'));
+        let size = probe.sync(Buffer.from('<svg height="1in" viewbox="0 0 100 50">'));
 
         assert.deepStrictEqual(size, { width: 2, height: 1, type: 'svg', mime: 'image/svg+xml', wUnits: 'in', hUnits: 'in' });
       });
 
       it('width is invalid, no height', function () {
-        var size = probe.sync(Buffer.from('<svg width="-1" viewbox="0 0 100 50">'));
+        let size = probe.sync(Buffer.from('<svg width="-1" viewbox="0 0 100 50">'));
 
         assert.deepStrictEqual(size, null);
       });
 
       it('height is invalid, no width', function () {
-        var size = probe.sync(Buffer.from('<svg height="foobar" viewbox="0 0 100 50">'));
+        let size = probe.sync(Buffer.from('<svg height="foobar" viewbox="0 0 100 50">'));
 
         assert.deepStrictEqual(size, null);
       });
 
       it('width is invalid (non positive)', function () {
-        var size = probe.sync(Buffer.from('<svg width="0" height="5">'));
+        let size = probe.sync(Buffer.from('<svg width="0" height="5">'));
 
         assert.deepStrictEqual(size, null);
       });
 
       it('width is invalid (Infinity)', function () {
-        var size = probe.sync(Buffer.from('<svg width="Infinity" height="5">'));
+        let size = probe.sync(Buffer.from('<svg width="Infinity" height="5">'));
 
         assert.deepStrictEqual(size, null);
       });
 
       it('no viewbox, no height', function () {
-        var size = probe.sync(Buffer.from('<svg width="5">'));
+        let size = probe.sync(Buffer.from('<svg width="5">'));
 
         assert.deepStrictEqual(size, null);
       });
 
       it('viewbox units are different', function () {
-        var size = probe.sync(Buffer.from('<svg width="5" viewbox="0 0 5px 3in">'));
+        let size = probe.sync(Buffer.from('<svg width="5" viewbox="0 0 5px 3in">'));
 
         assert.deepStrictEqual(size, null);
       });
@@ -514,92 +519,95 @@ describe('File formats', function () {
 
 
   describe('TIFF', function () {
-    it('real image', function () {
-      var file = path.join(__dirname, 'fixtures', 'iojs_logo.tiff');
+    it('real image', async function () {
+      let file = path.join(__dirname, 'fixtures', 'iojs_logo.tiff');
 
-      return probe(fs.createReadStream(file)).then(size => {
-        assert.deepStrictEqual(size, { width: 367, height: 187, type: 'tiff', mime: 'image/tiff', wUnits: 'px', hUnits: 'px' });
-      });
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size, { width: 367, height: 187, type: 'tiff', mime: 'image/tiff', wUnits: 'px', hUnits: 'px' });
     });
 
 
-    it('real image, Big Endian', function () {
-      var file = path.join(__dirname, 'fixtures', 'iojs_logo_be.tiff');
+    it('real image, Big Endian', async function () {
+      let file = path.join(__dirname, 'fixtures', 'iojs_logo_be.tiff');
 
-      return probe(fs.createReadStream(file)).then(size => {
-        assert.deepStrictEqual(size, { width: 367, height: 187, type: 'tiff', mime: 'image/tiff', wUnits: 'px', hUnits: 'px' });
-      });
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size, { width: 367, height: 187, type: 'tiff', mime: 'image/tiff', wUnits: 'px', hUnits: 'px' });
     });
 
 
-    it('TIFF IFD is first in the file', function () {
-      var file = path.join(__dirname, 'fixtures', 'meta_before_image.tiff');
+    it('TIFF IFD is first in the file', async function () {
+      let file = path.join(__dirname, 'fixtures', 'meta_before_image.tiff');
 
-      return probe(fs.createReadStream(file)).then(size => {
-        assert.deepStrictEqual(size, { width: 15, height: 15, type: 'tiff', mime: 'image/tiff', wUnits: 'px', hUnits: 'px' });
-      });
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size, { width: 15, height: 15, type: 'tiff', mime: 'image/tiff', wUnits: 'px', hUnits: 'px' });
     });
 
 
-    it('bad TIFF IFD', function () {
+    it('bad TIFF IFD', async function () {
       // zero entries in 1st ifd, invalid TIFF
       //                     sig     off      count next
-      var buf = Buffer.from('49492a00 08000000 0000 00000000'.replace(/ /g, ''), 'hex');
+      let buf = Buffer.from('49492a00 08000000 0000 00000000'.replace(/ /g, ''), 'hex');
 
-      return probe(from2([ buf ]))
-        .then(() => { throw new Error('should throw'); })
-        .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
+      await assert.rejects(
+        async () => probe(from2([ buf ])),
+        /unrecognized file format/
+      );
     });
 
 
-    it('bad TIFF IFD offset', function () {
+    it('bad TIFF IFD offset', async function () {
       // invalid 1st tiff offset
       //                     sig     off      count next
-      var buf = Buffer.from('49492a00 00000000 0000 00000000'.replace(/ /g, ''), 'hex');
+      let buf = Buffer.from('49492a00 00000000 0000 00000000'.replace(/ /g, ''), 'hex');
 
-      return probe(from2([ buf ]))
-        .then(() => { throw new Error('should throw'); })
-        .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
+      await assert.rejects(
+        async () => probe(from2([ buf ])),
+        /unrecognized file format/
+      );
     });
 
 
-    it('bad TIFF IFD value', function () {
+    it('bad TIFF IFD value', async function () {
       // invalid ifd type (FF instead of 03 or 04)
       //                     sig     off  count next
-      var buf = Buffer.from((
+      let buf = Buffer.from((
         '49492A00 08000000 0200' + // sig, off, count
         '0001 0000 01000000 FF000000' +
         '0101 0400 01000000 2A000000' +
         '00000000' // next
       ).replace(/ /g, ''), 'hex');
 
-      return probe(from2([ buf ]))
-        .then(() => { throw new Error('should throw'); })
-        .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
+      await assert.rejects(
+        async () => probe(from2([ buf ])),
+        /unrecognized file format/
+      );
     });
   });
 
 
   describe('TIFF (sync)', function () {
     it('real image', function () {
-      var file = path.join(__dirname, 'fixtures', 'iojs_logo.tiff');
-      var size = probe.sync(fs.readFileSync(file));
+      let file = path.join(__dirname, 'fixtures', 'iojs_logo.tiff');
+      let size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 367, height: 187, type: 'tiff', mime: 'image/tiff', wUnits: 'px', hUnits: 'px' });
     });
 
 
     it('real image, Big Endian', function () {
-      var file = path.join(__dirname, 'fixtures', 'iojs_logo_be.tiff');
-      var size = probe.sync(fs.readFileSync(file));
+      let file = path.join(__dirname, 'fixtures', 'iojs_logo_be.tiff');
+      let size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 367, height: 187, type: 'tiff', mime: 'image/tiff', wUnits: 'px', hUnits: 'px' });
     });
 
 
     it('TIFF IFD is first in the file', function () {
-      var file = path.join(__dirname, 'fixtures', 'meta_before_image.tiff');
-      var size = probe.sync(fs.readFileSync(file));
+      let file = path.join(__dirname, 'fixtures', 'meta_before_image.tiff');
+      let size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 15, height: 15, type: 'tiff', mime: 'image/tiff', wUnits: 'px', hUnits: 'px' });
     });
@@ -608,7 +616,7 @@ describe('File formats', function () {
     it('bad TIFF IFD', function () {
       // zero entries in 1st ifd, invalid TIFF
       //                     sig     off      count next
-      var buf = str2arr('49492a00 08000000 0000 00000000'.replace(/ /g, ''), 'hex');
+      let buf = str2arr('49492a00 08000000 0000 00000000'.replace(/ /g, ''), 'hex');
 
       assert.strictEqual(probe.sync(buf), null);
     });
@@ -617,7 +625,7 @@ describe('File formats', function () {
     it('bad TIFF IFD offset', function () {
       // invalid 1st tiff offset
       //                     sig     off      count next
-      var buf = str2arr('49492a00 00000000 0000 00000000'.replace(/ /g, ''), 'hex');
+      let buf = str2arr('49492a00 00000000 0000 00000000'.replace(/ /g, ''), 'hex');
 
       assert.strictEqual(probe.sync(buf), null);
     });
@@ -626,7 +634,7 @@ describe('File formats', function () {
     it('bad TIFF IFD value', function () {
       // invalid ifd type (FF instead of 03 or 04)
       //                     sig     off  count next
-      var buf = str2arr((
+      let buf = str2arr((
         '49492A00 08000000 0200' + // sig, off, count
         '0001 0000 01000000 FF000000' +
         '0101 0400 01000000 2A000000' +
@@ -638,7 +646,7 @@ describe('File formats', function () {
 
 
     it('coverage - truncated TIFF', function () {
-      var buf;
+      let buf;
 
       buf = str2arr('49492A00 08000000 02'.replace(/ /g, ''), 'hex');
       assert.strictEqual(probe.sync(buf), null);
@@ -650,93 +658,95 @@ describe('File formats', function () {
 
 
   describe('WEBP', function () {
-    it('should detect VP8', function () {
-      var file = path.join(__dirname, 'fixtures', 'webp-vp8.webp');
+    it('should detect VP8', async function () {
+      let file = path.join(__dirname, 'fixtures', 'webp-vp8.webp');
 
-      return probe(fs.createReadStream(file)).then(size => {
-        assert.deepStrictEqual(size, { width: 1, height: 1, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' });
-      });
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size, { width: 1, height: 1, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' });
     });
 
 
-    it('should skip VP8 header with bad code block', function () {
-      var buf = Buffer.from(str2arr('RIFF....WEBPVP8 ........................'));
+    it('should skip VP8 header with bad code block', async function () {
+      let buf = Buffer.from(str2arr('RIFF....WEBPVP8 ........................'));
 
-      return probe(from2([ buf ]))
-        .then(() => { throw new Error('should throw'); })
-        .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
+      await assert.rejects(
+        async () => probe(from2([ buf ])),
+        /unrecognized file format/
+      );
     });
 
 
-    it('should detect VP8X', function () {
-      var file = path.join(__dirname, 'fixtures', 'webp-vp8x.webp');
+    it('should detect VP8X', async function () {
+      let file = path.join(__dirname, 'fixtures', 'webp-vp8x.webp');
 
-      return probe(fs.createReadStream(file)).then(size => {
-        assert.deepStrictEqual(size, { width: 367, height: 187, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' });
-      });
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size, { width: 367, height: 187, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' });
     });
 
 
-    it('should detect VP8L (lossless)', function () {
-      var file = path.join(__dirname, 'fixtures', 'webp-vp8l.webp');
+    it('should detect VP8L (lossless)', async function () {
+      let file = path.join(__dirname, 'fixtures', 'webp-vp8l.webp');
 
-      return probe(fs.createReadStream(file)).then(size => {
-        assert.deepStrictEqual(size, { width: 367, height: 187, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' });
-      });
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size, { width: 367, height: 187, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' });
     });
 
 
-    it('should skip VP8L header with bad code block', function () {
-      var buf = Buffer.from(str2arr('RIFF....WEBPVP8L........................'));
+    it('should skip VP8L header with bad code block', async function () {
+      let buf = Buffer.from(str2arr('RIFF....WEBPVP8L........................'));
 
-      return probe(from2([ buf ]))
-        .then(() => { throw new Error('should throw'); })
-        .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
+      await assert.rejects(
+        async () => probe(from2([ buf ])),
+        /unrecognized file format/
+      );
     });
   });
 
 
   describe('WEBP (sync)', function () {
     it('should detect VP8', function () {
-      var file = path.join(__dirname, 'fixtures', 'webp-vp8.webp');
-      var size = probe.sync(fs.readFileSync(file));
+      let file = path.join(__dirname, 'fixtures', 'webp-vp8.webp');
+      let size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 1, height: 1, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' });
     });
 
 
     it('should skip VP8 header with bad code block', function () {
-      var size = probe.sync(str2arr('RIFF....WEBPVP8 ........................'));
+      let size = probe.sync(str2arr('RIFF....WEBPVP8 ........................'));
 
       assert.strictEqual(size, null);
     });
 
 
     it('should detect VP8X', function () {
-      var file = path.join(__dirname, 'fixtures', 'webp-vp8x.webp');
-      var size = probe.sync(fs.readFileSync(file));
+      let file = path.join(__dirname, 'fixtures', 'webp-vp8x.webp');
+      let size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 367, height: 187, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' });
     });
 
 
     it('should detect VP8L (lossless)', function () {
-      var file = path.join(__dirname, 'fixtures', 'webp-vp8l.webp');
-      var size = probe.sync(fs.readFileSync(file));
+      let file = path.join(__dirname, 'fixtures', 'webp-vp8l.webp');
+      let size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 367, height: 187, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' });
     });
 
 
     it('should skip VP8L header with bad code block', function () {
-      var size = probe.sync(str2arr('RIFF....WEBPVP8L........................'));
+      let size = probe.sync(str2arr('RIFF....WEBPVP8L........................'));
 
       assert.strictEqual(size, null);
     });
 
 
     it('coverage - truncated WEBP', function () {
-      var buf;
+      let buf;
 
       buf = str2arr('RIFF"\0\0\0WEBPVP8 ');
       assert.strictEqual(probe.sync(buf), null);

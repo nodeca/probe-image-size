@@ -2,17 +2,17 @@
 'use strict';
 
 
-var assert = require('assert');
-var http   = require('http');
-var URL    = require('url');
-var probe  = require('../');
+const assert = require('assert');
+const http   = require('http');
+const URL    = require('url');
+const probe  = require('../');
 
 
-var GIF1x1 = Buffer.from('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', 'base64');
+const GIF1x1 = Buffer.from('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', 'base64');
 
 
 describe('probeHttp', function () {
-  var responder, url, srv;
+  let responder, url, srv;
 
   before(function (callback) {
     srv = http.createServer(function (req, res) {
@@ -31,7 +31,7 @@ describe('probeHttp', function () {
   });
 
   it('should process an image (callback)', function (callback) {
-    var haveResponse = false;
+    let haveResponse = false;
 
     responder = function (req, res) {
       req.on('close', function () {
@@ -55,7 +55,7 @@ describe('probeHttp', function () {
     });
   });
 
-  it('should process an image (promise)', function () {
+  it('should process an image (promise)', async function () {
     responder = function (req, res) {
       res.writeHead(200);
       res.write(GIF1x1);
@@ -63,25 +63,25 @@ describe('probeHttp', function () {
       // response never ends
     };
 
-    return probe(url).then(function (size) {
-      assert.strictEqual(size.width, 1);
-      assert.strictEqual(size.height, 1);
-      assert.strictEqual(size.mime, 'image/gif');
-    });
+    let size = await probe(url);
+
+    assert.strictEqual(size.width, 1);
+    assert.strictEqual(size.height, 1);
+    assert.strictEqual(size.mime, 'image/gif');
   });
 
-  it('should return content-length', function () {
+  it('should return content-length', async function () {
     responder = function (req, res) {
       res.writeHead(200, { 'Content-Length': 1234 });
       res.end(GIF1x1);
     };
 
-    return probe(url).then(size => {
-      assert.strictEqual(size.width, 1);
-      assert.strictEqual(size.height, 1);
-      assert.strictEqual(size.length, 1234);
-      assert.strictEqual(size.mime, 'image/gif');
-    });
+    let size = await probe(url);
+
+    assert.strictEqual(size.width, 1);
+    assert.strictEqual(size.height, 1);
+    assert.strictEqual(size.length, 1234);
+    assert.strictEqual(size.mime, 'image/gif');
   });
 
   // Check that client closes the connection after all parsers fail,
@@ -89,7 +89,7 @@ describe('probeHttp', function () {
   // NOTE: the server output should be large enough so all parsers
   //       that buffer data will have their first buffer filled
   //
-  it('should abort request ASAP', function () {
+  it('should abort request ASAP', async function () {
     responder = function (req, res) {
       res.writeHead(200);
       res.write('this is not an image file,');
@@ -97,9 +97,10 @@ describe('probeHttp', function () {
       // response never ends
     };
 
-    return probe(url)
-      .then(() => { throw new Error('should throw'); })
-      .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
+    await assert.rejects(
+      async () => probe(url),
+      /unrecognized file format/
+    );
   });
 
   it('should fail on 404 (callback)', function (callback) {
@@ -116,50 +117,53 @@ describe('probeHttp', function () {
     });
   });
 
-  it('should fail on 404 (promise)', function () {
+  it('should fail on 404 (promise)', async function () {
     responder = function (req, res) {
       res.writeHead(404);
       res.write('not found');
       // response never ends
     };
 
-    return probe(url)
-      .then(() => { throw new Error('should throw'); })
-      .catch(err => assert.strictEqual(err.statusCode, 404));
+    await assert.rejects(
+      async () => probe(url),
+      { statusCode: 404 }
+    );
   });
 
-  it('should fail on status 201-299 codes', function () {
+  it('should fail on status 201-299 codes', async function () {
     responder = function (req, res) {
       res.writeHead(201);
       res.end(GIF1x1);
     };
 
-    return probe(url)
-      .then(() => { throw new Error('should throw'); })
-      .catch(err => assert.strictEqual(err.statusCode, 201));
+    await assert.rejects(
+      async () => probe(url),
+      { statusCode: 201 }
+    );
   });
 
 
-  it('should return error if url is invalid', function () {
-    return probe('badurl')
-      .then(() => { throw new Error('should throw'); })
+  it('should return error if url is invalid', async function () {
+    await assert.rejects(
+      async () => probe('badurl'),
       // search error text for both `request` & `got` packages
-      .catch(err => assert(err.message.match(/(ENOTFOUND badurl)|(Invalid URI)/)));
+      /(ENOTFOUND badurl)|(Invalid URI)/
+    );
   });
 
-  it('should return error if connection fails', function () {
+  it('should return error if connection fails', async function () {
     responder = function (req, res) {
       res.destroy();
     };
 
-    //return probe({ url, retries: 0 })
-    return probe(url, { retries: 0 })
-      .then(() => { throw new Error('should throw'); })
-      .catch(err => assert.strictEqual(err.code, 'ECONNRESET'));
+    await assert.rejects(
+      async () => probe(url, { retries: 0 }),
+      { code: 'ECONNRESET' }
+    );
   });
 
-  it('should add User-Agent to http requests', function () {
-    var userAgent;
+  it('should add User-Agent to http requests', async function () {
+    let userAgent;
 
     responder = function (req, res) {
       userAgent = req.headers['user-agent'];
@@ -168,11 +172,13 @@ describe('probeHttp', function () {
       res.end(GIF1x1);
     };
 
-    return probe(url).then(() => assert(/^probe/.test(userAgent)));
+    await probe(url);
+
+    assert(/^probe/.test(userAgent));
   });
 
-  it('should allow customize request options', function () {
-    var userAgent;
+  it('should allow customize request options', async function () {
+    let userAgent;
 
     responder = function (req, res) {
       userAgent = req.headers['user-agent'];
@@ -181,12 +187,13 @@ describe('probeHttp', function () {
       res.end(GIF1x1);
     };
 
-    return probe(url, { headers: { 'User-Agent': 'foobar ' } })
-      .then(() => assert(/^foo/.test(userAgent)));
+    await probe(url, { headers: { 'User-Agent': 'foobar ' } });
+
+    assert(/^foo/.test(userAgent));
   });
 
-  it('should allow customize request options (legacy)', function () {
-    var userAgent;
+  it('should allow customize request options (legacy)', async function () {
+    let userAgent;
 
     responder = function (req, res) {
       userAgent = req.headers['user-agent'];
@@ -195,12 +202,12 @@ describe('probeHttp', function () {
       res.end(GIF1x1);
     };
 
-    return probe({ url, headers: { 'User-Agent': 'foobar ' } })
-      .then(() => assert(/^foo/.test(userAgent)));
+    await probe({ url, headers: { 'User-Agent': 'foobar ' } });
+    assert(/^foo/.test(userAgent));
   });
 
 
-  it('should return url when following redirect', function () {
+  it('should return url when following redirect', async function () {
     responder = function (req, res) {
       if (req.url === '/redirect.gif') {
         res.writeHead(302, { Location: '/empty.gif' });
@@ -212,10 +219,9 @@ describe('probeHttp', function () {
       res.end(GIF1x1);
     };
 
-    return probe(url + '/redirect.gif')
-      .then(function (size) {
-        assert.strictEqual(size.url, url + '/empty.gif');
-      });
+    let size = await probe(url + '/redirect.gif');
+
+    assert.strictEqual(size.url, url + '/empty.gif');
   });
 
 

@@ -2,26 +2,26 @@
 'use strict';
 
 
-var assert   = require('assert');
-var fs       = require('fs');
-var path     = require('path');
-var probe    = require('../');
-var Readable = require('stream').Readable;
+const assert   = require('assert');
+const fs       = require('fs');
+const path     = require('path');
+const probe    = require('../');
+const Readable = require('stream').Readable;
 
 
 describe('probeStream', function () {
-  it('should process an image (promise)', function () {
-    var file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
+  it('should process an image (promise)', async function () {
+    let file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
 
-    return probe(fs.createReadStream(file)).then(function (size) {
-      assert.strictEqual(size.width, 367);
-      assert.strictEqual(size.height, 187);
-      assert.strictEqual(size.mime, 'image/jpeg');
-    });
+    let size = await probe(fs.createReadStream(file));
+
+    assert.strictEqual(size.width, 367);
+    assert.strictEqual(size.height, 187);
+    assert.strictEqual(size.mime, 'image/jpeg');
   });
 
   it('should process an image (callback)', function (done) {
-    var file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
+    let file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
 
     probe(fs.createReadStream(file), function (err, size) {
       assert.ifError(err);
@@ -32,16 +32,17 @@ describe('probeStream', function () {
     });
   });
 
-  it('should skip unrecognized files (promise)', function () {
-    var file = path.join(__dirname, 'fixtures', 'text_file.txt');
+  it('should skip unrecognized files (promise)', async function () {
+    let file = path.join(__dirname, 'fixtures', 'text_file.txt');
 
-    return probe(fs.createReadStream(file))
-      .then(() => { throw new Error('should throw'); })
-      .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
+    await assert.rejects(
+      async () => probe(fs.createReadStream(file)),
+      /unrecognized file format/
+    );
   });
 
   it('should skip unrecognized files (callback)', function (done) {
-    var file = path.join(__dirname, 'fixtures', 'text_file.txt');
+    let file = path.join(__dirname, 'fixtures', 'text_file.txt');
 
     probe(fs.createReadStream(file), function (err) {
       assert.strictEqual(err.message, 'unrecognized file format');
@@ -49,18 +50,20 @@ describe('probeStream', function () {
     });
   });
 
-  it('should skip empty files', function () {
-    var file = path.join(__dirname, 'fixtures', 'empty.txt');
+  it('should skip empty files', async function () {
+    let file = path.join(__dirname, 'fixtures', 'empty.txt');
 
-    return probe(fs.createReadStream(file))
-      .then(() => { throw new Error('should throw'); })
-      .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
+    await assert.rejects(
+      async () => probe(fs.createReadStream(file)),
+      /unrecognized file format/
+    );
   });
 
-  it('should fail on stream errors', function () {
-    return probe(require('from2')([ new Error('stream err') ]))
-      .then(() => { throw new Error('should throw'); })
-      .catch(err => assert.strictEqual(err.message, 'stream err'));
+  it('should fail on stream errors', async function () {
+    await assert.rejects(
+      async () => probe(require('from2')([ new Error('stream err') ])),
+      /stream err/
+    );
   });
 
 
@@ -71,18 +74,19 @@ describe('probeStream', function () {
   // and WEBP parser closes immediately after first chunk. Check that it doesn't
   // error out.
   //
-  it.skip('should not fail when processing multiple large chunks', function () {
-    var stream = new Readable({
+  it.skip('should not fail when processing multiple large chunks', async function () {
+    let stream = new Readable({
       read: function () {
         // > 16kB (so it will be split), < 64kB (SVG header size)
-        var x = Buffer.alloc(20000);
+        let x = Buffer.alloc(20000);
         x.fill(0x20);
         this.push(x);
       }
     });
 
-    return probe(stream)
-      .then(() => { throw new Error('should throw'); })
-      .catch(err => assert.strictEqual(err.message, 'unrecognized file format'));
+    await assert.rejects(
+      async () => probe(stream),
+      /unrecognized file format/
+    );
   });
 });
