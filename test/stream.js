@@ -86,9 +86,7 @@ describe('probeStream', function () {
     let stream = new Readable({
       read: function () {
         // > 16kB (so it will be split), < 64kB (SVG header size)
-        let x = Buffer.alloc(20000);
-        x.fill(0x20);
-        this.push(x);
+        this.push(Buffer.alloc(20000, 0x20));
       }
     });
 

@@ -332,23 +332,15 @@ describe('File formats', function () {
     /* eslint-disable max-nested-callbacks */
     describe('coverage', function () {
       it('too much data before doctype', async function () {
-        let buf = Buffer.alloc(70000);
-
-        buf.fill(0x20);
-
         await assert.rejects(
-          async () => probe(Readable.from([ buf ])),
+          async () => probe(Readable.from([ Buffer.alloc(70000, 0x20) ])),
           /unrecognized file format/
         );
       });
 
       it('too much data before svg', async function () {
-        let buf = Buffer.alloc(70000);
-
-        buf.fill(0x20);
-
         await assert.rejects(
-          async () => probe(Readable.from([ Buffer.from('<svg'), buf ])),
+          async () => probe(Readable.from([ Buffer.from('<svg'), Buffer.alloc(70000, 0x20) ])),
           /unrecognized file format/
         );
       });
