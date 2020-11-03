@@ -4,13 +4,14 @@
 var ProbeError  = require('./lib/common').ProbeError;
 var parsers     = require('./lib/parsers_stream');
 var PassThrough = require('stream').PassThrough;
+var pipeline    = require('stream').pipeline;
 
 
-module.exports = function probeStream(stream, keepOpen) {
+module.exports = function probeStream(src, keepOpen) {
   var proxy = new PassThrough();
 
   var result = new Promise(function (resolve, reject) {
-    stream.on('error', reject);
+    src.on('error', reject);
     proxy.on('error', reject);
 
     var alive_parsers = [];
@@ -50,14 +51,14 @@ module.exports = function probeStream(stream, keepOpen) {
 
   function cleanup() {
     // request stream doesn't have unpipe, https://github.com/request/request/issues/874
-    if (typeof stream.unpipe === 'function') stream.unpipe(proxy);
-    proxy.end();
-    if (!keepOpen) stream.destroy();
+    if (keepOpen && typeof src.unpipe === 'function') src.unpipe(proxy);
+    proxy.destroy();
   }
 
   result.then(cleanup).catch(cleanup);
 
-  stream.pipe(proxy);
+  if (keepOpen) src.pipe(proxy);
+  else pipeline(src, proxy, function () {});
 
   return result;
 };
