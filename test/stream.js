@@ -39,19 +39,19 @@ describe('probeStream', function () {
     filename = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
     file = fs.createReadStream(filename);
     await probe(file);
-    await delay(1);
+    await delay(100);
     assert.strictEqual(file.closed, true);
 
     filename = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
     file = fs.createReadStream(filename);
     await probe(file, true);
-    await delay(1);
+    await delay(100);
     assert.strictEqual(file.closed, false);
 
     filename = path.join(__dirname, 'fixtures', 'text_file.txt');
     file = fs.createReadStream(filename);
     try { await probe(file); } catch (err) {}
-    await delay(1);
+    await delay(100);
     assert.strictEqual(file.closed, true);
   });
 
