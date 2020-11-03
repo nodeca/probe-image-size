@@ -8,32 +8,41 @@ var PassThrough = require('stream').PassThrough;
 
 module.exports = function probeStream(stream, keepOpen) {
   var proxy = new PassThrough();
-  var cnt = 0; // count of working parsers
 
   var result = new Promise(function (resolve, reject) {
     stream.on('error', reject);
     proxy.on('error', reject);
 
-    function nope() {}
+    var alive_parsers = [];
+    var last_error;
 
-    function parserEnd() {
+    function parserEnd(err) {
+      var idx = alive_parsers.indexOf[this];
+
+      if (idx < 0) return;
+
+      if (err) last_error = err;
+
       proxy.unpipe(this);
       this.removeAllListeners();
-      cnt--;
+      alive_parsers.splice(idx, 1);
+
+      if (alive_parsers.length) return;
+
       // if all parsers finished without success -> fail.
-      if (!cnt) reject(new ProbeError('unrecognized file format', 'ECONTENT'));
+      reject(last_error || new ProbeError('unrecognized file format', 'ECONTENT'));
     }
 
     Object.keys(parsers).forEach(function (type) {
       var pStream = parsers[type]();
 
-      cnt++;
+      alive_parsers.push(pStream);
 
       pStream.once('data', resolve);
       pStream.once('end', parserEnd);
-      // silently ignore errors because user does not need to know
-      // that something wrong is happening here
-      pStream.on('error', nope);
+      // User does not need to know that something wrong in parser
+      // Process error the same was unrecognized format (end without data)
+      pStream.on('error', parserEnd);
 
       proxy.pipe(pStream);
     });
