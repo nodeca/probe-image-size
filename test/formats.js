@@ -76,6 +76,26 @@ describe('File formats', function () {
         hUnits: 'px'
       });
     });
+
+
+    it('should display 0 size as 256', async function () {
+      let file = path.join(__dirname, 'fixtures', 'google1.ico');
+
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size, {
+        width: 256,
+        height: 256,
+        variants: [
+          { height: 256, width: 256 },
+          { height: 24, width: 24 }
+        ],
+        type: 'ico',
+        mime: 'image/x-icon',
+        wUnits: 'px',
+        hUnits: 'px'
+      });
+    });
   });
 
 
@@ -93,6 +113,25 @@ describe('File formats', function () {
           { height: 32, width: 32 },
           { height: 48, width: 48 },
           { height: 128, width: 128 }
+        ],
+        type: 'ico',
+        mime: 'image/x-icon',
+        wUnits: 'px',
+        hUnits: 'px'
+      });
+    });
+
+
+    it('should display 0 size as 256', function () {
+      let file = path.join(__dirname, 'fixtures', 'google1.ico');
+      let size = probe.sync(fs.readFileSync(file));
+
+      assert.deepStrictEqual(size, {
+        width: 256,
+        height: 256,
+        variants: [
+          { height: 256, width: 256 },
+          { height: 24, width: 24 }
         ],
         type: 'ico',
         mime: 'image/x-icon',
