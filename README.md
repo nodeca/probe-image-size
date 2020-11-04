@@ -46,18 +46,16 @@ console.log(result); // =>
 
 
 // By URL with options
-let result = await probe('http://example.com/image.jpg', { timeout: 5000 });
+let result = await probe('http://example.com/image.jpg', { rejectUnauthorized: false });
 console.log(result);
 
 
 // From the stream
-let input = require('fs').createReadStream('image.jpg');
-
-let result = await probe(input);
+let result = await probe(require('fs').createReadStream('image.jpg'));
 console.log(result);
 
 
-// From a Buffer
+// From a Buffer (sync)
 let data = require('fs').readFileSync('image.jpg');
 console.log(probe.sync(data));
 ```
@@ -66,13 +64,18 @@ console.log(probe.sync(data));
 API
 ---
 
+Note:
+
+- You can access/browserify `stream.js` / `http.js` / `sync.js` directly.
+- If you don't like `http.js` dependencies, you can create your own wrapper
+  for `stream.js`.
+
 ### probe(src [, options|keepOpen]) -> Promise
 
 - `src` can be of this types:
   - _String_ - URL to fetch
   - _Stream_ - readable stream
-- `options` - HTTP only. See [`request` documentation](https://github.com/request/request).
-Defaults changed to `{ timeout: 60000 }`
+- `options` - HTTP only. See [`needle` documentation](https://github.com/tomas/needle#request-options), and customized [defaults](https://github.com/nodeca/probe-image-size/blob/master/http.js#L13).
 - `keepOpen` (Boolean) - stream only. Keep stream open after parser finishes
   (input stream will be closed by default)
 
@@ -114,7 +117,6 @@ Similar projects
 ----------------
 
 - [image-size](https://github.com/netroy/image-size)
-- [imagesize](https://github.com/arnaud-lb/imagesize.js)
 
 
 Support probe-image-size

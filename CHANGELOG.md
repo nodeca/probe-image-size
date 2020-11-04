@@ -8,15 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [6.0.0] - WIP
 ### Added
-- Add support for .ico files
+- Add support for `.ico` files.
 
 ### Changed
 - node.js v10+ required.
 - Drop callbacks support.
 - Drop legacy call support (URL in `options`).
+- Input stream will now be closed by default.
+- Use `needle` instead of outdated `request` (options names are different).
 - Rewrite tests to async/await.
 - Deps bump & cleanup.
-- Input stream will now be closed by default. If you want to keep it open, add `{ keepOpen: true }`.
 
 
 ## [5.0.0] - 2019-09-14

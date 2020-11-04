@@ -15,8 +15,8 @@ var defaults = {
   response_timeout: 60000,
   read_timeout: 60000,
   follow_max: 10,
-  // Enable if wish to ignore bad certificates.
-  //rejectUnauthorized: true,
+  // Use to ignore bad certificates.
+  //rejectUnauthorized: false,
   headers: {
     'User-Agent': defaultAgent
   }
