@@ -104,6 +104,13 @@ describe('probeHttp', function () {
     );
   });
 
+  it('should return error if url is not a string', async function () {
+    // for coverage
+    await assert.rejects(
+      async () => probe(123),
+      /URL must be a string/
+    );
+  });
 
   it('should return error if url is invalid', async function () {
     await assert.rejects(
