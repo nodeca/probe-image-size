@@ -156,7 +156,7 @@ describe('probeHttp', function () {
   it('should return url when following redirect', async function () {
     responder = function (req, res) {
       if (req.url === '/redirect.gif') {
-        res.writeHead(302, { Location: '/empty.gif' });
+        res.writeHead(302, { Location: url + '/empty.gif' });
         res.end();
         return;
       }

@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "deepmerge": "^4.0.0",
-    "request": "^2.83.0",
+    "needle": "^2.5.2",
     "stream-parser": "~0.3.1"
   },
   "devDependencies": {
