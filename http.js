@@ -2,10 +2,11 @@
 
 
 var ProbeError  = require('./lib/common').ProbeError;
-var needle     = require('needle');
+var needle      = require('needle');
 var merge       = require('deepmerge');
 var pkg         = require('./package.json');
 var probeStream = require('./stream');
+var URL         = require('url').URL;
 
 var defaultAgent = pkg.name + '/' + pkg.version + '(+https://github.com/nodeca/probe-image-size)';
 
@@ -34,7 +35,7 @@ module.exports = function probeHttp(src, options) {
     }
 
     stream.on('redirect', function (location) {
-      finalUrl = location;
+      finalUrl = new URL(location, finalUrl).href;
     });
 
     stream.on('header', function (statusCode, headers) {

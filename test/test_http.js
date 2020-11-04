@@ -5,6 +5,7 @@
 const assert = require('assert');
 const http   = require('http');
 const URL    = require('url');
+const zlib   = require('zlib');
 const probe  = require('../');
 
 
@@ -168,6 +169,55 @@ describe('probeHttp', function () {
     let size = await probe(url + '/redirect.gif');
 
     assert.strictEqual(size.url, url + '/empty.gif');
+    assert.strictEqual(size.width, 1);
+    assert.strictEqual(size.height, 1);
+    assert.strictEqual(size.mime, 'image/gif');
+  });
+
+  it('should follow relative redirect', async function () {
+    responder = function (req, res) {
+      if (req.url === '/path/to/step1.gif') {
+        res.writeHead(302, { Location: '../step2.gif' });
+        res.end();
+        return;
+      }
+
+      if (req.url === '/path/step2.gif') {
+        res.writeHead(302, { Location: 'step3.gif' });
+        res.end();
+        return;
+      }
+
+      res.writeHead(200);
+      res.end(GIF1x1);
+    };
+
+    let size = await probe(url + '/path/to/step1.gif');
+
+    assert.strictEqual(size.url, url + '/path/step3.gif');
+    assert.strictEqual(size.width, 1);
+    assert.strictEqual(size.height, 1);
+    assert.strictEqual(size.mime, 'image/gif');
+  });
+
+  it('should accept gzip-encoded output when not requested by client', async function () {
+    let encoding;
+
+    responder = function (req, res) {
+      encoding = req.headers['accept-encoding'] || 'identity';
+      res.setHeader('content-encoding', 'gzip');
+      res.writeHead(200);
+      res.end(zlib.gzipSync(GIF1x1));
+    };
+
+    let size = await probe(url + '/empty.gif');
+
+    // make sure client requested no compression
+    assert.strictEqual(encoding, 'identity');
+
+    assert.strictEqual(size.width, 1);
+    assert.strictEqual(size.height, 1);
+    assert.strictEqual(size.mime, 'image/gif');
   });
 
 
