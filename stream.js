@@ -20,8 +20,10 @@ module.exports = function probeStream(src, keepOpen) {
     function parserEnd(err) {
       var idx = alive_parsers.indexOf[this];
 
+      /* istanbul ignore if */
       if (idx < 0) return;
 
+      /* istanbul ignore if */
       if (err) last_error = err;
 
       proxy.unpipe(this);
