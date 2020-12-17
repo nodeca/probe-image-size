@@ -115,8 +115,8 @@ describe('probeHttp', function () {
   it('should return error if url is invalid', async function () {
     await assert.rejects(
       async () => probe('badurl'),
-      // search error text for both `request` & `got` packages
-      /(ENOTFOUND badurl)|(Invalid URI)/
+      // search error text for both `request` / `got` / Github Actions
+      /(ENOTFOUND badurl)|(Invalid URI)|(getaddrinfo EAI_AGAIN)/
     );
   });
 

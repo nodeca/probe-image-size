@@ -29,7 +29,7 @@
     "lint": "eslint .",
     "test": "npm run lint && nyc mocha",
     "coverage": "npm run test && nyc report --reporter html",
-    "report-coveralls": "nyc report --reporter=text-lcov | coveralls"
+    "report-coveralls": "nyc --reporter=lcov mocha"
   },
   "mocha": {
     "timeout": 5000
@@ -40,7 +40,6 @@
     "stream-parser": "~0.3.1"
   },
   "devDependencies": {
-    "coveralls": "^3.0.0",
     "eslint": "^7.12.1",
     "mocha": "^8.2.0",
     "nyc": "^15.1.0"
