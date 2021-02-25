@@ -40,7 +40,7 @@ rules:
   max-depth:              [ 1, 6 ]
   max-nested-callbacks:   [ 1, 4 ]
   # string can exceed 80 chars, but should not overflow github website :)
-  max-len:                [ 2, 120, 1000 ]
+  max-len:                [ 2, 120, 1000, { ignoreUrls: true } ]
   new-cap:                2
   new-parens:             2
   # Postponed

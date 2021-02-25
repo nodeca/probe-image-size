@@ -304,6 +304,575 @@ describe('File formats', function () {
   });
 
 
+  describe('AVIF', function () {
+    it('should detect AVIF', async function () {
+      let file = path.join(__dirname, 'fixtures', 'iojs_logo.avif');
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size, {
+        width: 367,
+        height: 187,
+        type: 'avif',
+        mime: 'image/avif',
+        wUnits: 'px',
+        hUnits: 'px'
+      });
+    });
+
+
+    it('should detect HEIC - image4.heic', async function () {
+      let file = path.join(__dirname, 'fixtures', 'image4.heic');
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size, {
+        width: 700,
+        height: 476,
+        type: 'heic',
+        mime: 'image/heic',
+        wUnits: 'px',
+        hUnits: 'px',
+        variants: [
+          { width: 700, height: 476 },
+          { width: 700, height: 476 }
+        ]
+      });
+    });
+
+
+    it('should detect HEIC - MIAF002.heic', async function () {
+      let file = path.join(__dirname, 'fixtures', 'MIAF002.heic');
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size, {
+        width: 2048,
+        height: 2048,
+        type: 'heif',
+        mime: 'image/heif',
+        wUnits: 'px',
+        hUnits: 'px',
+        variants: [
+          { width: 2048, height: 2048 },
+          { width: 160, height: 160 }
+        ]
+      });
+    });
+
+
+    it('minimal AVIF file', async function () {
+      let buf = str2arr((
+        '\0\0\0\x14 ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      let size = await probe(Readable.from([ Buffer.from(buf) ]));
+
+      assert.strictEqual(size.width, 16909060);
+    });
+
+
+    it('should keep largest size in ispe', async function () {
+      let buf = str2arr((
+        '\0\0\0\x14 ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x58 meta \0\0\0\0 ' +
+        '\0\0\0\x4C iprp ' +
+        '\0\0\0\x44 ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x00\x00\x00\x30 \x00\x00\x00\x40' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x00\x00\x04\x00 \x00\x00\x00\x10' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x00\x00\x00\x10 \x00\x00\x05\x00'
+      ).replace(/ /g, ''));
+
+      let size = await probe(Readable.from([ Buffer.from(buf) ]));
+
+      assert.deepStrictEqual(size, {
+        width: 16,
+        height: 1280,
+        type: 'avif',
+        mime: 'image/avif',
+        wUnits: 'px',
+        hUnits: 'px',
+        variants: [
+          { width: 48, height: 64 },
+          { width: 1024, height: 16 },
+          { width: 16, height: 1280 }
+        ]
+      });
+    });
+
+
+    it('invalid format (mp4)', async function () {
+      let buf = str2arr((
+        '\0\0\0\x10 ftyp 3gp5 \0\0\0\0' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      await assert.rejects(
+        async () => probe(Readable.from([ Buffer.from(buf) ])),
+        /unrecognized file format/
+      );
+    });
+
+
+    it('coverage - invalid box lengths', async function () {
+      let buf;
+
+      buf = str2arr((
+        '\0\0\0\x06 ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      await assert.rejects(
+        async () => probe(Readable.from([ Buffer.from(buf) ])),
+        /unrecognized file format/
+      );
+
+      buf = str2arr((
+        '\0\0\0\x14 ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x06 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      await assert.rejects(
+        async () => probe(Readable.from([ Buffer.from(buf) ])),
+        /unrecognized file format/
+      );
+
+      buf = str2arr((
+        '\0\0\0\x14 ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x06 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      await assert.rejects(
+        async () => probe(Readable.from([ Buffer.from(buf) ])),
+        /unrecognized file format/
+      );
+
+      buf = str2arr((
+        '\0\0\0\x14 ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x06 ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      await assert.rejects(
+        async () => probe(Readable.from([ Buffer.from(buf) ])),
+        /unrecognized file format/
+      );
+
+      buf = str2arr((
+        '\0\0\0\x14 ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x06 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      await assert.rejects(
+        async () => probe(Readable.from([ Buffer.from(buf) ])),
+        /unrecognized file format/
+      );
+    });
+
+
+    it('coverage - should not look past mdat', async function () {
+      let buf;
+
+      buf = str2arr((
+        '\0\0\0\x14 ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x0C mdat \0\0\0\0 ' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      await assert.rejects(
+        async () => probe(Readable.from([ Buffer.from(buf) ])),
+        /unrecognized file format/
+      );
+    });
+
+
+    it('coverage - other fields', async function () {
+      let buf = str2arr((
+        '\0\0\0\x14 ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x08 free ' +
+        '\0\0\0\x0C free \0\0\0\0 ' +
+        '\0\0\0\x4C meta \0\0\0\0 ' +
+        '\0\0\0\x08 free ' +
+        '\0\0\0\x38 iprp ' +
+        '\0\0\0\x08 free ' +
+        '\0\0\0\x28 ipco ' +
+        '\0\0\0\x08 free ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08' +
+        '\0\0\0\x0C free \0\0\0\0 '
+      ).replace(/ /g, ''));
+
+      let size = await probe(Readable.from([ Buffer.from(buf) ]));
+
+      assert.strictEqual(size.width, 16909060);
+    });
+
+
+    it('coverage - mime types', async function () {
+      let buf;
+
+      buf = str2arr((
+        '\0\0\0\x14 ftyp hevc \0\0\0\0 msf1' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      assert.strictEqual(
+        (await probe(Readable.from([ Buffer.from(buf) ]))).mime,
+        'image/heic-sequence'
+      );
+
+      buf = str2arr((
+        '\0\0\0\x14 ftyp mif1 \0\0\0\0 avif' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      assert.strictEqual(
+        (await probe(Readable.from([ Buffer.from(buf) ]))).mime,
+        'image/avif'
+      );
+
+      buf = str2arr((
+        '\0\0\0\x14 ftyp msf1 \0\0\0\0 heix' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      assert.strictEqual(
+        (await probe(Readable.from([ Buffer.from(buf) ]))).mime,
+        'image/heif-sequence'
+      );
+
+      buf = str2arr((
+        '\0\0\0\x14 ftyp mif1 \0\0\0\0 heix' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      assert.strictEqual(
+        (await probe(Readable.from([ Buffer.from(buf) ]))).mime,
+        'image/heif'
+      );
+
+      buf = str2arr((
+        '\0\0\0\x14 ftyp mif1 \0\0\0\0 xxxx' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      assert.strictEqual(
+        (await probe(Readable.from([ Buffer.from(buf) ]))).mime,
+        'image/avif'
+      );
+    });
+  });
+
+
+  describe('AVIF (sync)', function () {
+    it('should detect AVIF', function () {
+      let file = path.join(__dirname, 'fixtures', 'iojs_logo.avif');
+      let size = probe.sync(fs.readFileSync(file));
+
+      assert.deepStrictEqual(size, {
+        width: 367,
+        height: 187,
+        type: 'avif',
+        mime: 'image/avif',
+        wUnits: 'px',
+        hUnits: 'px'
+      });
+    });
+
+
+    it('should detect HEIC - image4.heic', async function () {
+      let file = path.join(__dirname, 'fixtures', 'image4.heic');
+      let size = probe.sync(fs.readFileSync(file));
+
+      assert.deepStrictEqual(size, {
+        width: 700,
+        height: 476,
+        type: 'heic',
+        mime: 'image/heic',
+        wUnits: 'px',
+        hUnits: 'px',
+        variants: [
+          { width: 700, height: 476 },
+          { width: 700, height: 476 }
+        ]
+      });
+    });
+
+
+    it('should detect HEIC - MIAF002.heic', async function () {
+      let file = path.join(__dirname, 'fixtures', 'MIAF002.heic');
+      let size = probe.sync(fs.readFileSync(file));
+
+      assert.deepStrictEqual(size, {
+        width: 2048,
+        height: 2048,
+        type: 'heif',
+        mime: 'image/heif',
+        wUnits: 'px',
+        hUnits: 'px',
+        variants: [
+          { width: 2048, height: 2048 },
+          { width: 160, height: 160 }
+        ]
+      });
+    });
+
+
+    it('minimal AVIF file', function () {
+      let buf = str2arr((
+        '\0\0\0\x14 ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      let size = probe.sync(buf);
+
+      assert.strictEqual(size.width, 16909060);
+    });
+
+
+    it('should keep largest size in ispe', function () {
+      let buf = str2arr((
+        '\0\0\0\x14 ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x58 meta \0\0\0\0 ' +
+        '\0\0\0\x4C iprp ' +
+        '\0\0\0\x44 ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x00\x00\x00\x30 \x00\x00\x00\x40' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x00\x00\x04\x00 \x00\x00\x00\x10' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x00\x00\x00\x10 \x00\x00\x05\x00'
+      ).replace(/ /g, ''));
+
+      let size = probe.sync(buf);
+
+      assert.deepStrictEqual(size, {
+        width: 16,
+        height: 1280,
+        type: 'avif',
+        mime: 'image/avif',
+        wUnits: 'px',
+        hUnits: 'px',
+        variants: [
+          { width: 48, height: 64 },
+          { width: 1024, height: 16 },
+          { width: 16, height: 1280 }
+        ]
+      });
+    });
+
+
+    it('invalid format (mp4)', function () {
+      let buf = str2arr((
+        '\0\0\0\x10 ftyp 3gp5 \0\0\0\0' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      assert.strictEqual(probe.sync(buf), null);
+    });
+
+
+    it('coverage - invalid box lengths', function () {
+      let buf;
+
+      buf = str2arr((
+        '\0\0\0\x06 ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      assert.strictEqual(probe.sync(buf), null);
+
+      buf = str2arr((
+        '\0\0\0\x14 ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x06 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      assert.strictEqual(probe.sync(buf), null);
+
+      buf = str2arr((
+        '\0\0\0\x14 ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x06 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      assert.strictEqual(probe.sync(buf), null);
+
+      buf = str2arr((
+        '\0\0\0\x14 ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x06 ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      assert.strictEqual(probe.sync(buf), null);
+
+      buf = str2arr((
+        '\0\0\0\x14 ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x06 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      assert.strictEqual(probe.sync(buf), null);
+    });
+
+
+    it('coverage - should not look past mdat', function () {
+      let buf;
+
+      buf = str2arr((
+        '\0\0\0\x14 ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x0C mdat \0\0\0\0 ' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      assert.strictEqual(probe.sync(buf), null);
+    });
+
+
+    it('coverage - other fields', function () {
+      let buf = str2arr((
+        '\0\0\0\x14 ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x08 free ' +
+        '\0\0\0\x0C free \0\0\0\0 ' +
+        '\0\0\0\x4C meta \0\0\0\0 ' +
+        '\0\0\0\x08 free ' +
+        '\0\0\0\x38 iprp ' +
+        '\0\0\0\x08 free ' +
+        '\0\0\0\x28 ipco ' +
+        '\0\0\0\x08 free ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08' +
+        '\0\0\0\x0C free \0\0\0\0 '
+      ).replace(/ /g, ''));
+
+      let size = probe.sync(buf);
+
+      assert.strictEqual(size.width, 16909060);
+    });
+
+
+    it('coverage - mime types', async function () {
+      let buf;
+
+      buf = str2arr((
+        '\0\0\0\x14 ftyp hevc \0\0\0\0 msf1' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      assert.strictEqual(
+        probe.sync(buf).mime,
+        'image/heic-sequence'
+      );
+
+      buf = str2arr((
+        '\0\0\0\x14 ftyp mif1 \0\0\0\0 avif' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      assert.strictEqual(
+        probe.sync(buf).mime,
+        'image/avif'
+      );
+
+      buf = str2arr((
+        '\0\0\0\x14 ftyp msf1 \0\0\0\0 heix' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      assert.strictEqual(
+        probe.sync(buf).mime,
+        'image/heif-sequence'
+      );
+
+      buf = str2arr((
+        '\0\0\0\x14 ftyp mif1 \0\0\0\0 heix' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      assert.strictEqual(
+        probe.sync(buf).mime,
+        'image/heif'
+      );
+
+      buf = str2arr((
+        '\0\0\0\x14 ftyp mif1 \0\0\0\0 xxxx' +
+        '\0\0\0\x30 meta \0\0\0\0 ' +
+        '\0\0\0\x24 iprp ' +
+        '\0\0\0\x1C ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08'
+      ).replace(/ /g, ''));
+
+      assert.strictEqual(
+        probe.sync(buf).mime,
+        'image/avif'
+      );
+    });
+  });
+
+
   describe('PSD', function () {
     it('should detect PSD', async function () {
       let file = path.join(__dirname, 'fixtures', 'empty.psd');
