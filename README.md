@@ -92,9 +92,21 @@ Note:
   hUnits: 'px', // height units type ('px' by default, can be different for SVG)
   url: ...,     // HTTP only, last url for the image in chain of redirects
                 // (if no redirects, same as src)
-  variants: [ { width, height }, ... ] | undefined // full list of sizes for ICO
+
+  // optional, image orientation (from Exif), number from 1 to 8;
+  // you may wish to swap width and height if orientation is >= 5
+  orientation: X,
+
+  // optional, full list of sizes for ICO (always) and AVIF (if multiple images)
+  variants: [ { width, height }, ... ] | undefined
 }
 ```
+
+Width and height in the output object represent image size *before* any transformations
+(orientation, cropping) are applied. Orientation is returned separately, which you may
+wish to apply afterwards depending on browser support (browsers
+[only support JPEG](https://zpl.fi/exif-orientation-in-different-formats/) orientation for now).
+See [known issues](known_issues.md) for details.
 
 Returned errors can be extended with 2 fields:
 

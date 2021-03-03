@@ -152,6 +152,23 @@ describe('File formats', function () {
     });
 
 
+    it('should detect JPEG orientation', async function () {
+      let file = path.join(__dirname, 'fixtures', 'Exif5-1.5x.jpg');
+
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size, {
+        width: 192,
+        height: 192,
+        type: 'jpg',
+        mime: 'image/jpeg',
+        wUnits: 'px',
+        hUnits: 'px',
+        orientation: 5
+      });
+    });
+
+
     // regression test
     it('should not fail on empty JPEG markers', async function () {
       let file = path.join(__dirname, 'fixtures', 'empty_comment.jpg');
@@ -209,6 +226,22 @@ describe('File formats', function () {
       let size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 367, height: 187, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' });
+    });
+
+
+    it('should detect JPEG orientation', async function () {
+      let file = path.join(__dirname, 'fixtures', 'Exif5-1.5x.jpg');
+      let size = probe.sync(fs.readFileSync(file));
+
+      assert.deepStrictEqual(size, {
+        width: 192,
+        height: 192,
+        type: 'jpg',
+        mime: 'image/jpeg',
+        wUnits: 'px',
+        hUnits: 'px',
+        orientation: 5
+      });
     });
 
 
@@ -316,6 +349,22 @@ describe('File formats', function () {
         mime: 'image/avif',
         wUnits: 'px',
         hUnits: 'px'
+      });
+    });
+
+
+    it('should detect AVIF orientation', async function () {
+      let file = path.join(__dirname, 'fixtures', 'Rot3Mir1-1.5x.avif');
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size, {
+        width: 192,
+        height: 192,
+        type: 'avif',
+        mime: 'image/avif',
+        wUnits: 'px',
+        hUnits: 'px',
+        orientation: 5
       });
     });
 
@@ -611,6 +660,22 @@ describe('File formats', function () {
         mime: 'image/avif',
         wUnits: 'px',
         hUnits: 'px'
+      });
+    });
+
+
+    it('should detect AVIF orientation', function () {
+      let file = path.join(__dirname, 'fixtures', 'Rot3Mir1-1.5x.avif');
+      let size = probe.sync(fs.readFileSync(file));
+
+      assert.deepStrictEqual(size, {
+        width: 192,
+        height: 192,
+        type: 'avif',
+        mime: 'image/avif',
+        wUnits: 'px',
+        hUnits: 'px',
+        orientation: 5
       });
     });
 
