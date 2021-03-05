@@ -11,6 +11,7 @@ const { Readable } = require('stream');
 
 
 /* eslint-disable max-len */
+/* eslint-disable no-undefined */
 describe('File formats', function () {
   describe('BMP', function () {
     it('should detect BMP', async function () {
@@ -217,6 +218,15 @@ describe('File formats', function () {
         /unrecognized file format/
       );
     });
+
+
+    it('coverage - 0xE1 segment but not exif', async function () {
+      let buf = Buffer.from('FFD8 FFE10010AAAAAAAAAAAAAAAAAAAAAAAAAAAA FFC00011 08000F000F03012200021101031101 FFFFD9'.replace(/ /g, ''), 'hex');
+
+      let size = await probe(Readable.from([ buf ]));
+
+      assert.strictEqual(size.width, 15);
+    });
   });
 
 
@@ -296,6 +306,14 @@ describe('File formats', function () {
       buf = str2arr('FFD8 FFC0 FFFF 00'.replace(/ /g, ''), 'hex');
       assert.strictEqual(probe.sync(buf), null);
     });
+
+
+    it('coverage - 0xE1 segment but not exif', async function () {
+      let buf = Buffer.from('FFD8 FFE10010AAAAAAAAAAAAAAAAAAAAAAAAAAAA FFC00011 08000F000F03012200021101031101 FFFFD9'.replace(/ /g, ''), 'hex');
+
+      let size = probe.sync(buf);
+      assert.strictEqual(size.width, 15);
+    });
   });
 
 
@@ -353,8 +371,24 @@ describe('File formats', function () {
     });
 
 
-    it('should detect AVIF orientation', async function () {
+    it('should detect AVIF orientation from irot/imir', async function () {
       let file = path.join(__dirname, 'fixtures', 'Rot3Mir1-1.5x.avif');
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size, {
+        width: 192,
+        height: 192,
+        type: 'avif',
+        mime: 'image/avif',
+        wUnits: 'px',
+        hUnits: 'px',
+        orientation: 5
+      });
+    });
+
+
+    it('should detect AVIF orientation from Exif', async function () {
+      let file = path.join(__dirname, 'fixtures', 'Exif5-1.5x.avif');
       let size = await probe(fs.createReadStream(file));
 
       assert.deepStrictEqual(size, {
@@ -383,7 +417,8 @@ describe('File formats', function () {
         variants: [
           { width: 700, height: 476 },
           { width: 700, height: 476 }
-        ]
+        ],
+        orientation: 1
       });
     });
 
@@ -419,6 +454,107 @@ describe('File formats', function () {
       let size = await probe(Readable.from([ Buffer.from(buf) ]));
 
       assert.strictEqual(size.width, 16909060);
+    });
+
+
+    it('minimal AVIF file + transforms', async function () {
+      let buf = str2arr((
+        '\0\0\0\x14 ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x42 meta \0\0\0\0 ' +
+        '\0\0\0\x36 iprp ' +
+        '\0\0\0\x2E ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08' +
+        '\0\0\0\x09 imir \x00' +
+        '\0\0\0\x09 irot \x03'
+      ).replace(/ /g, ''));
+
+      let size = await probe(Readable.from([ Buffer.from(buf) ]));
+
+      assert.strictEqual(size.orientation, 5);
+    });
+
+
+    it('minimal AVIF file + EXIF', async function () {
+      // orientation=5 minimal exif from Exif5-1.5x file
+      let exif_data = Buffer.from((
+        '4d4d002a 00000008 00050112 00030000 00010005 0000011a 00050000' +
+        '00010000 004a011b 00050000 00010000 00520128 00030000 00010002' +
+        '00000213 00030000 00010001 00000000 00000000 00480000 00010000' +
+        '00480000 0001').replace(/ /g, ''), 'hex');
+
+      let buf = str2arr((
+        // first column is length of the box, indents show hierarchy
+        '\0\0\0\x14     ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x72     meta \0\0\0\0 ' +
+        '  \0\0\0\x26   iinf \0\0\0\0 \0\x01' +
+        '    \0\0\0\x18 infe \0\0\0\0 \0\xAA\0\0 Exif \0\0\0\0' +
+        '  \0\0\0\x1C   iloc \0\0\0\0 \x22\x2F\0\x01 \0\xAA\0\0 \0\x46\0\x01 \0\x48\0\x62' +
+        '\0\0\0\x24     iprp ' +
+        '  \0\0\0\x1C   ipco ' +
+        '  \0\0\0\x14   ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08' +
+        '\0\0\0\0       mdat ' +
+        '               \0\0\0\x06 Exif \0\0'
+      ).replace(/ /g, ''));
+
+      let size = await probe(Readable.from([ Buffer.concat([ Buffer.from(buf), exif_data ]) ]));
+
+      assert.strictEqual(size.orientation, 5);
+    });
+
+
+    it('coverage - sig offset more than exif length', async function () {
+      // orientation=5 minimal exif from Exif5-1.5x file
+      let exif_data = Buffer.from((
+        '4d4d002a 00000008 00050112 00030000 00010005 0000011a 00050000' +
+        '00010000 004a011b 00050000 00010000 00520128 00030000 00010002' +
+        '00000213 00030000 00010001 00000000 00000000 00480000 00010000' +
+        '00480000 0001').replace(/ /g, ''), 'hex');
+
+      let buf = str2arr((
+        // first column is length of the box, indents show hierarchy
+        '\0\0\0\x14     ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x72     meta \0\0\0\0 ' +
+        '  \0\0\0\x26   iinf \0\0\0\0 \0\x01' +
+        '    \0\0\0\x18 infe \0\0\0\0 \0\xAA\0\0 Exif \0\0\0\0' +                 //  vvv - bad data here
+        '  \0\0\0\x1C   iloc \0\0\0\0 \x22\x2F\0\x01 \0\xAA\0\0 \0\x46\0\x01 \0\x48\0\x02' +
+        '\0\0\0\x24     iprp ' +
+        '  \0\0\0\x1C   ipco ' +
+        '  \0\0\0\x14   ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08' +
+        '\0\0\0\0       mdat ' +
+        '               \0\0\0\x06 Exif \0\0'
+      ).replace(/ /g, ''));
+
+      let size = await probe(Readable.from([ Buffer.concat([ Buffer.from(buf), exif_data ]) ]));
+
+      assert.strictEqual(size.orientation, undefined);
+    });
+
+
+    it('coverage - wrong infe, wrong ref index', async function () {
+      // orientation=5 minimal exif from Exif5-1.5x file
+      let exif_data = Buffer.from((
+        '4d4d002a 00000008 00050112 00030000 00010005 0000011a 00050000' +
+        '00010000 004a011b 00050000 00010000 00520128 00030000 00010002' +
+        '00000213 00030000 00010001 00000000 00000000 00480000 00010000' +
+        '00480000 0001').replace(/ /g, ''), 'hex');
+
+      let buf = str2arr((
+        // first column is length of the box, indents show hierarchy
+        '\0\0\0\x14     ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x72     meta \0\0\0\0 ' +
+        '  \0\0\0\x26   iinf \0\0\0\0 \0\x02' +
+        '    \0\0\0\x18 free \0\0\0\0 \0\0\0\0 \0\0\0\0 \0\0\0\0' +
+        '  \0\0\0\x1C   iloc \0\0\0\0 \x22\x2F\0\x01 \0\xAA\0\x01 \0\x46\0\x01 \0\x48\0\x62' +
+        '\0\0\0\x24     iprp ' +
+        '  \0\0\0\x1C   ipco ' +
+        '  \0\0\0\x14   ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08' +
+        '\0\0\0\0       mdat ' +
+        '               \0\0\0\x06 Exif \0\0'
+      ).replace(/ /g, ''));
+
+      let size = await probe(Readable.from([ Buffer.concat([ Buffer.from(buf), exif_data ]) ]));
+
+      assert.strictEqual(size.orientation, undefined);
     });
 
 
@@ -664,8 +800,24 @@ describe('File formats', function () {
     });
 
 
-    it('should detect AVIF orientation', function () {
+    it('should detect AVIF orientation from irot/imir', async function () {
       let file = path.join(__dirname, 'fixtures', 'Rot3Mir1-1.5x.avif');
+      let size = probe.sync(fs.readFileSync(file));
+
+      assert.deepStrictEqual(size, {
+        width: 192,
+        height: 192,
+        type: 'avif',
+        mime: 'image/avif',
+        wUnits: 'px',
+        hUnits: 'px',
+        orientation: 5
+      });
+    });
+
+
+    it('should detect AVIF orientation from Exif', async function () {
+      let file = path.join(__dirname, 'fixtures', 'Exif5-1.5x.avif');
       let size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, {
@@ -694,7 +846,8 @@ describe('File formats', function () {
         variants: [
           { width: 700, height: 476 },
           { width: 700, height: 476 }
-        ]
+        ],
+        orientation: 1
       });
     });
 
@@ -730,6 +883,107 @@ describe('File formats', function () {
       let size = probe.sync(buf);
 
       assert.strictEqual(size.width, 16909060);
+    });
+
+
+    it('minimal AVIF file + transforms', async function () {
+      let buf = str2arr((
+        '\0\0\0\x14 ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x42 meta \0\0\0\0 ' +
+        '\0\0\0\x36 iprp ' +
+        '\0\0\0\x2E ipco ' +
+        '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08' +
+        '\0\0\0\x09 imir \x00' +
+        '\0\0\0\x09 irot \x03'
+      ).replace(/ /g, ''));
+
+      let size = probe.sync(buf);
+
+      assert.strictEqual(size.orientation, 5);
+    });
+
+
+    it('minimal AVIF file + EXIF', async function () {
+      // orientation=5 minimal exif from Exif5-1.5x file
+      let exif_data = Buffer.from((
+        '4d4d002a 00000008 00050112 00030000 00010005 0000011a 00050000' +
+        '00010000 004a011b 00050000 00010000 00520128 00030000 00010002' +
+        '00000213 00030000 00010001 00000000 00000000 00480000 00010000' +
+        '00480000 0001').replace(/ /g, ''), 'hex');
+
+      let buf = str2arr((
+        // first column is length of the box, indents show hierarchy
+        '\0\0\0\x14     ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x72     meta \0\0\0\0 ' +
+        '  \0\0\0\x26   iinf \0\0\0\0 \0\x01' +
+        '    \0\0\0\x18 infe \0\0\0\0 \0\xAA\0\0 Exif \0\0\0\0' +
+        '  \0\0\0\x1C   iloc \0\0\0\0 \x22\x2F\0\x01 \0\xAA\0\0 \0\x46\0\x01 \0\x48\0\x62' +
+        '\0\0\0\x24     iprp ' +
+        '  \0\0\0\x1C   ipco ' +
+        '  \0\0\0\x14   ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08' +
+        '\0\0\0\0       mdat ' +
+        '               \0\0\0\x06 Exif \0\0'
+      ).replace(/ /g, ''));
+
+      let size = probe.sync(Buffer.concat([ Buffer.from(buf), exif_data ]));
+
+      assert.strictEqual(size.orientation, 5);
+    });
+
+
+    it('coverage - sig offset more than exif length', async function () {
+      // orientation=5 minimal exif from Exif5-1.5x file
+      let exif_data = Buffer.from((
+        '4d4d002a 00000008 00050112 00030000 00010005 0000011a 00050000' +
+        '00010000 004a011b 00050000 00010000 00520128 00030000 00010002' +
+        '00000213 00030000 00010001 00000000 00000000 00480000 00010000' +
+        '00480000 0001').replace(/ /g, ''), 'hex');
+
+      let buf = str2arr((
+        // first column is length of the box, indents show hierarchy
+        '\0\0\0\x14     ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x72     meta \0\0\0\0 ' +
+        '  \0\0\0\x26   iinf \0\0\0\0 \0\x01' +
+        '    \0\0\0\x18 infe \0\0\0\0 \0\xAA\0\0 Exif \0\0\0\0' +                 //  vvv - bad data here
+        '  \0\0\0\x1C   iloc \0\0\0\0 \x22\x2F\0\x01 \0\xAA\0\0 \0\x46\0\x01 \0\x48\0\x02' +
+        '\0\0\0\x24     iprp ' +
+        '  \0\0\0\x1C   ipco ' +
+        '  \0\0\0\x14   ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08' +
+        '\0\0\0\0       mdat ' +
+        '               \0\0\0\x06 Exif \0\0'
+      ).replace(/ /g, ''));
+
+      let size = probe.sync(Buffer.concat([ Buffer.from(buf), exif_data ]));
+
+      assert.strictEqual(size.orientation, undefined);
+    });
+
+
+    it('coverage - wrong infe, wrong ref index', async function () {
+      // orientation=5 minimal exif from Exif5-1.5x file
+      let exif_data = Buffer.from((
+        '4d4d002a 00000008 00050112 00030000 00010005 0000011a 00050000' +
+        '00010000 004a011b 00050000 00010000 00520128 00030000 00010002' +
+        '00000213 00030000 00010001 00000000 00000000 00480000 00010000' +
+        '00480000 0001').replace(/ /g, ''), 'hex');
+
+      let buf = str2arr((
+        // first column is length of the box, indents show hierarchy
+        '\0\0\0\x14     ftyp avif \0\0\0\0 mif1' +
+        '\0\0\0\x72     meta \0\0\0\0 ' +
+        '  \0\0\0\x26   iinf \0\0\0\0 \0\x02' +
+        '    \0\0\0\x18 free \0\0\0\0 \0\0\0\0 \0\0\0\0 \0\0\0\0' +
+        '  \0\0\0\x1C   iloc \0\0\0\0 \x22\x2F\0\x01 \0\xAA\0\x01 \0\x46\0\x01 \0\x48\0\x62' +
+        '\0\0\0\x24     iprp ' +
+        '  \0\0\0\x1C   ipco ' +
+        '  \0\0\0\x14   ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08' +
+        '\0\0\0\0       mdat ' +
+        '               \0\0\0\x06 Exif \0\0'
+      ).replace(/ /g, ''));
+
+      let size = probe.sync(Buffer.concat([ Buffer.from(buf), exif_data ]));
+
+      assert.strictEqual(size.orientation, undefined);
     });
 
 

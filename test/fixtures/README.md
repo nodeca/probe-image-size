@@ -4,4 +4,4 @@ Fixtures derived from https://github.com/nodejs/node/issues/37, author: @substac
 
 `MIAF002.heic` is from [nokiatech/heif_conformance](https://github.com/nokiatech/heif_conformance).
 
-`Exif5-1.5x.jpg`, `Rot3Mir1-1.5x.avif` are from [these orientation tests](https://zpl.fi/exif-orientation-in-different-formats/).
+`Exif5-1.5x.*`, `Rot3Mir1-1.5x.avif` are from [these orientation tests](https://zpl.fi/exif-orientation-in-different-formats/).
