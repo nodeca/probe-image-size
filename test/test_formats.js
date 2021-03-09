@@ -1587,7 +1587,7 @@ describe('File formats', function () {
 
 
     it('should skip VP8 header with bad code block', async function () {
-      let buf = Buffer.from(str2arr('RIFF....WEBPVP8 ........................'));
+      let buf = Buffer.from(str2arr('RIFF\x20\0\0\0WEBPVP8 \x0C\0\0\0....................'));
 
       await assert.rejects(
         async () => probe(Readable.from([ buf ])),
@@ -1615,12 +1615,21 @@ describe('File formats', function () {
 
 
     it('should skip VP8L header with bad code block', async function () {
-      let buf = Buffer.from(str2arr('RIFF....WEBPVP8L........................'));
+      let buf = Buffer.from(str2arr('RIFF\x20\0\0\0WEBPVP8L\x0C\0\0\0....................'));
 
       await assert.rejects(
         async () => probe(Readable.from([ buf ])),
         /unrecognized file format/
       );
+    });
+
+
+    it('should detect exif orientation', async function () {
+      let file = path.join(__dirname, 'fixtures', 'Exif5-1.5x.webp');
+
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size.orientation, 5);
     });
   });
 
@@ -1635,7 +1644,7 @@ describe('File formats', function () {
 
 
     it('should skip VP8 header with bad code block', function () {
-      let size = probe.sync(str2arr('RIFF....WEBPVP8 ........................'));
+      let size = probe.sync(str2arr('RIFF\x20\0\0\0WEBPVP8 \x0C\0\0\0....................'));
 
       assert.strictEqual(size, null);
     });
@@ -1657,8 +1666,16 @@ describe('File formats', function () {
     });
 
 
+    it('should detect exif orientation', async function () {
+      let file = path.join(__dirname, 'fixtures', 'Exif5-1.5x.webp');
+      let size = probe.sync(fs.readFileSync(file));
+
+      assert.deepStrictEqual(size.orientation, 5);
+    });
+
+
     it('should skip VP8L header with bad code block', function () {
-      let size = probe.sync(str2arr('RIFF....WEBPVP8L........................'));
+      let size = probe.sync(str2arr('RIFF\x20\0\0\0WEBPVP8L\x0C\0\0\0....................'));
 
       assert.strictEqual(size, null);
     });

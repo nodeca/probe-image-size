@@ -2,7 +2,6 @@
 
  - images where metadata is encoded after image data are not supported (not recommended by standard)
  - cropping transformation (`clap` box) is not supported (no supported in browsers yet)
- - ??? exif orientation
 
 ### JPEG
 
@@ -14,4 +13,4 @@
 
 ### WEBP
 
- - ??? exif orientation
+ - webp files will be downloaded and parsed until the end of the file
