@@ -10,6 +10,9 @@ var pipeline    = require('stream').pipeline;
 module.exports = function probeStream(src, keepOpen) {
   var proxy = new PassThrough();
 
+  // increase max number of listeners to stop memory leak warning
+  proxy.setMaxListeners(Object.keys(parsers).length + 10);
+
   var result = new Promise(function (resolve, reject) {
     src.on('error', reject);
     proxy.on('error', reject);
