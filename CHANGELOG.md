@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [7.0.0] - WIP
+### Added
+- Add AVIF/HEIC/HEIF support.
+- Add orientation info.
+
+
 ## [6.0.0] - 2020-11-04
 ### Added
 - Add support for `.ico` files.
@@ -174,6 +180,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First release.
 
 
+[7.0.0]: https://github.com/nodeca/probe-image-size/compare/6.0.0...7.0.0
 [6.0.0]: https://github.com/nodeca/probe-image-size/compare/5.0.0...6.0.0
 [5.0.0]: https://github.com/nodeca/probe-image-size/compare/4.1.1...5.0.0
 [4.1.1]: https://github.com/nodeca/probe-image-size/compare/4.1.0...4.1.1
