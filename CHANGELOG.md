@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [7.0.1] - 2021-03-18
+### Fixed
+- Fix crash in async SVG parser, #52.
+
+
 ## [7.0.0] - 2021-03-11
 ### Added
 - Add AVIF/HEIC/HEIF support.
@@ -180,6 +185,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First release.
 
 
+[7.0.1]: https://github.com/nodeca/probe-image-size/compare/7.0.0...7.0.1
 [7.0.0]: https://github.com/nodeca/probe-image-size/compare/6.0.0...7.0.0
 [6.0.0]: https://github.com/nodeca/probe-image-size/compare/5.0.0...6.0.0
 [5.0.0]: https://github.com/nodeca/probe-image-size/compare/4.1.1...5.0.0
