@@ -95,4 +95,16 @@ describe('probeStream', function () {
       /unrecognized file format/
     );
   });
+
+  it('should not fail when processing svg in multiple chunks', async function () {
+    let stream = new Readable({
+      read: function () {
+        this.push('<?xml version="1.0" encoding="UTF-8"?><svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">');
+        this.push('</svg>');
+        this.push(null);
+      }
+    });
+
+    await probe(stream);
+  });
 });
