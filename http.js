@@ -3,7 +3,7 @@
 
 var ProbeError  = require('./lib/common').ProbeError;
 var needle      = require('needle');
-var merge       = require('deepmerge');
+var lodashMerge       = require('lodash.merge');
 var pkg         = require('./package.json');
 var probeStream = require('./stream');
 var URL         = require('url').URL;
@@ -28,7 +28,8 @@ module.exports = function probeHttp(src, options) {
     var stream, len, finalUrl = src;
 
     try {
-      stream = needle.get(src, merge.all([ defaults, options ]));
+      var needleOptions = lodashMerge({}, defaults, options);
+      stream = needle.get(src, needleOptions);
     } catch (err) {
       reject(err);
       return;
