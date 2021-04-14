@@ -35,7 +35,7 @@
     "timeout": 5000
   },
   "dependencies": {
-    "deepmerge": "^4.0.0",
+    "lodash.merge": "^4.6.2",
     "needle": "^2.5.2",
     "stream-parser": "~0.3.1"
   },
