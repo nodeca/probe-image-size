@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [7.1.1] - WIP
+## [7.1.1] - 2021-05-27
 ### Fixed
 - Allow byte order mark at the start of SVG, #57.
 
@@ -196,6 +196,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First release.
 
 
+[7.1.1]: https://github.com/nodeca/probe-image-size/compare/7.1.0...7.1.1
 [7.1.0]: https://github.com/nodeca/probe-image-size/compare/7.0.1...7.1.0
 [7.0.1]: https://github.com/nodeca/probe-image-size/compare/7.0.0...7.0.1
 [7.0.0]: https://github.com/nodeca/probe-image-size/compare/6.0.0...7.0.0
