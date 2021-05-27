@@ -1256,6 +1256,24 @@ describe('File formats', function () {
       assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
     });
 
+    it('should skip BOM', async function () {
+      let size = await probe(Readable.from([ Buffer.from('\ufeff  <svg width="5" height="4"></svg>') ]));
+
+      assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
+    });
+
+    it('should skip BOM in different chunks', async function () {
+      let size = await probe(Readable.from([
+        Buffer.from([ 0xEF ]),
+        Buffer.from([ 0xBB, 0xBF ]),
+        Buffer.from(' <s'),
+        Buffer.from('vg width="'),
+        Buffer.from('5" height="5"></svg>')
+      ]));
+
+      assert.deepStrictEqual(size, { width: 5, height: 5, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
+    });
+
     /* eslint-disable max-nested-callbacks */
     describe('coverage', function () {
       it('too much data before doctype', async function () {
@@ -1363,6 +1381,12 @@ describe('File formats', function () {
 
     it('should ignore stroke-width', function () {
       let size = probe.sync(Buffer.from('<svg stroke-width="2" width="5" height="4"></svg>'));
+
+      assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
+    });
+
+    it('should skip BOM', async function () {
+      let size = probe.sync(Buffer.from('\ufeff  <svg width="5" height="4"></svg>'));
 
       assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
     });
