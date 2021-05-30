@@ -114,7 +114,7 @@ Returned errors can be extended with 2 fields:
 - `status` - equals to a HTTP status code if it receives a non-200 response.
 
 
-### sync.probe(src) -> result|null
+### probe.sync(src) -> result|null
 
 Sync version can eat arrays, typed arrays and buffers. On success it returns
 the same result as async version. On fail it returns null.
