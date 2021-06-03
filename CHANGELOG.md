@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [7.2.0] - WIP
+## [7.2.0] - 2021-06-03
 ### Changed
 - SVG embedded in HTML is no longer recognized as SVG image, #60.
 
@@ -204,6 +204,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First release.
 
 
+[7.2.0]: https://github.com/nodeca/probe-image-size/compare/7.1.1...7.2.0
 [7.1.1]: https://github.com/nodeca/probe-image-size/compare/7.1.0...7.1.1
 [7.1.0]: https://github.com/nodeca/probe-image-size/compare/7.0.1...7.1.0
 [7.0.1]: https://github.com/nodeca/probe-image-size/compare/7.0.0...7.0.1
