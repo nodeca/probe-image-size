@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [7.2.0] - WIP
+### Changed
+- SVG embedded in HTML is no longer recognized as SVG image, #60.
+
+### Fixed
+- Allow XML namespaces in SVG images, #61.
+
+
 ## [7.1.1] - 2021-05-27
 ### Fixed
 - Allow byte order mark at the start of SVG, #57.

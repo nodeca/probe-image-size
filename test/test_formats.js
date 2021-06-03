@@ -1256,6 +1256,33 @@ describe('File formats', function () {
       assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
     });
 
+    it('should not parse HTML as SVG', async function () {
+      let buf = Buffer.from('<html><body><svg width="5" height="4"></svg></body></html>');
+
+      await assert.rejects(
+        async () => probe(Readable.from([ buf ])),
+        /unrecognized file format/
+      );
+    });
+
+    it('should skip initial comments and directives', async function () {
+      let buf = Buffer.from('<?xml version="1.0"?><!-- comment --><svg width="5" height="4"></svg>');
+
+      assert.deepStrictEqual(
+        await probe(Readable.from([ buf ])),
+        { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' }
+      );
+    });
+
+    it('should allow SVG namespace', async function () {
+      let buf = Buffer.from('<aaa:svg xmlns:aaa="http://www.w3.org/2000/svg" width="5" height="4"></aaa:svg>');
+
+      assert.deepStrictEqual(
+        await probe(Readable.from([ buf ])),
+        { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' }
+      );
+    });
+
     it('should skip BOM', async function () {
       let size = await probe(Readable.from([ Buffer.from('\ufeff  <svg width="5" height="4"></svg>') ]));
 
@@ -1349,6 +1376,13 @@ describe('File formats', function () {
           /unrecognized file format/
         );
       });
+
+      it('early termination', async function () {
+        await assert.rejects(
+          async () => probe(Readable.from([ Buffer.from('<svg width="5" height="5"') ])),
+          /unrecognized file format/
+        );
+      });
     });
   });
 
@@ -1383,6 +1417,30 @@ describe('File formats', function () {
       let size = probe.sync(Buffer.from('<svg stroke-width="2" width="5" height="4"></svg>'));
 
       assert.deepStrictEqual(size, { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' });
+    });
+
+    it('should not parse HTML as SVG', async function () {
+      let buf = Buffer.from('<html><body><svg width="5" height="4"></svg></body></html>');
+
+      assert.strictEqual(probe.sync(buf), null);
+    });
+
+    it('should skip initial comments and directives', async function () {
+      let buf = Buffer.from('<?xml version="1.0"?><!-- comment --><svg width="5" height="4"></svg>');
+
+      assert.deepStrictEqual(
+        probe.sync(buf),
+        { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' }
+      );
+    });
+
+    it('should allow SVG namespace', async function () {
+      let buf = Buffer.from('<aaa:svg xmlns:aaa="http://www.w3.org/2000/svg" width="5" height="4"></aaa:svg>');
+
+      assert.deepStrictEqual(
+        probe.sync(buf),
+        { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' }
+      );
     });
 
     it('should skip BOM', async function () {
@@ -1454,6 +1512,12 @@ describe('File formats', function () {
 
       it('viewbox units are different', function () {
         let size = probe.sync(Buffer.from('<svg width="5" viewbox="0 0 5px 3in">'));
+
+        assert.deepStrictEqual(size, null);
+      });
+
+      it('early termination', function () {
+        let size = probe.sync(Buffer.from('<svg width="5" height="5"'));
 
         assert.deepStrictEqual(size, null);
       });
