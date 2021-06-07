@@ -471,6 +471,17 @@ describe('probeHttpWithAgent', function () {
     });
   });
 
+  it('should not parse application/json', async function () {
+    // regression test for #62, http library might decide to parse this
+    responder = function (req, res) {
+      res.setHeader('content-type', 'application/json');
+      res.writeHead(200);
+      res.end('{ "test": 123 }');
+    };
+
+    await assert.rejects(() => probe(url + '/test.json'), /unrecognized file format/);
+  });
+
   after(function () {
     httpAgent.destroy();
     srv.close();

@@ -15,6 +15,7 @@ var defaults = {
   response_timeout: 60000,
   read_timeout: 60000,
   follow_max: 10,
+  parse_response: false,
   // Use to ignore bad certificates.
   //rejectUnauthorized: false,
   headers: {
