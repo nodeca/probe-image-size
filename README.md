@@ -13,6 +13,7 @@ Key features:
 - small size, no heavy dependencies
 - works with remote and local data
 - effective with big images (speed/memory), download minimal data from remotes
+- extracts orientation value when available
 - easy to browserify (splitted to components)
 
 

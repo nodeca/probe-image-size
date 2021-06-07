@@ -2,7 +2,7 @@
 
  - images where metadata is encoded after image data are not supported (should
    not happen in real world, because such data layout not recommended by standard)
- - cropping transformation (`clap` box) is not ignored (anyway, no supported
+ - cropping transformation (`clap` box) is ignored (anyway, no supported
    by browsers yet)
 
 
