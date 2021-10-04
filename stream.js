@@ -7,7 +7,8 @@ var PassThrough = require('stream').PassThrough;
 var pipeline    = require('stream').pipeline;
 
 
-module.exports = function probeStream(src, keepOpen) {
+module.exports = function probeStream(src, options) {
+  var keepOpen = options.keepOpen;
   var proxy = new PassThrough();
 
   // increase max number of listeners to stop memory leak warning
