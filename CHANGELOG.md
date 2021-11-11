@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [7.2.2] - WIP
 ### Fixed
 - Skip invalid chunks in JPEG parser instead of stopping, so some broken images can still be parsed, #68.
+- Better error handling when server redirects to utf8-encoded internationalized domain name.
 
 
 ## [7.2.1] - 2021-06-07

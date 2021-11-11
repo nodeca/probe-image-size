@@ -37,7 +37,12 @@ module.exports = function probeHttp(src, options) {
     }
 
     stream.on('redirect', function (location) {
-      finalUrl = new URL(location, finalUrl).href;
+      try {
+        finalUrl = new URL(location, finalUrl).href;
+      } catch (err) {
+        reject(err);
+        stream.request.abort();
+      }
     });
 
     stream.on('header', function (statusCode, headers) {
