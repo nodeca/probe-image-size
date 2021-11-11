@@ -200,6 +200,24 @@ describe('File formats', function () {
     });
 
 
+    it('should skip unknown bytes between segments', async function () {
+      // not exactly standard, https://github.com/nodeca/probe-image-size/issues/68, `AA`s are extras in fixture
+      let buf = Buffer.from('FFD8 FFE00002 AAAAAAAA FFC00011 08000F000F03012200021101031101 FFD9'.replace(/ /g, ''), 'hex');
+
+      let size = await probe(Readable.from([ buf ]));
+
+      assert.deepStrictEqual(size, { width: 15, height: 15, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' });
+
+      // but don't allow garbage after first segment
+      buf = Buffer.from('FFD8 AAAAAAAA FFE00002 FFC00011 08000F000F03012200021101031101 FFD9'.replace(/ /g, ''), 'hex');
+
+      await assert.rejects(
+        async () => probe(Readable.from([ buf ])),
+        /unrecognized file format/
+      );
+    });
+
+
     it('coverage - EOI before SOI', async function () {
       let buf = Buffer.from('FFD8 FFD0 FFD9'.replace(/ /g, ''), 'hex');
 
@@ -277,6 +295,20 @@ describe('File formats', function () {
       let size = probe.sync(buf);
 
       assert.deepStrictEqual(size, { width: 15, height: 15, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' });
+    });
+
+
+    it('should skip unknown bytes between segments', async function () {
+      // not exactly standard, https://github.com/nodeca/probe-image-size/issues/68, `AA`s are extras in fixture
+      let buf = str2arr('FFD8 FFE00002 AAAAAAAA FFC00011 08000F000F03012200021101031101 FFD9'.replace(/ /g, ''), 'hex');
+      let size = probe.sync(buf);
+
+      assert.deepStrictEqual(size, { width: 15, height: 15, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' });
+
+      // but don't allow garbage after first segment
+      buf = str2arr('FFD8 AAAAAAAA FFE00002 FFC00011 08000F000F03012200021101031101 FFD9'.replace(/ /g, ''), 'hex');
+
+      assert.strictEqual(probe.sync(buf), null);
     });
 
 
