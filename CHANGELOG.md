@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [7.2.2] - WIP
+## [7.2.2] - 2021-10-12
 ### Fixed
 - Skip invalid chunks in JPEG parser instead of stopping, so some broken images can still be parsed, #68.
 - Better error handling when server redirects to utf8-encoded internationalized domain name.
