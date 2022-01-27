@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [7.2.3] - 2022-01-27
+### Fixed
+- Fix `Error` extend in FF, #71.
+
+
 ## [7.2.2] - 2021-10-12
 ### Fixed
 - Skip invalid chunks in JPEG parser instead of stopping, so some broken images can still be parsed, #68.
@@ -215,6 +220,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First release.
 
 
+[7.2.3]: https://github.com/nodeca/probe-image-size/compare/7.2.2...7.2.3
 [7.2.2]: https://github.com/nodeca/probe-image-size/compare/7.2.1...7.2.2
 [7.2.1]: https://github.com/nodeca/probe-image-size/compare/7.2.0...7.2.1
 [7.2.0]: https://github.com/nodeca/probe-image-size/compare/7.1.1...7.2.0
