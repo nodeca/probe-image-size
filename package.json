@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "lodash.merge": "^4.6.2",
-    "needle": "^2.5.2",
+    "needle": "^3.2.0",
     "stream-parser": "~0.3.1"
   },
   "devDependencies": {
