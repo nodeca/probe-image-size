@@ -21,12 +21,29 @@ describe('File formats', function () {
 
       assert.deepStrictEqual(size, { width: 367, height: 187, type: 'bmp', mime: 'image/bmp', wUnits: 'px', hUnits: 'px' });
     });
+
+
+    it('should get correct size on flip row order BMP', async function () {
+      let file = path.join(__dirname, 'fixtures', 'iojs_logo_flip_row_order.bmp');
+
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size, { width: 367, height: 187, type: 'bmp', mime: 'image/bmp', wUnits: 'px', hUnits: 'px' });
+    });
   });
 
 
   describe('BMP (sync)', function () {
     it('should detect BMP', function () {
       let file = path.join(__dirname, 'fixtures', 'iojs_logo.bmp');
+      let size = probe.sync(fs.readFileSync(file));
+
+      assert.deepStrictEqual(size, { width: 367, height: 187, type: 'bmp', mime: 'image/bmp', wUnits: 'px', hUnits: 'px' });
+    });
+
+
+    it('should get correct size on flip row order BMP', function () {
+      let file = path.join(__dirname, 'fixtures', 'iojs_logo_flip_row_order.bmp');
       let size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 367, height: 187, type: 'bmp', mime: 'image/bmp', wUnits: 'px', hUnits: 'px' });
