@@ -21,12 +21,27 @@ describe('File formats', function () {
 
       assert.deepStrictEqual(size, { width: 367, height: 187, type: 'bmp', mime: 'image/bmp', wUnits: 'px', hUnits: 'px' });
     });
+
+    it('should detect old (v2) BMP', async function () {
+      let file = path.join(__dirname, 'fixtures', 'iojs_logo_header_v2.bmp');
+
+      let size = await probe(fs.createReadStream(file));
+
+      assert.deepStrictEqual(size, { width: 367, height: 187, type: 'bmp', mime: 'image/bmp', wUnits: 'px', hUnits: 'px' });
+    });
   });
 
 
   describe('BMP (sync)', function () {
     it('should detect BMP', function () {
       let file = path.join(__dirname, 'fixtures', 'iojs_logo.bmp');
+      let size = probe.sync(fs.readFileSync(file));
+
+      assert.deepStrictEqual(size, { width: 367, height: 187, type: 'bmp', mime: 'image/bmp', wUnits: 'px', hUnits: 'px' });
+    });
+
+    it('should detect old (v2) BMP', function () {
+      let file = path.join(__dirname, 'fixtures', 'iojs_logo_header_v2.bmp');
       let size = probe.sync(fs.readFileSync(file));
 
       assert.deepStrictEqual(size, { width: 367, height: 187, type: 'bmp', mime: 'image/bmp', wUnits: 'px', hUnits: 'px' });
