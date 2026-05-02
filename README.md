@@ -109,6 +109,12 @@ wish to apply afterwards depending on browser support (browsers
 [only support JPEG](https://zpl.fi/exif-orientation-in-different-formats/) orientation for now).
 See [known issues](known_issues.md) for details.
 
+> [!WARNING]
+>
+> For untrusted sources, returned `width` and `height` should not be treated
+> as trusted values. You may need to additionally check that they are within
+> ranges acceptable for your application.
+
 Returned errors can be extended with 2 fields:
 
 - `code` - equals to `ECONTENT` if the library failed to parse the file;
@@ -120,10 +126,12 @@ Returned errors can be extended with 2 fields:
 Sync version can eat arrays, typed arrays and buffers. On success it returns
 the same result as async version. On fail it returns null.
 
-__Note.__ Formats like JPEG & TIFF can store size anywhere (far from the head).
-That usually does not happens, but if you need guarantees - always provide full
-file content to sync methods. We strongly recommend to use async version
-as memory-friendly.
+> [!NOTE]
+>
+> Formats like JPEG & TIFF can store size anywhere (far from the head).
+> That usually does not happens, but if you need guarantees - always provide
+> full file content to sync methods. We strongly recommend to use async version
+> as memory-friendly.
 
 
 Similar projects
