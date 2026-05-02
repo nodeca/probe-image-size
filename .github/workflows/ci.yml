@@ -6,6 +6,9 @@ on:
   schedule:
     - cron: '0 0 * * 3'
 
+permissions:
+  contents: read
+
 jobs:
   test:
 
@@ -16,10 +19,10 @@ jobs:
         node-version: [ '12', '14', '16' ]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         check-latest: true
@@ -33,6 +36,6 @@ jobs:
       run: npm run report-coveralls
 
     - name: Upload coverage report to coveralls.io
-      uses: coverallsapp/github-action@v1.1.2
+      uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
