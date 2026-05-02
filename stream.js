@@ -44,7 +44,15 @@ module.exports = function probeStream(src, keepOpen) {
 
       alive_parsers.push(pStream);
 
-      pStream.once('data', resolve);
+      pStream.once('data', function (data) {
+        if (data.width > 0 && data.height > 0) {
+          resolve(data);
+          return;
+        }
+
+        // Manually finish parser to get standars "unrecognized" error.
+        parserEnd.call(pStream);
+      });
       pStream.once('end', parserEnd);
       // User does not need to know that something wrong in parser
       // Process error the same was unrecognized format (end without data)

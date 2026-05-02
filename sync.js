@@ -10,7 +10,10 @@ function probeBuffer(buffer) {
   for (var i = 0; i < parser_names.length; i++) {
     var result = parsers[parser_names[i]](buffer);
 
-    if (result) return result;
+    if (result) {
+      if (result.width > 0 && result.height > 0) return result;
+      return null;
+    }
   }
 
   return null;

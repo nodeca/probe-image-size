@@ -9,6 +9,15 @@ const probe    = require('../');
 const { Readable } = require('stream');
 
 
+function fixture(s) {
+  return Buffer.from(
+    s.replace(/;.*/mg, '')
+      .match(/[0-9a-f]{2}/gi)
+      .map(i => parseInt(i, 16))
+  );
+}
+
+
 describe('probeStream', function () {
   it('should process an image', async function () {
     let file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
@@ -60,6 +69,40 @@ describe('probeStream', function () {
 
     await assert.rejects(
       async () => probe(fs.createReadStream(file)),
+      /unrecognized file format/
+    );
+  });
+
+  it('should reject parser results with non-positive width', async function () {
+    let buf = fixture(`
+      ; Minimal PNG header data consumed by the parser:
+      ; signature, first chunk length, IHDR marker, width, height.
+      89 50 4E 47 0D 0A 1A 0A ; PNG signature
+      00 00 00 0D             ; IHDR data length
+      49 48 44 52             ; IHDR
+      00 00 00 00             ; width = 0, invalid
+      00 00 00 01             ; height = 1
+    `);
+
+    await assert.rejects(
+      async () => probe(Readable.from([ buf ])),
+      /unrecognized file format/
+    );
+  });
+
+  it('should reject parser results with non-positive height', async function () {
+    let buf = fixture(`
+      ; Minimal PNG header data consumed by the parser:
+      ; signature, first chunk length, IHDR marker, width, height.
+      89 50 4E 47 0D 0A 1A 0A ; PNG signature
+      00 00 00 0D             ; IHDR data length
+      49 48 44 52             ; IHDR
+      00 00 00 01             ; width = 1
+      00 00 00 00             ; height = 0, invalid
+    `);
+
+    await assert.rejects(
+      async () => probe(Readable.from([ buf ])),
       /unrecognized file format/
     );
   });
