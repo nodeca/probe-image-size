@@ -207,6 +207,18 @@ describe('probeHttp', function () {
     assert.strictEqual(size.mime, 'image/gif');
   });
 
+  it('should reject on redirect loop', async function () {
+    responder = function (req, res) {
+      res.writeHead(302, { Location: '/loop' });
+      res.end();
+    };
+
+    await assert.rejects(
+      async () => probe(url + '/loop', { follow_max: 2 }),
+      /Max redirects reached/
+    );
+  });
+
   it('should accept gzip-encoded output when not requested by client', async function () {
     let encoding;
 

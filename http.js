@@ -26,7 +26,25 @@ var defaults = {
 
 module.exports = function probeHttp(src, options) {
   return new Promise(function (resolve, reject) {
-    var stream, len, finalUrl = src;
+    var stream, len, finalUrl = src, settled = false;
+
+    function abortRequest() {
+      if (stream && stream.request) stream.request.abort();
+    }
+
+    function settle(resolveResult, rejectError) {
+      if (settled) return;
+      settled = true;
+
+      if (rejectError) {
+        reject(rejectError);
+        abortRequest();
+        return;
+      }
+
+      resolve(resolveResult);
+      abortRequest();
+    }
 
     try {
       var needleOptions = lodashMerge({}, defaults, options);
@@ -40,15 +58,13 @@ module.exports = function probeHttp(src, options) {
       try {
         finalUrl = new URL(location, finalUrl).href;
       } catch (err) {
-        reject(err);
-        stream.request.abort();
+        settle(null, err);
       }
     });
 
     stream.on('header', function (statusCode, headers) {
       if (statusCode !== 200) {
-        reject(new ProbeError('bad status code: ' + statusCode, null, statusCode));
-        stream.request.abort();
+        settle(null, new ProbeError('bad status code: ' + statusCode, null, statusCode));
         return;
       }
 
@@ -56,8 +72,11 @@ module.exports = function probeHttp(src, options) {
     });
 
     stream.on('err', function (err) {
-      reject(err);
-      stream.request.abort();
+      settle(null, err);
+    });
+
+    stream.on('done', function (err) {
+      if (err) settle(null, err);
     });
 
     probeStream(stream, true)
@@ -66,12 +85,10 @@ module.exports = function probeHttp(src, options) {
 
         result.url = finalUrl;
 
-        resolve(result);
-        stream.request.abort();
+        settle(result);
       })
       .catch(function (err) {
-        reject(err);
-        stream.request.abort();
+        settle(null, err);
       });
   });
 };
