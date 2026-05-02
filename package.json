@@ -17,6 +17,16 @@
     "psd"
   ],
   "repository": "nodeca/probe-image-size",
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/puzrin"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/nodeca"
+    }
+  ],
   "license": "MIT",
   "files": [
     "index.js",
