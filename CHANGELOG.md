@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved BMP format handling, #77.
 - Ensure width/height are positive.
 - Fixed max redirects handling, #81.
+- Fixed webp sync parser (adjust to streamed version).
 
 ## [7.2.3] - 2022-01-27
 ### Fixed
