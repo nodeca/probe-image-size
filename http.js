@@ -1,12 +1,12 @@
 'use strict';
 
 
-var ProbeError  = require('./lib/common').ProbeError;
-var needle      = require('needle');
-var lodashMerge       = require('lodash.merge');
-var pkg         = require('./package.json');
+var ProbeError = require('./lib/common').ProbeError;
+var needle = require('needle');
+var lodashMerge = require('lodash.merge');
+var pkg = require('./package.json');
 var probeStream = require('./stream');
-var URL         = require('url').URL;
+var URL = require('url').URL;
 
 var defaultAgent = pkg.name + '/' + pkg.version + '(+https://github.com/nodeca/probe-image-size)';
 
@@ -17,22 +17,25 @@ var defaults = {
   follow_max: 10,
   parse_response: false,
   // Use to ignore bad certificates.
-  //rejectUnauthorized: false,
+  // rejectUnauthorized: false,
   headers: {
     'User-Agent': defaultAgent
   }
 };
 
 
-module.exports = function probeHttp(src, options) {
+module.exports = function probeHttp (src, options) {
   return new Promise(function (resolve, reject) {
-    var stream, len, finalUrl = src, settled = false;
+    var stream;
+    var len;
+    var finalUrl = src;
+    var settled = false;
 
-    function abortRequest() {
+    function abortRequest () {
       if (stream && stream.request) stream.request.abort();
     }
 
-    function settle(resolveResult, rejectError) {
+    function settle (resolveResult, rejectError) {
       if (settled) return;
       settled = true;
 

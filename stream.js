@@ -1,13 +1,13 @@
 'use strict';
 
 
-var ProbeError  = require('./lib/common').ProbeError;
-var parsers     = require('./lib/parsers_stream');
+var ProbeError = require('./lib/common').ProbeError;
+var parsers = require('./lib/parsers_stream');
 var PassThrough = require('stream').PassThrough;
-var pipeline    = require('stream').pipeline;
+var pipeline = require('stream').pipeline;
 
 
-module.exports = function probeStream(src, keepOpen) {
+module.exports = function probeStream (src, keepOpen) {
   var proxy = new PassThrough();
 
   // increase max number of listeners to stop memory leak warning
@@ -20,7 +20,7 @@ module.exports = function probeStream(src, keepOpen) {
     var alive_parsers = [];
     var last_error;
 
-    function parserEnd(err) {
+    function parserEnd (err) {
       var idx = alive_parsers.indexOf[this];
 
       /* istanbul ignore if */
@@ -62,7 +62,7 @@ module.exports = function probeStream(src, keepOpen) {
     });
   });
 
-  function cleanup() {
+  function cleanup () {
     // request stream doesn't have unpipe, https://github.com/request/request/issues/874
     if (keepOpen && typeof src.unpipe === 'function') src.unpipe(proxy);
     proxy.destroy();

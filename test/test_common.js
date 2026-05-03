@@ -5,7 +5,6 @@ const { describe, it } = require('node:test');
 const common = require('../lib/common');
 
 describe('common read helpers', function () {
-
   describe('readUInt16LE', function () {
     it('reads zero', function () {
       assert.strictEqual(common.readUInt16LE([0x00, 0x00], 0), 0);

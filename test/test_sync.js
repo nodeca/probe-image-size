@@ -1,15 +1,14 @@
-
 'use strict';
 
 
 const assert = require('assert');
-const fs     = require('fs');
-const path   = require('path');
+const fs = require('fs');
+const path = require('path');
 const { describe, it } = require('node:test');
-const probe  = require('../');
+const probe = require('../');
 
 
-function fixture(s) {
+function fixture (s) {
   return Buffer.from(
     s.replace(/;.*/mg, '')
       .match(/[0-9a-f]{2}/gi)
@@ -20,23 +19,23 @@ function fixture(s) {
 
 describe('probeBuffer', function () {
   it('should skip unrecognized files', function () {
-    let file = path.join(__dirname, 'fixtures', 'text_file.txt');
-    let size = probe.sync(fs.readFileSync(file));
+    const file = path.join(__dirname, 'fixtures', 'text_file.txt');
+    const size = probe.sync(fs.readFileSync(file));
 
     assert.strictEqual(size, null);
   });
 
 
   it('should skip empty files', function () {
-    let file = path.join(__dirname, 'fixtures', 'empty.txt');
-    let size = probe.sync(fs.readFileSync(file));
+    const file = path.join(__dirname, 'fixtures', 'empty.txt');
+    const size = probe.sync(fs.readFileSync(file));
 
     assert.strictEqual(size, null);
   });
 
 
   it('should reject parser results with non-positive width', function () {
-    let buf = fixture(`
+    const buf = fixture(`
       ; Minimal PNG header data consumed by the parser:
       ; signature, first chunk length, IHDR marker, width, height.
       89 50 4E 47 0D 0A 1A 0A ; PNG signature
@@ -51,7 +50,7 @@ describe('probeBuffer', function () {
 
 
   it('should reject parser results with non-positive height', function () {
-    let buf = fixture(`
+    const buf = fixture(`
       ; Minimal PNG header data consumed by the parser:
       ; signature, first chunk length, IHDR marker, width, height.
       89 50 4E 47 0D 0A 1A 0A ; PNG signature

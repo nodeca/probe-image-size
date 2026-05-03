@@ -11,14 +11,12 @@ if (!files.length) {
 }
 
 files.forEach(function (file) {
-
   if (file.match(/^https?:\/\//)) {
     require('../')(file)
       .then(result => console.log(`${file}:`, result))
       .catch(err => console.log(err));
-
   } else {
-    let input = require('fs').createReadStream(file);
+    const input = require('fs').createReadStream(file);
 
     input.on('error', err => console.log(`${file}: ${err}`));
 

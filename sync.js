@@ -4,7 +4,7 @@
 var parsers = require('./lib/parsers_sync');
 
 
-function probeBuffer(buffer) {
+function probeBuffer (buffer) {
   var parser_names = Object.keys(parsers);
 
   for (var i = 0; i < parser_names.length; i++) {
@@ -20,11 +20,7 @@ function probeBuffer(buffer) {
 }
 
 
-///////////////////////////////////////////////////////////////////////
-// Exports
-//
-
-module.exports = function get_image_size(src) {
+module.exports = function get_image_size (src) {
   return probeBuffer(src);
 };
 

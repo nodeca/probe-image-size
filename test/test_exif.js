@@ -1,15 +1,14 @@
-
 'use strict';
 
 
-const assert  = require('assert');
-const fs      = require('fs');
-const path    = require('path');
+const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
 const { describe, it } = require('node:test');
-const exif    = require('../lib/exif_utils');
+const exif = require('../lib/exif_utils');
 
 
-function fixture(s) {
+function fixture (s) {
   return Buffer.from(
     s.replace(/;.*/mg, '')
       .match(/[0-9a-f]{2}/gi)
@@ -20,7 +19,7 @@ function fixture(s) {
 
 describe('Exif parser', function () {
   it('should iterate through exif', async function () {
-    let expected_exif_fields = {
+    const expected_exif_fields = {
       '0:272:2:23': 'image_blob_reduce test',
       '0:274:3:1': [6],
       '0:282:5:1': null,
@@ -34,8 +33,8 @@ describe('Exif parser', function () {
       '1:513:4:1': [258],
       '1:514:4:1': [658]
     };
-    let image   = fs.readFileSync(path.join(__dirname, 'fixtures', 'test.exif'));
-    let entries = {};
+    const image = fs.readFileSync(path.join(__dirname, 'fixtures', 'test.exif'));
+    const entries = {};
     new exif.ExifParser(image, 0, image.length).each(entry => {
       entries[entry.ifd + ':' + entry.tag + ':' + entry.format + ':' + entry.count] = entry.value;
     });
@@ -44,7 +43,7 @@ describe('Exif parser', function () {
 
 
   it('should read all exif formats', async function () {
-    let expected_exif_fields = {
+    const expected_exif_fields = {
       '0:50000:2:4': 'abc',
       '0:50001:1:2': [255, 34],
       '0:50002:6:2': [-1, 34],
@@ -60,7 +59,7 @@ describe('Exif parser', function () {
       '0:50012:255:1': null
     };
 
-    let data = fixture(`
+    const data = fixture(`
       4D 4D 00 2A ; TIFF signature
       00 00 00 08 ; next IFD
       ; = 0x08
@@ -81,7 +80,7 @@ describe('Exif parser', function () {
       00 00 00 00 ; next IFD
     `);
 
-    let entries = {};
+    const entries = {};
     new exif.ExifParser(data, 0, data.length).each(entry => {
       entries[entry.ifd + ':' + entry.tag + ':' + entry.format + ':' + entry.count] = entry.value;
     });
@@ -90,13 +89,13 @@ describe('Exif parser', function () {
 
 
   it('should decode utf8 if possible', async function () {
-    let expected_exif_fields = {
+    const expected_exif_fields = {
       '0:50000:2:3': 'α',
       '0:50001:2:3': '\xff\xff',
       '0:50002:2:4': 'αβ'
     };
 
-    let data = fixture(`
+    const data = fixture(`
       4D 4D 00 2A ; TIFF signature
       00 00 00 08 ; next IFD
       ; = 0x08
@@ -107,7 +106,7 @@ describe('Exif parser', function () {
       00 00 00 00 ; next IFD
     `);
 
-    let entries = {};
+    const entries = {};
     new exif.ExifParser(data, 0, data.length).each(entry => {
       entries[entry.ifd + ':' + entry.tag + ':' + entry.format + ':' + entry.count] = entry.value;
     });
@@ -157,7 +156,7 @@ describe('Exif parser', function () {
 
 
   it('should parse subIFDs', async function () {
-    let expected_exif_fields = {
+    const expected_exif_fields = {
       '0:34665:4:1': [38],
       '0:34853:4:1': [64],
       '34665:40965:4:1': [78],
@@ -166,7 +165,7 @@ describe('Exif parser', function () {
       '40965:50003:2:4': 'abc'
     };
 
-    let data = fixture(`
+    const data = fixture(`
       49 49 2A 00 ; TIFF signature
       08 00 00 00 ; next IFD
       ; = 0x08
@@ -186,7 +185,7 @@ describe('Exif parser', function () {
       53 C3 02 00 04 00 00 00 61 62 63 00
     `);
 
-    let entries = {};
+    const entries = {};
     new exif.ExifParser(data, 0, data.length).each(entry => {
       entries[entry.ifd + ':' + entry.tag + ':' + entry.format + ':' + entry.count] = entry.value;
     });
@@ -195,12 +194,12 @@ describe('Exif parser', function () {
 
 
   it('should not parse if subIFD offset is not a number', async function () {
-    let expected_exif_fields = {
+    const expected_exif_fields = {
       '0:34665:2:1': '&',
       '0:34853:2:1': '@'
     };
 
-    let data = fixture(`
+    const data = fixture(`
       49 49 2A 00 ; TIFF signature
       08 00 00 00 ; next IFD
       ; = 0x08
@@ -220,7 +219,7 @@ describe('Exif parser', function () {
       53 C3 02 00 04 00 00 00 61 62 63 00
     `);
 
-    let entries = {};
+    const entries = {};
     new exif.ExifParser(data, 0, data.length).each(entry => {
       entries[entry.ifd + ':' + entry.tag + ':' + entry.format + ':' + entry.count] = entry.value;
     });
@@ -230,7 +229,7 @@ describe('Exif parser', function () {
 
   describe('get_orientation', function () {
     it('should read exif orientation', async function () {
-      let data = fixture(`
+      const data = fixture(`
         49 49 2A 00 ; TIFF signature
         08 00 00 00 ; next IFD
         ; = 0x08
@@ -245,7 +244,7 @@ describe('Exif parser', function () {
 
 
     it('should return 0 if no orientation tag', async function () {
-      let data = fixture(`
+      const data = fixture(`
         49 49 2A 00 ; TIFF signature
         08 00 00 00 ; next IFD
         ; = 0x08
@@ -259,7 +258,7 @@ describe('Exif parser', function () {
 
 
     it('should return -1 on error', async function () {
-      let data = fixture('00 00 00 00');
+      const data = fixture('00 00 00 00');
       assert.strictEqual(exif.get_orientation(data), -1);
     });
   });

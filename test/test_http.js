@@ -1,19 +1,18 @@
-
 'use strict';
 
 
 const assert = require('assert');
-const http   = require('http');
-const URL    = require('url');
-const zlib   = require('zlib');
+const http = require('http');
+const URL = require('url');
+const zlib = require('zlib');
 const { after, before, describe, it } = require('node:test');
-const probe  = require('../');
+const probe = require('../');
 
 
 const GIF1x1 = Buffer.from('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', 'base64');
 
 
-function listen(server) {
+function listen (server) {
   return new Promise(function (resolve, reject) {
     server.once('error', reject);
 
@@ -24,7 +23,7 @@ function listen(server) {
   });
 }
 
-function close(server) {
+function close (server) {
   return new Promise(function (resolve, reject) {
     server.close(function (err) {
       if (err) reject(err);
@@ -47,8 +46,8 @@ describe('probeHttp', function () {
     url = URL.format({
       protocol: 'http',
       hostname: srv.address().address,
-      port:     srv.address().port,
-      path:     '/'
+      port: srv.address().port,
+      path: '/'
     });
   });
 
@@ -60,7 +59,7 @@ describe('probeHttp', function () {
       // response never ends
     };
 
-    let size = await probe(url);
+    const size = await probe(url);
 
     assert.strictEqual(size.width, 1);
     assert.strictEqual(size.height, 1);
@@ -73,7 +72,7 @@ describe('probeHttp', function () {
       res.end(GIF1x1);
     };
 
-    let size = await probe(url);
+    const size = await probe(url);
 
     assert.strictEqual(size.width, 1);
     assert.strictEqual(size.height, 1);
@@ -194,7 +193,7 @@ describe('probeHttp', function () {
       res.end(GIF1x1);
     };
 
-    let size = await probe(url + '/redirect.gif');
+    const size = await probe(url + '/redirect.gif');
 
     assert.strictEqual(size.url, url + '/empty.gif');
     assert.strictEqual(size.width, 1);
@@ -220,7 +219,7 @@ describe('probeHttp', function () {
       res.end(GIF1x1);
     };
 
-    let size = await probe(url + '/path/to/step1.gif');
+    const size = await probe(url + '/path/to/step1.gif');
 
     assert.strictEqual(size.url, url + '/path/step3.gif');
     assert.strictEqual(size.width, 1);
@@ -250,7 +249,7 @@ describe('probeHttp', function () {
       res.end(zlib.gzipSync(GIF1x1));
     };
 
-    let size = await probe(url + '/empty.gif');
+    const size = await probe(url + '/empty.gif');
 
     // make sure client requested no compression
     assert.strictEqual(encoding, 'identity');
@@ -269,9 +268,9 @@ describe('probeHttp', function () {
 describe('probeHttpWithAgent', function () {
   let responder, url, srv;
 
-  let httpAgent = new http.Agent({
-    keepAlive  : true,
-    maxSockets : 1
+  const httpAgent = new http.Agent({
+    keepAlive: true,
+    maxSockets: 1
   });
 
   before(async function () {
@@ -284,8 +283,8 @@ describe('probeHttpWithAgent', function () {
     url = URL.format({
       protocol: 'http',
       hostname: srv.address().address,
-      port:     srv.address().port,
-      path:     '/'
+      port: srv.address().port,
+      path: '/'
     });
   });
 
@@ -297,7 +296,7 @@ describe('probeHttpWithAgent', function () {
       // response never ends
     };
 
-    let size = await probe(url, { agent: httpAgent });
+    const size = await probe(url, { agent: httpAgent });
 
     assert.strictEqual(size.width, 1);
     assert.strictEqual(size.height, 1);
@@ -310,7 +309,7 @@ describe('probeHttpWithAgent', function () {
       res.end(GIF1x1);
     };
 
-    let size = await probe(url, { agent: httpAgent });
+    const size = await probe(url, { agent: httpAgent });
 
     assert.strictEqual(size.width, 1);
     assert.strictEqual(size.height, 1);
@@ -431,7 +430,7 @@ describe('probeHttpWithAgent', function () {
       res.end(GIF1x1);
     };
 
-    let size = await probe(url + '/redirect.gif');
+    const size = await probe(url + '/redirect.gif');
 
     assert.strictEqual(size.url, url + '/empty.gif');
     assert.strictEqual(size.width, 1);
@@ -457,7 +456,7 @@ describe('probeHttpWithAgent', function () {
       res.end(GIF1x1);
     };
 
-    let size = await probe(url + '/path/to/step1.gif');
+    const size = await probe(url + '/path/to/step1.gif');
 
     assert.strictEqual(size.url, url + '/path/step3.gif');
     assert.strictEqual(size.width, 1);
@@ -475,7 +474,7 @@ describe('probeHttpWithAgent', function () {
       res.end(zlib.gzipSync(GIF1x1));
     };
 
-    let size = await probe(url + '/empty.gif');
+    const size = await probe(url + '/empty.gif');
 
     // make sure client requested no compression
     assert.strictEqual(encoding, 'identity');
@@ -490,7 +489,7 @@ describe('probeHttpWithAgent', function () {
       if (err) throw err;
 
       // lets go through all sockets and inspect all socket objects
-      for (let hostTarget in httpAgent.sockets) {
+      for (const hostTarget in httpAgent.sockets) {
         // normally, there are 2 internal listeners and 1 needle sets up,
         // but to be sure the test does not fail even if newer node versions
         // introduce additional listeners, we use a higher limit.

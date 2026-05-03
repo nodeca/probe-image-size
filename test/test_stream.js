@@ -1,15 +1,15 @@
 'use strict';
 
 
-const assert   = require('assert');
-const fs       = require('fs');
-const path     = require('path');
+const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
 const { describe, it } = require('node:test');
-const probe    = require('../');
+const probe = require('../');
 const { Readable } = require('stream');
 
 
-function fixture(s) {
+function fixture (s) {
   return Buffer.from(
     s.replace(/;.*/mg, '')
       .match(/[0-9a-f]{2}/gi)
@@ -20,9 +20,9 @@ function fixture(s) {
 
 describe('probeStream', function () {
   it('should process an image', async function () {
-    let file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
+    const file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
 
-    let size = await probe(fs.createReadStream(file));
+    const size = await probe(fs.createReadStream(file));
 
     assert.strictEqual(size.width, 367);
     assert.strictEqual(size.height, 187);
@@ -30,7 +30,7 @@ describe('probeStream', function () {
   });
 
   it('should skip unrecognized files', async function () {
-    let file = path.join(__dirname, 'fixtures', 'text_file.txt');
+    const file = path.join(__dirname, 'fixtures', 'text_file.txt');
 
     await assert.rejects(
       async () => probe(fs.createReadStream(file)),
@@ -39,7 +39,7 @@ describe('probeStream', function () {
   });
 
   it('should close stream unless asked to keep open', async function () {
-    function delay(ms) {
+    function delay (ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
     }
 
@@ -65,7 +65,7 @@ describe('probeStream', function () {
   });
 
   it('should skip empty files', async function () {
-    let file = path.join(__dirname, 'fixtures', 'empty.txt');
+    const file = path.join(__dirname, 'fixtures', 'empty.txt');
 
     await assert.rejects(
       async () => probe(fs.createReadStream(file)),
@@ -74,7 +74,7 @@ describe('probeStream', function () {
   });
 
   it('should reject parser results with non-positive width', async function () {
-    let buf = fixture(`
+    const buf = fixture(`
       ; Minimal PNG header data consumed by the parser:
       ; signature, first chunk length, IHDR marker, width, height.
       89 50 4E 47 0D 0A 1A 0A ; PNG signature
@@ -91,7 +91,7 @@ describe('probeStream', function () {
   });
 
   it('should reject parser results with non-positive height', async function () {
-    let buf = fixture(`
+    const buf = fixture(`
       ; Minimal PNG header data consumed by the parser:
       ; signature, first chunk length, IHDR marker, width, height.
       89 50 4E 47 0D 0A 1A 0A ; PNG signature
@@ -108,7 +108,7 @@ describe('probeStream', function () {
   });
 
   it('should fail on stream errors', async function () {
-    async function * generate() {
+    async function * generate () {
       throw new Error('stream err');
     }
     await assert.rejects(
@@ -126,7 +126,7 @@ describe('probeStream', function () {
   // error out.
   //
   it('should not fail when processing multiple large chunks', async function () {
-    let stream = new Readable({
+    const stream = new Readable({
       read: function () {
         // > 16kB (so it will be split), < 64kB (SVG header size)
         this.push(Buffer.alloc(20000, 0x20));
@@ -140,7 +140,7 @@ describe('probeStream', function () {
   });
 
   it('should not fail when processing svg in multiple chunks', async function () {
-    let stream = new Readable({
+    const stream = new Readable({
       read: function () {
         this.push('<?xml version="1.0" encoding="UTF-8"?><svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">');
         this.push('</svg>');
