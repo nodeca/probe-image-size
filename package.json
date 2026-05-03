@@ -47,7 +47,8 @@
     "stream-parser": "~0.3.1"
   },
   "devDependencies": {
-    "eslint": "^8.2.0",
+    "eslint": "^9.39.4",
+    "neostandard": "^0.13.0",
     "nyc": "^18.0.0"
   }
 }
