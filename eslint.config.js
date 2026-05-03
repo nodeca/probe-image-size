@@ -1,6 +1,6 @@
-'use strict';
+'use strict'
 
-const neostandard = require('neostandard');
+const neostandard = require('neostandard')
 
 module.exports = [
   ...neostandard({
@@ -8,9 +8,7 @@ module.exports = [
     ignores: [
       'coverage/**',
       '.nyc_output/**'
-    ],
-    noJsx: true,
-    semi: true
+    ]
   }),
   {
     files: ['**/*.js'],
@@ -34,4 +32,4 @@ module.exports = [
       ecmaVersion: 2018
     }
   }
-];
+]

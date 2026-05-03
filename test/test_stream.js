@@ -1,12 +1,12 @@
-'use strict';
+'use strict'
 
 
-const assert = require('assert');
-const fs = require('fs');
-const path = require('path');
-const { describe, it } = require('node:test');
-const probe = require('../');
-const { Readable } = require('stream');
+const assert = require('assert')
+const fs = require('fs')
+const path = require('path')
+const { describe, it } = require('node:test')
+const probe = require('../')
+const { Readable } = require('stream')
 
 
 function fixture (s) {
@@ -14,64 +14,64 @@ function fixture (s) {
     s.replace(/;.*/mg, '')
       .match(/[0-9a-f]{2}/gi)
       .map(i => parseInt(i, 16))
-  );
+  )
 }
 
 
 describe('probeStream', function () {
   it('should process an image', async function () {
-    const file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
+    const file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg')
 
-    const size = await probe(fs.createReadStream(file));
+    const size = await probe(fs.createReadStream(file))
 
-    assert.strictEqual(size.width, 367);
-    assert.strictEqual(size.height, 187);
-    assert.strictEqual(size.mime, 'image/jpeg');
-  });
+    assert.strictEqual(size.width, 367)
+    assert.strictEqual(size.height, 187)
+    assert.strictEqual(size.mime, 'image/jpeg')
+  })
 
   it('should skip unrecognized files', async function () {
-    const file = path.join(__dirname, 'fixtures', 'text_file.txt');
+    const file = path.join(__dirname, 'fixtures', 'text_file.txt')
 
     await assert.rejects(
       async () => probe(fs.createReadStream(file)),
       /unrecognized file format/
-    );
-  });
+    )
+  })
 
   it('should close stream unless asked to keep open', async function () {
     function delay (ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
+      return new Promise(resolve => setTimeout(resolve, ms))
     }
 
-    var filename, file;
+    var filename, file
 
-    filename = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
-    file = fs.createReadStream(filename);
-    await probe(file);
-    await delay(100);
-    assert.strictEqual(file.closed, true);
+    filename = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg')
+    file = fs.createReadStream(filename)
+    await probe(file)
+    await delay(100)
+    assert.strictEqual(file.closed, true)
 
-    filename = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg');
-    file = fs.createReadStream(filename);
-    await probe(file, true);
-    await delay(100);
-    assert.strictEqual(file.closed, false);
+    filename = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg')
+    file = fs.createReadStream(filename)
+    await probe(file, true)
+    await delay(100)
+    assert.strictEqual(file.closed, false)
 
-    filename = path.join(__dirname, 'fixtures', 'text_file.txt');
-    file = fs.createReadStream(filename);
-    try { await probe(file); } catch (err) {}
-    await delay(100);
-    assert.strictEqual(file.closed, true);
-  });
+    filename = path.join(__dirname, 'fixtures', 'text_file.txt')
+    file = fs.createReadStream(filename)
+    try { await probe(file) } catch (err) {}
+    await delay(100)
+    assert.strictEqual(file.closed, true)
+  })
 
   it('should skip empty files', async function () {
-    const file = path.join(__dirname, 'fixtures', 'empty.txt');
+    const file = path.join(__dirname, 'fixtures', 'empty.txt')
 
     await assert.rejects(
       async () => probe(fs.createReadStream(file)),
       /unrecognized file format/
-    );
-  });
+    )
+  })
 
   it('should reject parser results with non-positive width', async function () {
     const buf = fixture(`
@@ -82,13 +82,13 @@ describe('probeStream', function () {
       49 48 44 52             ; IHDR
       00 00 00 00             ; width = 0, invalid
       00 00 00 01             ; height = 1
-    `);
+    `)
 
     await assert.rejects(
       async () => probe(Readable.from([buf])),
       /unrecognized file format/
-    );
-  });
+    )
+  })
 
   it('should reject parser results with non-positive height', async function () {
     const buf = fixture(`
@@ -99,23 +99,23 @@ describe('probeStream', function () {
       49 48 44 52             ; IHDR
       00 00 00 01             ; width = 1
       00 00 00 00             ; height = 0, invalid
-    `);
+    `)
 
     await assert.rejects(
       async () => probe(Readable.from([buf])),
       /unrecognized file format/
-    );
-  });
+    )
+  })
 
   it('should fail on stream errors', async function () {
     async function * generate () {
-      throw new Error('stream err');
+      throw new Error('stream err')
     }
     await assert.rejects(
       async () => probe(Readable.from(generate())),
       /stream err/
-    );
-  });
+    )
+  })
 
 
   // Regression test: when processing multiple consecutive large chunks in
@@ -129,25 +129,25 @@ describe('probeStream', function () {
     const stream = new Readable({
       read: function () {
         // > 16kB (so it will be split), < 64kB (SVG header size)
-        this.push(Buffer.alloc(20000, 0x20));
+        this.push(Buffer.alloc(20000, 0x20))
       }
-    });
+    })
 
     await assert.rejects(
       async () => probe(stream),
       /unrecognized file format/
-    );
-  });
+    )
+  })
 
   it('should not fail when processing svg in multiple chunks', async function () {
     const stream = new Readable({
       read: function () {
-        this.push('<?xml version="1.0" encoding="UTF-8"?><svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">');
-        this.push('</svg>');
-        this.push(null);
+        this.push('<?xml version="1.0" encoding="UTF-8"?><svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">')
+        this.push('</svg>')
+        this.push(null)
       }
-    });
+    })
 
-    await probe(stream);
-  });
-});
+    await probe(stream)
+  })
+})

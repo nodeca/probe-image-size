@@ -1,33 +1,33 @@
 #!/usr/bin/env node
 
-'use strict';
+'use strict'
 
 
-const files = process.argv.slice(2);
+const files = process.argv.slice(2)
 
 if (!files.length) {
-  console.error('Usage: dump.js file1 [file2 [file3 ...]]');
-  process.exit(1);
+  console.error('Usage: dump.js file1 [file2 [file3 ...]]')
+  process.exit(1)
 }
 
 files.forEach(function (file) {
   if (file.match(/^https?:\/\//)) {
     require('../')(file)
       .then(result => console.log(`${file}:`, result))
-      .catch(err => console.log(err));
+      .catch(err => console.log(err))
   } else {
-    const input = require('fs').createReadStream(file);
+    const input = require('fs').createReadStream(file)
 
-    input.on('error', err => console.log(`${file}: ${err}`));
+    input.on('error', err => console.log(`${file}: ${err}`))
 
     require('../')(input)
       .then(result => {
-        console.log(`${file}:`, result);
-        input.destroy();
+        console.log(`${file}:`, result)
+        input.destroy()
       })
       .catch(err => {
-        console.log(err);
-        input.destroy();
-      });
+        console.log(err)
+        input.destroy()
+      })
   }
-});
+})
