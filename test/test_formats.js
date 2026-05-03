@@ -153,6 +153,13 @@ describe('File formats', function () {
         hUnits: 'px'
       })
     })
+
+
+    it('should skip truncated ICO index', function () {
+      const buf = Buffer.from([0, 0, 1, 0, 2, 0, 16, 16])
+
+      assert.strictEqual(probe.sync(buf), null)
+    })
   })
 
 
