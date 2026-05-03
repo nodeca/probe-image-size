@@ -6,28 +6,49 @@ const assert = require('assert');
 const http   = require('http');
 const URL    = require('url');
 const zlib   = require('zlib');
+const { after, before, describe, it } = require('node:test');
 const probe  = require('../');
 
 
 const GIF1x1 = Buffer.from('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', 'base64');
 
 
+function listen(server) {
+  return new Promise(function (resolve, reject) {
+    server.once('error', reject);
+
+    server.listen(0, 'localhost', function () {
+      server.removeListener('error', reject);
+      resolve();
+    });
+  });
+}
+
+function close(server) {
+  return new Promise(function (resolve, reject) {
+    server.close(function (err) {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+}
+
+
 describe('probeHttp', function () {
   let responder, url, srv;
 
-  before(function (callback) {
+  before(async function () {
     srv = http.createServer(function (req, res) {
       responder(req, res);
-    }).listen(0, 'localhost', function (err) {
+    });
 
-      url = URL.format({
-        protocol: 'http',
-        hostname: srv.address().address,
-        port:     srv.address().port,
-        path:     '/'
-      });
+    await listen(srv);
 
-      callback(err);
+    url = URL.format({
+      protocol: 'http',
+      hostname: srv.address().address,
+      port:     srv.address().port,
+      path:     '/'
     });
   });
 
@@ -240,8 +261,8 @@ describe('probeHttp', function () {
   });
 
 
-  after(function () {
-    srv.close();
+  after(async function () {
+    await close(srv);
   });
 });
 
@@ -253,19 +274,18 @@ describe('probeHttpWithAgent', function () {
     maxSockets : 1
   });
 
-  before(function (callback) {
+  before(async function () {
     srv = http.createServer(function (req, res) {
       responder(req, res);
-    }).listen(0, 'localhost', function (err) {
+    });
 
-      url = URL.format({
-        protocol: 'http',
-        hostname: srv.address().address,
-        port:     srv.address().port,
-        path:     '/'
-      });
+    await listen(srv);
 
-      callback(err);
+    url = URL.format({
+      protocol: 'http',
+      hostname: srv.address().address,
+      port:     srv.address().port,
+      path:     '/'
     });
   });
 
@@ -494,8 +514,8 @@ describe('probeHttpWithAgent', function () {
     await assert.rejects(() => probe(url + '/test.json'), /unrecognized file format/);
   });
 
-  after(function () {
+  after(async function () {
     httpAgent.destroy();
-    srv.close();
+    await close(srv);
   });
 });

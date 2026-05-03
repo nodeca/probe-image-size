@@ -5,6 +5,7 @@
 const assert  = require('assert');
 const fs      = require('fs');
 const path    = require('path');
+const { describe, it } = require('node:test');
 const exif    = require('../lib/exif_utils');
 
 

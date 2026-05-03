@@ -5,6 +5,7 @@
 const assert  = require('assert');
 const fs      = require('fs');
 const path    = require('path');
+const { describe, it } = require('node:test');
 const probe   = require('../');
 const str2arr = require('../lib/common').str2arr;
 const { Readable } = require('stream');
