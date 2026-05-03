@@ -4,7 +4,6 @@
 var probeStream = require('./stream');
 var probeHttp   = require('./http');
 
-/* eslint-disable consistent-return */
 
 module.exports = function get_image_size(src, options) {
 

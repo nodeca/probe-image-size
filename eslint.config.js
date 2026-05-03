@@ -17,10 +17,17 @@ module.exports = [
     languageOptions: {
       ecmaVersion: 2015,
       sourceType: 'commonjs'
+    },
+    rules: {
+      'no-var': 'off',
+      camelcase: 'off',
     }
   },
   {
-    files: ['test/**/*.js'],
+    files: [
+      'support/**/*.js',
+      'test/**/*.js'
+    ],
     languageOptions: {
       ecmaVersion: 2018
     }

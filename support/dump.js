@@ -2,15 +2,12 @@
 
 'use strict';
 
-/*eslint-env node, es6*/
-/*eslint-disable no-console*/
-
 
 const files = process.argv.slice(2);
 
 if (!files.length) {
   console.error('Usage: dump.js file1 [file2 [file3 ...]]');
-  return;
+  process.exit(1);
 }
 
 files.forEach(function (file) {

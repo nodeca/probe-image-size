@@ -1,4 +1,3 @@
-
 'use strict';
 
 
@@ -86,7 +85,7 @@ describe('probeStream', function () {
     `);
 
     await assert.rejects(
-      async () => probe(Readable.from([ buf ])),
+      async () => probe(Readable.from([buf])),
       /unrecognized file format/
     );
   });
@@ -103,7 +102,7 @@ describe('probeStream', function () {
     `);
 
     await assert.rejects(
-      async () => probe(Readable.from([ buf ])),
+      async () => probe(Readable.from([buf])),
       /unrecognized file format/
     );
   });
