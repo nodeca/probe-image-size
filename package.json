@@ -37,9 +37,9 @@
   ],
   "scripts": {
     "lint": "eslint .",
-    "test": "npm run lint && nyc node --test --test-timeout=5000",
+    "test": "npm run lint && nyc node --test",
     "coverage": "npm run test && nyc report --reporter html",
-    "report-coveralls": "nyc --reporter=lcov node --test --test-timeout=5000"
+    "report-coveralls": "nyc --reporter=lcov node --test"
   },
   "dependencies": {
     "lodash.merge": "^4.6.2",
@@ -48,6 +48,6 @@
   },
   "devDependencies": {
     "eslint": "^8.2.0",
-    "nyc": "^15.1.0"
+    "nyc": "^18.0.0"
   }
 }
