@@ -62,6 +62,21 @@ console.log(probe.sync(data));
 ```
 
 
+Security notes
+--------------
+
+**Network requests.** The library uses GET requests to extract image metadata.
+The default HTTP wrapper supports requests to localhost and private networks.
+Such requests are not a security issue on their own.
+
+If HTTP(S) GET requests to internal services are a concern, block access to local
+and private networks at the interface or network level. A separate VM lets you
+configure these restrictions independently.
+
+**Image dimensions.** For untrusted images, treat the returned `width` and `height`
+as untrusted too. Check that they are within ranges acceptable for your application.
+
+
 API
 ---
 
@@ -72,6 +87,8 @@ Note:
   for `stream.js`.
 
 ### probe(src [, options|keepOpen]) -> Promise
+
+See [Security notes](#security-notes) when working with untrusted input.
 
 - `src` can be of this types:
   - _String_ - URL to fetch
@@ -108,12 +125,6 @@ Width and height in the output object represent image size *before* any transfor
 wish to apply afterwards depending on browser support (browsers
 [only support JPEG](https://zpl.fi/exif-orientation-in-different-formats/) orientation for now).
 See [known issues](known_issues.md) for details.
-
-> [!WARNING]
->
-> For untrusted sources, returned `width` and `height` should not be treated
-> as trusted values. You may need to additionally check that they are within
-> ranges acceptable for your application.
 
 Returned errors can be extended with 2 fields:
 
