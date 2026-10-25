@@ -3,7 +3,9 @@
 
 const assert = require('assert')
 const { describe, it } = require('node:test')
-const parseSvgHeader = require('../lib/common/svg_header').parse
+const svgHeader = require('../lib/common/svg_header')
+const parseSync = require('../lib/parse_sync/svg')
+const parseSvgHeader = str => parseSync(Buffer.from(str))
 
 
 describe('svg header parser', function () {
@@ -75,6 +77,36 @@ describe('svg header parser', function () {
       parseSvgHeader('<!DOCTYPE svg [<!ENTITY foo "bar">]><svg width="5" height="4"></svg>'),
       expected
     )
+  })
+
+  it('should skip brackets and quotes inside doctype', function () {
+    assert.deepStrictEqual(
+      parseSvgHeader('<!DOCTYPE svg PUBLIC "a[b>c" \'d"e\' [\n' +
+        '<!ENTITY a "x]y>z">\n' +
+        '<!-- ] > \' -->\n' +
+        '<?pi ] > " ?>\n' +
+        ']><svg width="5" height="4"></svg>'),
+      { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' }
+    )
+  })
+
+  it('should give the same result for any chunking', function () {
+    const buf = Buffer.from('\ufeff<?xml version="1.0"?><!-- a-b -- > --><!DOCTYPE svg [<!ENTITY a "x]y>z" \'q\'> <?pi ?? ?>]>' +
+      '<aaa:svg data-x="a>b" width=\'5\' height=40 viewBox="0 0 10 80"/>')
+    const expected = parseSync(buf)
+
+    assert.ok(expected)
+
+    for (let size = 1; size <= 5; size++) {
+      const parser = new svgHeader.Parser()
+
+      for (let i = 0; i < buf.length && parser.getStatus() === svgHeader.NEED_MORE; i += size) {
+        parser.push(buf.subarray(i, i + size))
+      }
+
+      assert.strictEqual(parser.getStatus(), svgHeader.DONE)
+      assert.deepStrictEqual(svgHeader.getSize(parser.attrs), expected)
+    }
   })
 
   it('should skip tags inside comments', function () {
@@ -187,6 +219,27 @@ describe('svg header parser', function () {
 
     it('unclosed tag', function () {
       assert.strictEqual(parseSvgHeader('<svg width="5" height="5"'), undefined)
+    })
+
+    it('malformed markup', function () {
+      assert.strictEqual(parseSvgHeader('<![CDATA[ ]]><svg width="5" height="5">'), undefined)
+      assert.strictEqual(parseSvgHeader('<!-x --><svg width="5" height="5">'), undefined)
+      assert.strictEqual(parseSvgHeader('<!DOCTYPE svg [<x>]><svg width="5" height="5">'), undefined)
+      assert.strictEqual(parseSvgHeader('<!DOCTYPE svg [<!1>]><svg width="5" height="5">'), undefined)
+      assert.strictEqual(parseSvgHeader('<!DOCTYPE svg [<!-x>]><svg width="5" height="5">'), undefined)
+      assert.strictEqual(parseSvgHeader('<svg width="5" height="5" @>'), undefined)
+      assert.strictEqual(parseSvgHeader('<svg width=>'), undefined)
+      assert.strictEqual(parseSvgHeader('<svg width="5"height="4">'), undefined)
+      assert.strictEqual(parseSvgHeader('<svg/x>'), undefined)
+      assert.strictEqual(parseSync(Buffer.from([0xEF, 0x3C])), undefined)
+      assert.strictEqual(parseSync(Buffer.from([0xEF, 0xBB, 0x3C])), undefined)
+    })
+
+    it('attribute without value', function () {
+      assert.deepStrictEqual(
+        parseSvgHeader('<svg foo width="5" height="4">'),
+        { width: 5, height: 4, type: 'svg', mime: 'image/svg+xml', wUnits: 'px', hUnits: 'px' }
+      )
     })
   })
 })
