@@ -3,8 +3,8 @@
 
 const assert = require('assert')
 const { describe, it } = require('node:test')
-const svgHeader = require('../lib/common/svg_header')
-const parseSync = require('../lib/parse_sync/svg')
+const svgHeader = require('../../lib/common/svg_header_parser')
+const parseSync = require('../../lib/parse_sync/svg')
 const parseSvgHeader = str => parseSync(Buffer.from(str))
 
 

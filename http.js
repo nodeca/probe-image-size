@@ -1,7 +1,7 @@
 'use strict'
 
 
-var ProbeError = require('./lib/common').ProbeError
+var ProbeError = require('./lib/common/utils').ProbeError
 var needle = require('needle')
 var lodashMerge = require('lodash.merge')
 var pkg = require('./package.json')

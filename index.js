@@ -18,4 +18,4 @@ module.exports = function get_image_size (src, options) {
 
 module.exports.parsers = require('./lib/parsers_stream')
 module.exports.sync = require('./sync')
-module.exports.Error = require('./lib/common').ProbeError
+module.exports.Error = require('./lib/common/utils').ProbeError

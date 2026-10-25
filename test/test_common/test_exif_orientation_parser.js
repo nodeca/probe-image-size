@@ -5,7 +5,7 @@ const assert = require('assert')
 const fs = require('fs')
 const path = require('path')
 const { describe, it } = require('node:test')
-const exif = require('../lib/common/exif_orientation')
+const exif = require('../../lib/common/exif_orientation_parser')
 
 
 function makeExif (entries, big_endian = false, ifd0_offset = 8) {
@@ -36,7 +36,7 @@ function makeExif (entries, big_endian = false, ifd0_offset = 8) {
 
 describe('Exif orientation parser', function () {
   it('should read orientation from a real EXIF fixture', function () {
-    const data = fs.readFileSync(path.join(__dirname, 'fixtures', 'test.exif'))
+    const data = fs.readFileSync(path.join(__dirname, '..', 'fixtures', 'test.exif'))
     const parser = new exif.Parser()
 
     parser.push(data)

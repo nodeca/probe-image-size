@@ -1,7 +1,7 @@
 'use strict'
 
 
-var ProbeError = require('./lib/common').ProbeError
+var ProbeError = require('./lib/common/utils').ProbeError
 var parsers = require('./lib/parsers_stream')
 var PassThrough = require('stream').PassThrough
 var pipeline = require('stream').pipeline
