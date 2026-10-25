@@ -37,6 +37,30 @@ describe('JPEG', function () {
   })
 
 
+  it('should read dimensions after a padded EXIF segment', async function () {
+    const file = path.join(__dirname, '..', 'fixtures', 'Exif5-1.5x.jpg')
+    const image = fs.readFileSync(file)
+    const tiff_offset = image.indexOf('Exif\0\0') + 6
+    const length_offset = tiff_offset - 8
+    const app1_length = image.readUInt16BE(length_offset)
+    const app1_end = length_offset + app1_length
+    // EOI markers inside APP1 must not terminate the image.
+    const padding = Buffer.alloc(4096, Buffer.from([0xff, 0xd9]))
+    const data = Buffer.concat([
+      image.subarray(0, tiff_offset + 8), padding,
+      image.subarray(tiff_offset + 8, app1_end), padding,
+      image.subarray(app1_end)
+    ])
+    data.writeUInt16BE(app1_length + 2 * padding.length, length_offset)
+    data.writeUInt32LE(8 + padding.length, tiff_offset + 4)
+
+    const size = await probe(Readable.from([data]))
+
+    assert.deepStrictEqual(size, probe.sync(image))
+    assert.deepStrictEqual(size, probe.sync(data))
+  })
+
+
   // regression test
   it('should not fail on empty JPEG markers', async function () {
     const file = path.join(__dirname, '..', 'fixtures', 'empty_comment.jpg')

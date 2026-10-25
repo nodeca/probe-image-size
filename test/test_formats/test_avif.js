@@ -58,6 +58,21 @@ describe('AVIF', function () {
   })
 
 
+  it('should finish before the end of a large EXIF item', async function () {
+    const file = path.join(__dirname, '..', 'fixtures', 'Exif5-1.5x.avif')
+    const image = fs.readFileSync(file)
+    const data = Buffer.concat([image, Buffer.alloc(4096)])
+    const iloc_offset = data.indexOf('iloc') - 4
+    const iloc_end = iloc_offset + data.readUInt32BE(iloc_offset)
+    // EXIF is the last iloc entry in this fixture; its length occupies the last 4 bytes.
+    data.writeUInt32BE(0x40000000, iloc_end - 4)
+
+    const size = await probe(Readable.from([data]))
+
+    assert.deepStrictEqual(size, probe.sync(image))
+  })
+
+
   it('should detect HEIC - image4.heic', async function () {
     const file = path.join(__dirname, '..', 'fixtures', 'image4.heic')
     const size = await probe(fs.createReadStream(file))
