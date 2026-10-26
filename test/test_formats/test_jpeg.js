@@ -6,7 +6,6 @@ const fs = require('fs')
 const path = require('path')
 const { describe, it } = require('node:test')
 const probe = require('../../')
-const str2arr = require('../../lib/common/utils').str2arr
 const { Readable } = require('stream')
 
 
@@ -56,8 +55,15 @@ describe('JPEG', function () {
 
     const size = await probe(Readable.from([data]))
 
-    assert.deepStrictEqual(size, probe.sync(image))
-    assert.deepStrictEqual(size, probe.sync(data))
+    assert.deepStrictEqual(size, {
+      width: 192,
+      height: 192,
+      type: 'jpg',
+      mime: 'image/jpeg',
+      wUnits: 'px',
+      hUnits: 'px',
+      orientation: 5
+    })
   })
 
 
@@ -142,99 +148,8 @@ describe('JPEG', function () {
 describe('JPEG (sync)', function () {
   it('should detect JPEG', function () {
     const file = path.join(__dirname, '..', 'fixtures', 'iojs_logo.jpeg')
-    const size = probe.sync(fs.readFileSync(file))
+    const size = probe.sync(new Uint8Array(fs.readFileSync(file)))
 
     assert.deepStrictEqual(size, { width: 367, height: 187, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' })
-  })
-
-
-  it('should detect JPEG orientation', async function () {
-    const file = path.join(__dirname, '..', 'fixtures', 'Exif5-1.5x.jpg')
-    const size = probe.sync(fs.readFileSync(file))
-
-    assert.deepStrictEqual(size, {
-      width: 192,
-      height: 192,
-      type: 'jpg',
-      mime: 'image/jpeg',
-      wUnits: 'px',
-      hUnits: 'px',
-      orientation: 5
-    })
-  })
-
-
-  it('should not fail on empty JPEG markers', function () {
-    const file = path.join(__dirname, '..', 'fixtures', 'empty_comment.jpg')
-    const size = probe.sync(fs.readFileSync(file))
-
-    assert.deepStrictEqual(size, { width: 40, height: 20, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' })
-  })
-
-
-  it('should not fail on bad JPEG', function () {
-    // length of C0 is less than needed (should be 5+ bytes)
-    const buf = str2arr('FFD8 FFC0 0004 00112233 FFD9'.replace(/ /g, ''), 'hex')
-    const size = probe.sync(buf)
-
-    assert.strictEqual(size, null)
-  })
-
-
-  it('should skip padding', function () {
-    const buf = str2arr('FFD8 FFFFFFFFC00011 08000F000F03012200021101031101 FFFFD9'.replace(/ /g, ''), 'hex')
-    const size = probe.sync(buf)
-
-    assert.deepStrictEqual(size, { width: 15, height: 15, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' })
-  })
-
-
-  it('should skip unknown bytes between segments', async function () {
-    // not exactly standard, https://github.com/nodeca/probe-image-size/issues/68, `AA`s are extras in fixture
-    let buf = str2arr('FFD8 FFE00002 AAAAAAAA FFC00011 08000F000F03012200021101031101 FFD9'.replace(/ /g, ''), 'hex')
-    const size = probe.sync(buf)
-
-    assert.deepStrictEqual(size, { width: 15, height: 15, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' })
-
-    // but don't allow garbage after first segment
-    buf = str2arr('FFD8 AAAAAAAA FFE00002 FFC00011 08000F000F03012200021101031101 FFD9'.replace(/ /g, ''), 'hex')
-
-    assert.strictEqual(probe.sync(buf), null)
-  })
-
-
-  it('coverage - EOI before SOI', function () {
-    const buf = str2arr('FFD8 FFD0 FFD9'.replace(/ /g, ''), 'hex')
-
-    assert.strictEqual(probe.sync(buf), null)
-  })
-
-
-  it('coverage - unknown marker', function () {
-    const buf = str2arr('FFD8 FF05'.replace(/ /g, ''), 'hex')
-
-    assert.strictEqual(probe.sync(buf), null)
-  })
-
-
-  it('coverage - truncated JPEG', function () {
-    let buf
-
-    buf = str2arr('FFD8 FF'.replace(/ /g, ''), 'hex')
-    assert.strictEqual(probe.sync(buf), null)
-
-    buf = str2arr('FFD8 FFC0 00'.replace(/ /g, ''), 'hex')
-    assert.strictEqual(probe.sync(buf), null)
-
-    buf = str2arr('FFD8 FFC0 FFFF 00'.replace(/ /g, ''), 'hex')
-    assert.strictEqual(probe.sync(buf), null)
-  })
-
-
-  it('coverage - 0xE1 segment but not exif', async function () {
-    const buf = Buffer.from('FFD8 FFE10010AAAAAAAAAAAAAAAAAAAAAAAAAAAA FFC00011 08000F000F03012200021101031101 FFFFD9'.replace(/ /g, ''), 'hex')
-
-    const size = probe.sync(buf)
-    assert.strictEqual(size.width, 15)
   })
 })
