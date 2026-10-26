@@ -5,9 +5,15 @@ const assert = require('assert')
 const fs = require('fs')
 const path = require('path')
 const { describe, it } = require('node:test')
-const probe = require('../../')
-const str2arr = require('../../lib/common/utils').str2arr
-const { Readable } = require('stream')
+const { NEED_MORE, DONE, str2arr } = require('../../lib/common/utils')
+const { Parser } = require('../../lib/formats/webp')
+
+
+function parse (...chunks) {
+  const parser = new Parser()
+  for (const chunk of chunks) parser.push(chunk)
+  return parser.getResult()
+}
 
 
 function fixture (s) {
@@ -36,64 +42,79 @@ function makeExifWebp (exif_data, exif_length = exif_data.length) {
 }
 
 
+const frame_chunks = [
+  str2arr('VP8 ' + '\x0A\0\0\0' + '\0\0\0\x9D\x01\x2A\xC0\0\x80\0'),
+  str2arr('VP8L' + '\x05\0\0\0' + '\x2F\xBF\xC0\x1F\0' + '\0'),
+  str2arr('VP8X' + '\x0A\0\0\0' + '\x08\0\0\0\xBF\0\0\x7F\0\0')
+]
+const tail = str2arr((
+  'JUNK \x01\0\0\0 x \0\0' + // Odd-sized chunk with extra zero padding.
+  'EXIF \x1A\0\0\0' +
+  '  II \x2A\0 \x08\0\0\0 \x01\0' +
+  '  \x12\x01 \x03\0 \x01\0\0\0 \x06\0\0\0' + // Orientation = 6.
+  '  \0\0\0\0'
+).replace(/ /g, ''))
+const images = frame_chunks.map(chunk => {
+  const data = new Uint8Array([...str2arr('RIFF\0\0\0\0WEBP'), ...chunk, ...tail])
+  new DataView(data.buffer).setUint32(4, data.length - 8, true)
+  return data
+})
+const dimensions = { width: 192, height: 128, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' }
+const expected = { ...dimensions, orientation: 6 }
+
+
 describe('WEBP', function () {
-  it('should detect VP8', async function () {
+  it('should detect VP8', function () {
     const file = path.join(__dirname, '..', 'fixtures', 'webp-vp8.webp')
 
-    const size = await probe(fs.createReadStream(file))
+    const size = parse(fs.readFileSync(file))
 
     assert.deepStrictEqual(size, { width: 1, height: 1, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' })
   })
 
 
-  it('should skip VP8 header with bad code block', async function () {
+  it('should skip VP8 header with bad code block', function () {
     const buf = Buffer.from(str2arr('RIFF\x20\0\0\0WEBPVP8 \x0C\0\0\0....................'))
 
-    await assert.rejects(
-      async () => probe(Readable.from([buf])),
-      /unrecognized file format/
-    )
+    assert.strictEqual(parse(buf), undefined)
   })
 
 
-  it('should detect VP8X', async function () {
+  it('should detect VP8X', function () {
     const file = path.join(__dirname, '..', 'fixtures', 'webp-vp8x.webp')
 
-    const size = await probe(fs.createReadStream(file))
+    const size = parse(fs.readFileSync(file))
 
     assert.deepStrictEqual(size, { width: 367, height: 187, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' })
   })
 
 
-  it('should detect VP8L (lossless)', async function () {
+  it('should detect VP8L (lossless)', function () {
     const file = path.join(__dirname, '..', 'fixtures', 'webp-vp8l.webp')
 
-    const size = await probe(fs.createReadStream(file))
+    const size = parse(fs.readFileSync(file))
 
     assert.deepStrictEqual(size, { width: 367, height: 187, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' })
   })
 
 
-  it('should skip VP8L header with bad code block', async function () {
+  it('should skip VP8L header with bad code block', function () {
     const buf = Buffer.from(str2arr('RIFF\x20\0\0\0WEBPVP8L\x0C\0\0\0....................'))
 
-    await assert.rejects(
-      async () => probe(Readable.from([buf])),
-      /unrecognized file format/
-    )
+    assert.strictEqual(parse(buf), undefined)
   })
 
 
-  it('should detect exif orientation', async function () {
+  it('should detect exif orientation', function () {
     const file = path.join(__dirname, '..', 'fixtures', 'Exif5-1.5x.webp')
 
-    const size = await probe(fs.createReadStream(file))
+    const size = parse(fs.readFileSync(file))
 
     assert.deepStrictEqual(size.orientation, 5)
   })
 
 
-  it('should finish before the end of a large EXIF chunk', async function () {
+  it('should finish before the end of a large EXIF chunk', function () {
     const exif_data = Buffer.alloc(4096)
     fixture(`
       49 49 2A 00 ; little-endian TIFF signature
@@ -104,7 +125,7 @@ describe('WEBP', function () {
     `).copy(exif_data)
     const data = makeExifWebp(exif_data, 0x40000000)
 
-    const size = await probe(Readable.from([data]))
+    const size = parse(data)
 
     assert.strictEqual(size.width, 10)
     assert.strictEqual(size.height, 10)
@@ -112,7 +133,7 @@ describe('WEBP', function () {
   })
 
 
-  it('should continue reading EXIF after the first chunk', async function () {
+  it('should continue reading EXIF after the first chunk', function () {
     const ifd0_offset = 4096
     const exif_data = Buffer.alloc(ifd0_offset + 18)
     exif_data.write('II*\0', 0, 'latin1')
@@ -124,18 +145,61 @@ describe('WEBP', function () {
     exif_data.writeUInt16LE(6, ifd0_offset + 10)
     const data = makeExifWebp(exif_data)
 
-    const size = await probe(Readable.from([data.subarray(0, 4096), data.subarray(4096)]))
+    const size = parse(data.subarray(0, 4096), data.subarray(4096))
 
     assert.strictEqual(size.orientation, 6)
   })
-})
 
 
-describe('WEBP (sync)', function () {
-  it('should detect VP8', function () {
-    const file = path.join(__dirname, '..', 'fixtures', 'webp-vp8.webp')
-    const size = probe.sync(new Uint8Array(fs.readFileSync(file)))
+  it('should handle every chunk boundary for VP8, VP8L and VP8X', function () {
+    for (const image of images) {
+      const orientation_end = image.length - 4
 
-    assert.deepStrictEqual(size, { width: 1, height: 1, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' })
+      for (let split = 0; split <= image.length; split++) {
+        const parser = new Parser()
+        parser.push(image.subarray(0, split))
+        parser.push(new Uint8Array(0))
+
+        assert.strictEqual(parser.getStatus(), split < orientation_end ? NEED_MORE : DONE)
+        assert.deepStrictEqual(parser.getResult(), split < orientation_end ? undefined : expected)
+
+        parser.push(image.subarray(split))
+        assert.strictEqual(parser.getStatus(), DONE)
+        assert.deepStrictEqual(parser.getResult(), expected)
+      }
+
+      const parser = new Parser()
+      const chunk = new Uint8Array(1)
+      for (const byte of image) {
+        chunk[0] = byte
+        parser.push(chunk)
+        chunk[0] = 0
+      }
+      assert.deepStrictEqual(parser.getResult(), expected)
+    }
+  })
+
+  it('should keep orientation reads inside the EXIF chunk', function () {
+    for (const length of [21, 22]) {
+      const data = new Uint8Array(images[2])
+      const exif_offset = data.length - (8 + 26)
+      data[exif_offset + 4] = length
+      const parser = new Parser()
+      parser.push(data)
+
+      assert.strictEqual(parser.getStatus(), DONE)
+      assert.deepStrictEqual(parser.getResult(), length === 22 ? expected : dimensions)
+    }
+  })
+
+  it('should stop at the RIFF boundary without reading later chunks', function () {
+    const data = new Uint8Array(images[2])
+    // End RIFF after its header and the ten-byte VP8X chunk.
+    new DataView(data.buffer).setUint32(4, 12 + 8 + 10 - 8, true)
+    const parser = new Parser()
+    parser.push(data)
+
+    assert.strictEqual(parser.getStatus(), DONE)
+    assert.deepStrictEqual(parser.getResult(), dimensions)
   })
 })

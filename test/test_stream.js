@@ -19,6 +19,22 @@ function fixture (s) {
 
 
 describe('probeStream', function () {
+  it('should return available dimensions at end of stream', async function () {
+    const file = path.join(__dirname, 'fixtures', 'Exif5-1.5x.avif')
+    const image = fs.readFileSync(file)
+    const data = image.subarray(0, image.indexOf('mdat') - 4)
+    const expected = { width: 192, height: 192, type: 'avif', mime: 'image/avif', wUnits: 'px', hUnits: 'px' }
+
+    assert.deepStrictEqual(await probe(Readable.from([data])), expected)
+  })
+
+  it('should reject an incomplete image header', async function () {
+    await assert.rejects(
+      async () => probe(Readable.from([Buffer.from('<svg width="5" height="5"')])),
+      /unrecognized file format/
+    )
+  })
+
   it('should process an image', async function () {
     const file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg')
 

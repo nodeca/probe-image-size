@@ -18,6 +18,13 @@ function fixture (s) {
 
 
 describe('probeBuffer', function () {
+  it('should process an image', function () {
+    const file = path.join(__dirname, 'fixtures', 'iojs_logo.jpeg')
+    const size = probe.sync(new Uint8Array(fs.readFileSync(file)))
+
+    assert.deepStrictEqual(size, { width: 367, height: 187, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px' })
+  })
+
   it('should skip unrecognized files', function () {
     const file = path.join(__dirname, 'fixtures', 'text_file.txt')
     const size = probe.sync(fs.readFileSync(file))
