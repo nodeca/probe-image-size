@@ -105,7 +105,7 @@ describe('svg header parser', function () {
       }
 
       assert.strictEqual(parser.getStatus(), svgHeader.DONE)
-      assert.deepStrictEqual(svgHeader.getSize(parser.attrs), expected)
+      assert.deepStrictEqual(parser.getResult(), expected)
     }
   })
 
