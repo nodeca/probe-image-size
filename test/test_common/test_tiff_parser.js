@@ -3,8 +3,8 @@
 
 const assert = require('assert')
 const { describe, it } = require('node:test')
+const { NEED_MORE, DONE, str2arr } = require('../../lib/common/utils')
 const tiff = require('../../lib/common/tiff_parser')
-const str2arr = require('../../lib/common/utils').str2arr
 
 
 describe('TIFF parser', function () {
@@ -32,11 +32,11 @@ describe('TIFF parser', function () {
         parser.push(data.subarray(0, split))
         parser.push(new Uint8Array(0))
 
-        assert.strictEqual(parser.getStatus(), split < data.length ? tiff.NEED_MORE : tiff.DONE)
+        assert.strictEqual(parser.getStatus(), split < data.length ? NEED_MORE : DONE)
         assert.deepStrictEqual(parser.getResult(), split < data.length ? undefined : expected)
 
         parser.push(data.subarray(split))
-        assert.strictEqual(parser.getStatus(), tiff.DONE)
+        assert.strictEqual(parser.getStatus(), DONE)
         assert.deepStrictEqual(parser.getResult(), expected)
       }
 
@@ -47,7 +47,7 @@ describe('TIFF parser', function () {
         parser.push(chunk)
         chunk[0] = 0
       }
-      assert.strictEqual(parser.getStatus(), tiff.DONE)
+      assert.strictEqual(parser.getStatus(), DONE)
       assert.deepStrictEqual(parser.getResult(), expected)
     }
   })

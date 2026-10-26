@@ -3,8 +3,8 @@
 
 const assert = require('assert')
 const { describe, it } = require('node:test')
+const { NEED_MORE, DONE, str2arr } = require('../../lib/common/utils')
 const miaf = require('../../lib/common/miaf_parser')
-const str2arr = require('../../lib/common/utils').str2arr
 
 
 const image = Buffer.from(str2arr((
@@ -37,7 +37,7 @@ describe('MIAF parser', function () {
         parser.push(data.subarray(0, split))
         parser.push(new Uint8Array(0))
         parser.push(data.subarray(split))
-        assert.strictEqual(parser.getStatus(), miaf.DONE, 'split ' + split)
+        assert.strictEqual(parser.getStatus(), DONE, 'split ' + split)
         assert.deepStrictEqual(parser.getResult(), expected, 'split ' + split)
       }
     }
@@ -67,10 +67,10 @@ describe('MIAF parser', function () {
           ...expected, orientation: end < orientation_end ? 3 : 6
         }, 'end ' + end)
       }
-      assert.strictEqual(parser.getStatus(), end < orientation_end ? miaf.NEED_MORE : miaf.DONE, 'end ' + end)
+      assert.strictEqual(parser.getStatus(), end < orientation_end ? NEED_MORE : DONE, 'end ' + end)
 
       parser.push(image.subarray(end))
-      assert.strictEqual(parser.getStatus(), miaf.DONE)
+      assert.strictEqual(parser.getStatus(), DONE)
       assert.deepStrictEqual(parser.getResult(), expected)
     }
   })
@@ -83,7 +83,7 @@ describe('MIAF parser', function () {
       const parser = new miaf.Parser()
       parser.push(data)
 
-      assert.strictEqual(parser.getStatus(), miaf.DONE)
+      assert.strictEqual(parser.getStatus(), DONE)
       assert.deepStrictEqual(parser.getResult(), { ...expected, orientation: length === 32 ? 6 : 3 })
     }
   })
@@ -97,7 +97,7 @@ describe('MIAF parser', function () {
     const parser = new miaf.Parser()
     parser.push(data)
 
-    assert.strictEqual(parser.getStatus(), miaf.DONE)
+    assert.strictEqual(parser.getStatus(), DONE)
     assert.deepStrictEqual(parser.getResult(), expected)
   })
 })

@@ -5,6 +5,7 @@ const assert = require('assert')
 const fs = require('fs')
 const path = require('path')
 const { describe, it } = require('node:test')
+const { NEED_MORE, DONE } = require('../../lib/common/utils')
 const psd = require('../../lib/common/psd_parser')
 
 
@@ -20,11 +21,11 @@ describe('PSD parser', function () {
       parser.push(header.subarray(0, split))
       parser.push(new Uint8Array(0))
 
-      assert.strictEqual(parser.getStatus(), split < header.length ? psd.NEED_MORE : psd.DONE)
+      assert.strictEqual(parser.getStatus(), split < header.length ? NEED_MORE : DONE)
       assert.deepStrictEqual(parser.getResult(), split < header.length ? undefined : expected)
 
       parser.push(header.subarray(split))
-      assert.strictEqual(parser.getStatus(), psd.DONE)
+      assert.strictEqual(parser.getStatus(), DONE)
       assert.deepStrictEqual(parser.getResult(), expected)
     }
 
@@ -35,7 +36,7 @@ describe('PSD parser', function () {
       parser.push(chunk)
       chunk[0] = 0
     }
-    assert.strictEqual(parser.getStatus(), psd.DONE)
+    assert.strictEqual(parser.getStatus(), DONE)
     assert.deepStrictEqual(parser.getResult(), expected)
   })
 })

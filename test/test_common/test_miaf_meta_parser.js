@@ -5,8 +5,8 @@ const assert = require('assert')
 const fs = require('fs')
 const path = require('path')
 const { describe, it } = require('node:test')
+const { NEED_MORE, DONE, FAIL, str2arr } = require('../../lib/common/utils')
 const meta = require('../../lib/common/miaf_meta_parser')
-const str2arr = require('../../lib/common/utils').str2arr
 
 
 const iprp_box = str2arr((
@@ -64,7 +64,7 @@ describe('MIAF meta parser', function () {
       }
 
       parser.push(chunk)
-      assert.strictEqual(parser.getStatus(), meta.DONE, name)
+      assert.strictEqual(parser.getStatus(), DONE, name)
       assert.deepStrictEqual(parser.getResult(), {
         width,
         height,
@@ -85,12 +85,12 @@ describe('MIAF meta parser', function () {
         parser.push([])
 
         if (split < data.length) {
-          assert.strictEqual(parser.getStatus(), meta.NEED_MORE, 'split ' + split)
+          assert.strictEqual(parser.getStatus(), NEED_MORE, 'split ' + split)
           assert.strictEqual(parser.getResult(), undefined)
         }
 
         parser.push(data.slice(split))
-        assert.strictEqual(parser.getStatus(), meta.DONE, 'split ' + split)
+        assert.strictEqual(parser.getStatus(), DONE, 'split ' + split)
         assert.deepStrictEqual(parser.getResult(), expected_result, 'split ' + split)
       }
     }
@@ -113,7 +113,7 @@ describe('MIAF meta parser', function () {
       for (const box of boxes) parser.push(box)
 
       const over_limit = counts.reduce((sum, count) => sum + count, 0) > 100
-      assert.strictEqual(parser.getStatus(), over_limit ? meta.FAIL : meta.DONE)
+      assert.strictEqual(parser.getStatus(), over_limit ? FAIL : DONE)
       assert.strictEqual(parser.variants.length, 100)
       if (over_limit) assert.strictEqual(parser.getResult(), undefined)
     }
@@ -123,10 +123,10 @@ describe('MIAF meta parser', function () {
     const item = '\0\0 \0\0 \0\x01 \0\x10\0\x21'
 
     for (const [counts, status, stored_count] of [
-      [[1000], meta.DONE, 1000],
-      [[1001], meta.FAIL, 0],
-      [[500, 500], meta.DONE, 1000],
-      [[500, 501], meta.FAIL, 500]
+      [[1000], DONE, 1000],
+      [[1001], FAIL, 0],
+      [[500, 500], DONE, 1000],
+      [[500, 501], FAIL, 500]
     ]) {
       let item_id = 0
       const boxes = counts.map(count => {
@@ -164,7 +164,7 @@ describe('MIAF meta parser', function () {
       const parser = new meta.Parser(data.length)
       for (const byte of data) parser.push([byte])
 
-      assert.strictEqual(parser.getStatus(), meta.DONE)
+      assert.strictEqual(parser.getStatus(), DONE)
       assert.deepStrictEqual(parser.getResult(), { ...expected_result, exif_location })
     }
   })
@@ -187,7 +187,7 @@ describe('MIAF meta parser', function () {
       const parser = new meta.Parser(data.length)
       parser.push(data)
 
-      assert.strictEqual(parser.getStatus(), meta.DONE)
+      assert.strictEqual(parser.getStatus(), DONE)
       assert.deepStrictEqual(parser.getResult(), { ...expected_result, exif_location })
     }
   })
@@ -208,7 +208,7 @@ describe('MIAF meta parser', function () {
         const parser = new meta.Parser(data.length)
         parser.push(data)
 
-        assert.strictEqual(parser.getStatus(), meta.DONE)
+        assert.strictEqual(parser.getStatus(), DONE)
         assert.strictEqual(parser.getResult().orientation, orientations[turns])
       }
     }
@@ -220,7 +220,7 @@ describe('MIAF meta parser', function () {
       const parser = new meta.Parser(data.length)
       parser.push(data)
 
-      assert.strictEqual(parser.getStatus(), meta.DONE)
+      assert.strictEqual(parser.getStatus(), DONE)
       assert.strictEqual(parser.getResult(), undefined)
     }
   })
@@ -244,11 +244,11 @@ describe('MIAF meta parser', function () {
     for (const data of invalid) {
       const parser = new meta.Parser(data.length)
       parser.push(data)
-      assert.strictEqual(parser.getStatus(), meta.FAIL)
+      assert.strictEqual(parser.getStatus(), FAIL)
       assert.strictEqual(parser.getResult(), undefined)
 
       parser.push(valid)
-      assert.strictEqual(parser.getStatus(), meta.FAIL)
+      assert.strictEqual(parser.getStatus(), FAIL)
     }
   })
 
@@ -273,10 +273,10 @@ describe('MIAF meta parser', function () {
 
       for (let skipped = 0; skipped < padding_size; skipped += chunk.length) parser.push(chunk)
 
-      assert.strictEqual(parser.getStatus(), meta.NEED_MORE)
+      assert.strictEqual(parser.getStatus(), NEED_MORE)
       assert.deepStrictEqual(parser.variants, [])
       parser.push(iprp_box)
-      assert.strictEqual(parser.getStatus(), meta.DONE)
+      assert.strictEqual(parser.getStatus(), DONE)
       assert.deepStrictEqual(parser.getResult(), { ...expected_result, exif_location: null })
     }
   })

@@ -3,6 +3,7 @@
 
 const assert = require('assert')
 const { describe, it } = require('node:test')
+const { NEED_MORE, DONE } = require('../../lib/common/utils')
 const svgHeader = require('../../lib/common/svg_header_parser')
 const parseSync = require('../../lib/parse_sync/svg')
 const parseSvgHeader = str => parseSync(Buffer.from(str))
@@ -100,11 +101,11 @@ describe('svg header parser', function () {
     for (let size = 1; size <= 5; size++) {
       const parser = new svgHeader.Parser()
 
-      for (let i = 0; i < buf.length && parser.getStatus() === svgHeader.NEED_MORE; i += size) {
+      for (let i = 0; i < buf.length && parser.getStatus() === NEED_MORE; i += size) {
         parser.push(buf.subarray(i, i + size))
       }
 
-      assert.strictEqual(parser.getStatus(), svgHeader.DONE)
+      assert.strictEqual(parser.getStatus(), DONE)
       assert.deepStrictEqual(parser.getResult(), expected)
     }
   })

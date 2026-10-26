@@ -3,8 +3,8 @@
 
 const assert = require('assert')
 const { describe, it } = require('node:test')
+const { NEED_MORE, DONE, str2arr } = require('../../lib/common/utils')
 const webp = require('../../lib/common/webp_parser')
-const str2arr = require('../../lib/common/utils').str2arr
 
 
 const frame_chunks = [
@@ -38,11 +38,11 @@ describe('WebP parser', function () {
         parser.push(image.subarray(0, split))
         parser.push(new Uint8Array(0))
 
-        assert.strictEqual(parser.getStatus(), split < orientation_end ? webp.NEED_MORE : webp.DONE)
+        assert.strictEqual(parser.getStatus(), split < orientation_end ? NEED_MORE : DONE)
         assert.deepStrictEqual(parser.getResult(), split < orientation_end ? undefined : expected)
 
         parser.push(image.subarray(split))
-        assert.strictEqual(parser.getStatus(), webp.DONE)
+        assert.strictEqual(parser.getStatus(), DONE)
         assert.deepStrictEqual(parser.getResult(), expected)
       }
 
@@ -65,7 +65,7 @@ describe('WebP parser', function () {
       const parser = new webp.Parser()
       parser.push(data)
 
-      assert.strictEqual(parser.getStatus(), webp.DONE)
+      assert.strictEqual(parser.getStatus(), DONE)
       assert.deepStrictEqual(parser.getResult(), length === 22 ? expected : dimensions)
     }
   })
@@ -77,7 +77,7 @@ describe('WebP parser', function () {
     const parser = new webp.Parser()
     parser.push(data)
 
-    assert.strictEqual(parser.getStatus(), webp.DONE)
+    assert.strictEqual(parser.getStatus(), DONE)
     assert.deepStrictEqual(parser.getResult(), dimensions)
   })
 })

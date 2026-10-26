@@ -3,8 +3,8 @@
 
 const assert = require('assert')
 const { describe, it } = require('node:test')
+const { NEED_MORE, DONE, FAIL, str2arr } = require('../../lib/common/utils')
 const ftyp = require('../../lib/common/miaf_ftyp_parser')
-const str2arr = require('../../lib/common/utils').str2arr
 
 
 describe('MIAF ftyp parser', function () {
@@ -48,7 +48,7 @@ describe('MIAF ftyp parser', function () {
         chunk[0] = 0
       }
 
-      assert.strictEqual(parser.getStatus(), ftyp.DONE, input)
+      assert.strictEqual(parser.getStatus(), DONE, input)
       assert.deepStrictEqual(parser.getResult(), type ? { type, mime } : undefined, input)
     }
   })
@@ -62,12 +62,12 @@ describe('MIAF ftyp parser', function () {
       parser.push([])
 
       if (split < data.length) {
-        assert.strictEqual(parser.getStatus(), ftyp.NEED_MORE, 'split ' + split)
+        assert.strictEqual(parser.getStatus(), NEED_MORE, 'split ' + split)
         assert.strictEqual(parser.getResult(), undefined)
       }
 
       parser.push(data.slice(split))
-      assert.strictEqual(parser.getStatus(), ftyp.DONE, 'split ' + split)
+      assert.strictEqual(parser.getStatus(), DONE, 'split ' + split)
       assert.deepStrictEqual(parser.getResult(), { type: 'avif', mime: 'image/avif' }, 'split ' + split)
     }
   })
@@ -79,17 +79,17 @@ describe('MIAF ftyp parser', function () {
     parser.push([...data, ...extra])
     parser.push(extra)
 
-    assert.strictEqual(parser.getStatus(), ftyp.DONE)
+    assert.strictEqual(parser.getStatus(), DONE)
     assert.deepStrictEqual(parser.getResult(), { type: 'heif', mime: 'image/heif' })
   })
 
   it('should reject sizes with an incomplete header or brand', function () {
     for (const size of [0, 4, 7, 9, 10, 11]) {
       const parser = new ftyp.Parser(size)
-      assert.strictEqual(parser.getStatus(), ftyp.FAIL, 'size ' + size)
+      assert.strictEqual(parser.getStatus(), FAIL, 'size ' + size)
 
       parser.push(str2arr('mif1\0\0\0\0'))
-      assert.strictEqual(parser.getStatus(), ftyp.FAIL)
+      assert.strictEqual(parser.getStatus(), FAIL)
       assert.strictEqual(parser.getResult(), undefined)
     }
   })
@@ -107,10 +107,10 @@ describe('MIAF ftyp parser', function () {
       parser.push(chunk)
     }
 
-    assert.strictEqual(parser.getStatus(), ftyp.NEED_MORE)
+    assert.strictEqual(parser.getStatus(), NEED_MORE)
     assert.strictEqual(parser.getResult(), undefined)
     parser.push(image_brands)
-    assert.strictEqual(parser.getStatus(), ftyp.DONE)
+    assert.strictEqual(parser.getStatus(), DONE)
     assert.deepStrictEqual(parser.getResult(), { type: 'heif', mime: 'image/heif' })
   })
 })

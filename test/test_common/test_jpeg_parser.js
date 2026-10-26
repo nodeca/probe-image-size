@@ -3,8 +3,8 @@
 
 const assert = require('assert')
 const { describe, it } = require('node:test')
+const { NEED_MORE, DONE, FAIL, str2arr } = require('../../lib/common/utils')
 const jpeg = require('../../lib/common/jpeg_parser')
-const str2arr = require('../../lib/common/utils').str2arr
 
 
 const image = new Uint8Array(str2arr((
@@ -27,11 +27,11 @@ describe('JPEG parser', function () {
       parser.push(image.subarray(0, split))
       parser.push(new Uint8Array(0))
 
-      assert.strictEqual(parser.getStatus(), split < image.length ? jpeg.NEED_MORE : jpeg.DONE)
+      assert.strictEqual(parser.getStatus(), split < image.length ? NEED_MORE : DONE)
       assert.deepStrictEqual(parser.getResult(), split < image.length ? undefined : expected)
 
       parser.push(image.subarray(split))
-      assert.strictEqual(parser.getStatus(), jpeg.DONE)
+      assert.strictEqual(parser.getStatus(), DONE)
       assert.deepStrictEqual(parser.getResult(), expected)
     }
 
@@ -58,7 +58,7 @@ describe('JPEG parser', function () {
     const parser = new jpeg.Parser()
     parser.push(data)
 
-    assert.strictEqual(parser.getStatus(), jpeg.DONE)
+    assert.strictEqual(parser.getStatus(), DONE)
     assert.deepStrictEqual(parser.getResult(), {
       width: 192, height: 128, type: 'jpg', mime: 'image/jpeg', wUnits: 'px', hUnits: 'px'
     })
@@ -71,7 +71,7 @@ describe('JPEG parser', function () {
       const parser = new jpeg.Parser()
       parser.push(data)
 
-      assert.strictEqual(parser.getStatus(), jpeg.FAIL)
+      assert.strictEqual(parser.getStatus(), FAIL)
       assert.strictEqual(parser.getResult(), undefined)
     }
   })

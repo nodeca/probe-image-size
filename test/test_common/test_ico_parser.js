@@ -5,6 +5,7 @@ const assert = require('assert')
 const fs = require('fs')
 const path = require('path')
 const { describe, it } = require('node:test')
+const { NEED_MORE, DONE } = require('../../lib/common/utils')
 const ico = require('../../lib/common/ico_parser')
 const readUInt16LE = require('../../lib/common/read_le_be').readUInt16LE
 
@@ -29,11 +30,11 @@ describe('ICO parser', function () {
       parser.push(data.subarray(0, split))
       parser.push(new Uint8Array(0))
 
-      assert.strictEqual(parser.getStatus(), split < index_size ? ico.NEED_MORE : ico.DONE)
+      assert.strictEqual(parser.getStatus(), split < index_size ? NEED_MORE : DONE)
       assert.deepStrictEqual(parser.getResult(), split < index_size ? undefined : expected)
 
       parser.push(data.subarray(split))
-      assert.strictEqual(parser.getStatus(), ico.DONE)
+      assert.strictEqual(parser.getStatus(), DONE)
       assert.deepStrictEqual(parser.getResult(), expected)
     }
 
@@ -44,7 +45,7 @@ describe('ICO parser', function () {
       parser.push(chunk)
       chunk[0] = 0
     }
-    assert.strictEqual(parser.getStatus(), ico.DONE)
+    assert.strictEqual(parser.getStatus(), DONE)
     assert.deepStrictEqual(parser.getResult(), expected)
   })
 })

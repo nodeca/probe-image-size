@@ -5,6 +5,7 @@ const assert = require('assert')
 const fs = require('fs')
 const path = require('path')
 const { describe, it } = require('node:test')
+const { NEED_MORE, DONE, FAIL } = require('../../lib/common/utils')
 const exif = require('../../lib/common/exif_orientation_parser')
 
 
@@ -41,7 +42,7 @@ describe('Exif orientation parser', function () {
 
     parser.push(data)
 
-    assert.strictEqual(parser.getStatus(), exif.DONE)
+    assert.strictEqual(parser.getStatus(), DONE)
     assert.strictEqual(parser.orientation, 6)
   })
 
@@ -52,7 +53,7 @@ describe('Exif orientation parser', function () {
           const parser = new exif.Parser()
           parser.push(makeExif([[0x0112, 3, 1, value]], big_endian))
 
-          assert.strictEqual(parser.getStatus(), exif.DONE)
+          assert.strictEqual(parser.getStatus(), DONE)
           assert.strictEqual(parser.orientation, value)
         }
       })
@@ -69,13 +70,13 @@ describe('Exif orientation parser', function () {
           parser.push(new Uint8Array(0))
 
           if (split_offset < data.length - 4) {
-            assert.strictEqual(parser.getStatus(), exif.NEED_MORE, 'split ' + split_offset)
+            assert.strictEqual(parser.getStatus(), NEED_MORE, 'split ' + split_offset)
             assert.strictEqual(parser.orientation, 0)
           }
 
           parser.push(data.subarray(split_offset))
 
-          assert.strictEqual(parser.getStatus(), exif.DONE, 'split ' + split_offset)
+          assert.strictEqual(parser.getStatus(), DONE, 'split ' + split_offset)
           assert.strictEqual(parser.orientation, 5, 'split ' + split_offset)
         }
       })
@@ -95,7 +96,7 @@ describe('Exif orientation parser', function () {
             chunk.fill(0)
           }
 
-          assert.strictEqual(parser.getStatus(), exif.DONE, 'chunk size ' + chunk_size)
+          assert.strictEqual(parser.getStatus(), DONE, 'chunk size ' + chunk_size)
           assert.strictEqual(parser.orientation, 7, 'chunk size ' + chunk_size)
         }
       })
@@ -108,7 +109,7 @@ describe('Exif orientation parser', function () {
       const data = makeExif(entries)
       parser.push(data.subarray(0, data.length - 4))
 
-      assert.strictEqual(parser.getStatus(), exif.DONE)
+      assert.strictEqual(parser.getStatus(), DONE)
       assert.strictEqual(parser.orientation, 0)
     }
   })
@@ -118,7 +119,7 @@ describe('Exif orientation parser', function () {
       const parser = new exif.Parser()
       parser.push(makeExif([[0x0112, type, component_count, 6]]))
 
-      assert.strictEqual(parser.getStatus(), exif.DONE)
+      assert.strictEqual(parser.getStatus(), DONE)
       assert.strictEqual(parser.orientation, 0)
     }
   })
@@ -128,7 +129,7 @@ describe('Exif orientation parser', function () {
       const parser = new exif.Parser()
       parser.push(makeExif([[0x0112, 3, 1, value]]))
 
-      assert.strictEqual(parser.getStatus(), exif.DONE)
+      assert.strictEqual(parser.getStatus(), DONE)
       assert.strictEqual(parser.orientation, 0)
     }
   })
@@ -141,7 +142,7 @@ describe('Exif orientation parser', function () {
       [0x0112, 3, 1, 6]
     ]))
 
-    assert.strictEqual(parser.getStatus(), exif.DONE)
+    assert.strictEqual(parser.getStatus(), DONE)
     assert.strictEqual(parser.orientation, 6)
   })
 
@@ -159,9 +160,9 @@ describe('Exif orientation parser', function () {
       parser.push(padding_chunk)
     }
 
-    assert.strictEqual(parser.getStatus(), exif.NEED_MORE)
+    assert.strictEqual(parser.getStatus(), NEED_MORE)
     parser.push(data.subarray(8))
-    assert.strictEqual(parser.getStatus(), exif.DONE)
+    assert.strictEqual(parser.getStatus(), DONE)
     assert.strictEqual(parser.orientation, 6)
   })
 
@@ -172,7 +173,7 @@ describe('Exif orientation parser', function () {
 
     parser.push(data)
 
-    assert.strictEqual(parser.getStatus(), exif.NEED_MORE)
+    assert.strictEqual(parser.getStatus(), NEED_MORE)
     assert.strictEqual(parser.orientation, 0)
   })
 
@@ -183,7 +184,7 @@ describe('Exif orientation parser', function () {
 
     parser.push(makeExif(entries))
 
-    assert.strictEqual(parser.getStatus(), exif.DONE)
+    assert.strictEqual(parser.getStatus(), DONE)
     assert.strictEqual(parser.orientation, 6)
   })
 
@@ -193,7 +194,7 @@ describe('Exif orientation parser', function () {
 
     parser.push(makeExif(entries))
 
-    assert.strictEqual(parser.getStatus(), exif.DONE)
+    assert.strictEqual(parser.getStatus(), DONE)
     assert.strictEqual(parser.orientation, 0)
   })
 
@@ -207,7 +208,7 @@ describe('Exif orientation parser', function () {
 
       parser.push(Buffer.concat([exif_data, other_ifd]))
 
-      assert.strictEqual(parser.getStatus(), exif.DONE)
+      assert.strictEqual(parser.getStatus(), DONE)
       assert.strictEqual(parser.orientation, 0)
     }
   })
@@ -216,7 +217,7 @@ describe('Exif orientation parser', function () {
     const parser = new exif.Parser()
     parser.push(Buffer.from('49492a0000000000', 'hex'))
 
-    assert.strictEqual(parser.getStatus(), exif.DONE)
+    assert.strictEqual(parser.getStatus(), DONE)
     assert.strictEqual(parser.orientation, 0)
   })
 
@@ -225,7 +226,7 @@ describe('Exif orientation parser', function () {
       const parser = new exif.Parser()
       parser.push(Buffer.from(signature + '08000000', 'hex'))
 
-      assert.strictEqual(parser.getStatus(), exif.FAIL)
+      assert.strictEqual(parser.getStatus(), FAIL)
       assert.strictEqual(parser.orientation, 0)
     }
   })
@@ -237,7 +238,7 @@ describe('Exif orientation parser', function () {
       const parser = new exif.Parser()
       parser.push(data)
 
-      assert.strictEqual(parser.getStatus(), exif.FAIL)
+      assert.strictEqual(parser.getStatus(), FAIL)
       assert.strictEqual(parser.orientation, 0)
     }
   })
@@ -247,12 +248,12 @@ describe('Exif orientation parser', function () {
     const parser = new exif.Parser()
     parser.push(data.subarray(0, 22))
 
-    assert.strictEqual(parser.getStatus(), exif.DONE)
+    assert.strictEqual(parser.getStatus(), DONE)
     assert.strictEqual(parser.orientation, 5)
 
     parser.push(data.subarray(22))
     parser.push(Buffer.alloc(8))
-    assert.strictEqual(parser.getStatus(), exif.DONE)
+    assert.strictEqual(parser.getStatus(), DONE)
     assert.strictEqual(parser.orientation, 5)
   })
 
@@ -261,7 +262,7 @@ describe('Exif orientation parser', function () {
     parser.push(Buffer.alloc(8))
     parser.push(makeExif([[0x0112, 3, 1, 6]]))
 
-    assert.strictEqual(parser.getStatus(), exif.FAIL)
+    assert.strictEqual(parser.getStatus(), FAIL)
     assert.strictEqual(parser.orientation, 0)
   })
 })
