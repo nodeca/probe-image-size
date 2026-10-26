@@ -22,7 +22,7 @@ describe('GIF', function () {
 describe('GIF (sync)', function () {
   it('should detect GIF', function () {
     const file = path.join(__dirname, '..', 'fixtures', 'iojs_logo.gif')
-    const size = probe.sync(fs.readFileSync(file))
+    const size = probe.sync(new Uint8Array(fs.readFileSync(file)))
 
     assert.deepStrictEqual(size, { width: 367, height: 187, type: 'gif', mime: 'image/gif', wUnits: 'px', hUnits: 'px' })
   })

@@ -22,7 +22,7 @@ describe('PSD', function () {
 describe('PSD (sync)', function () {
   it('should detect PSD', function () {
     const file = path.join(__dirname, '..', 'fixtures', 'empty.psd')
-    const size = probe.sync(fs.readFileSync(file))
+    const size = probe.sync(new Uint8Array(fs.readFileSync(file)))
 
     assert.deepStrictEqual(size, { width: 640, height: 400, type: 'psd', mime: 'image/vnd.adobe.photoshop', wUnits: 'px', hUnits: 'px' })
   })

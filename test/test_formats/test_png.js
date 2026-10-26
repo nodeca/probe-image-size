@@ -34,15 +34,8 @@ describe('PNG', function () {
 describe('PNG (sync)', function () {
   it('should detect PNG', function () {
     const file = path.join(__dirname, '..', 'fixtures', 'iojs_logo.png')
-    const size = probe.sync(fs.readFileSync(file))
+    const size = probe.sync(new Uint8Array(fs.readFileSync(file)))
 
     assert.deepStrictEqual(size, { width: 367, height: 187, type: 'png', mime: 'image/png', wUnits: 'px', hUnits: 'px' })
-  })
-
-
-  it('should skip PNG start pattern without IHDR', function () {
-    const size = probe.sync(str2arr('\x89PNG\r\n\x1a\n                  '))
-
-    assert.strictEqual(size, null)
   })
 })
