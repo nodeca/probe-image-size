@@ -73,6 +73,52 @@ describe('AVIF', function () {
   })
 
 
+  it('should read EXIF after ftyp and meta spanning multiple reads', async function () {
+    const padding = Buffer.alloc(8192, 'zzzz')
+    const ftyp = Buffer.from(str2arr(('\0\0\0\0 ftyp avif \0\0\0\0 mif1').replace(/ /g, '')))
+    ftyp.writeUInt32BE(ftyp.length + padding.length, 0)
+
+    const meta = Buffer.from(str2arr((
+      '\0\0\0\0     meta \0\0\0\0' +
+      '  \0\0\0\x26   iinf \0\0\0\0 \0\x01' +
+      '    \0\0\0\x18 infe \0\0\0\0 \0\xAA\0\0 Exif \0\0\0\0' +
+      '  \0\0\0\x1E   iloc \0\0\0\0 \x44\0 \0\x01' +
+      '    \0\xAA \0\0 \0\x01 \0\0\0\0 \0\0\0\0' +
+      '  \0\0\0\x24   iprp' +
+      '    \0\0\0\x1C ipco' +
+      '      \0\0\0\x14 ispe \0\0\0\0 \0\0\0\xC0 \0\0\0\x80' +
+      '  \0\0\0\0     free'
+    ).replace(/ /g, '')))
+    meta.writeUInt32BE(meta.length + padding.length, 0)
+    meta.writeUInt32BE(8 + padding.length, meta.length - 8)
+
+    const mdat = Buffer.from(str2arr(('\0\0\0\0 mdat').replace(/ /g, '')))
+    const exif = Buffer.from(str2arr((
+      '\0\0\0\0' + // TIFF header offset within the EXIF item.
+      'MM \0\x2A \0\0\0\x08 \0\x01' +
+      '\x01\x12 \0\x03 \0\0\0\x01 \0\x06\0\0' + // Orientation = 6.
+      '\0\0\0\0'
+    ).replace(/ /g, '')))
+    mdat.writeUInt32BE(mdat.length + exif.length, 0)
+    const exif_offset = ftyp.length + padding.length + meta.length + padding.length + mdat.length
+    // The single iloc extent stores an absolute offset and a length.
+    meta.writeUInt32BE(exif_offset, meta.indexOf('iloc') + 18)
+    meta.writeUInt32BE(exif.length, meta.indexOf('iloc') + 22)
+
+    const size = await probe(Readable.from([ftyp, padding, meta, padding, mdat, exif]))
+
+    assert.deepStrictEqual(size, {
+      width: 192,
+      height: 128,
+      type: 'avif',
+      mime: 'image/avif',
+      wUnits: 'px',
+      hUnits: 'px',
+      orientation: 6
+    })
+  })
+
+
   it('should detect HEIC - image4.heic', async function () {
     const file = path.join(__dirname, '..', 'fixtures', 'image4.heic')
     const size = await probe(fs.createReadStream(file))
@@ -365,11 +411,11 @@ describe('AVIF', function () {
       '\0\0\0\x14 ftyp avif \0\0\0\0 mif1' +
       '\0\0\0\x08 free ' +
       '\0\0\0\x0C free \0\0\0\0 ' +
-      '\0\0\0\x4C meta \0\0\0\0 ' +
+      '\0\0\0\x54 meta \0\0\0\0 ' +
       '\0\0\0\x08 free ' +
-      '\0\0\0\x38 iprp ' +
+      '\0\0\0\x40 iprp ' +
       '\0\0\0\x08 free ' +
-      '\0\0\0\x28 ipco ' +
+      '\0\0\0\x30 ipco ' +
       '\0\0\0\x08 free ' +
       '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08' +
       '\0\0\0\x0C free \0\0\0\0 '
@@ -771,11 +817,11 @@ describe('AVIF (sync)', function () {
       '\0\0\0\x14 ftyp avif \0\0\0\0 mif1' +
       '\0\0\0\x08 free ' +
       '\0\0\0\x0C free \0\0\0\0 ' +
-      '\0\0\0\x4C meta \0\0\0\0 ' +
+      '\0\0\0\x54 meta \0\0\0\0 ' +
       '\0\0\0\x08 free ' +
-      '\0\0\0\x38 iprp ' +
+      '\0\0\0\x40 iprp ' +
       '\0\0\0\x08 free ' +
-      '\0\0\0\x28 ipco ' +
+      '\0\0\0\x30 ipco ' +
       '\0\0\0\x08 free ' +
       '\0\0\0\x14 ispe \0\0\0\0 \x01\x02\x03\x04 \x05\x06\x07\x08' +
       '\0\0\0\x0C free \0\0\0\0 '
