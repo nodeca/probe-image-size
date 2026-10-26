@@ -3,13 +3,13 @@
 const neostandard = require('neostandard')
 
 module.exports = [
-  ...neostandard({
-    env: ['node'],
+  ...neostandard({ env: ['node'] }),
+  {
     ignores: [
       'coverage/**',
       '.nyc_output/**'
     ]
-  }),
+  },
   {
     files: ['**/*.js'],
     languageOptions: {
