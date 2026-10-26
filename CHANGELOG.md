@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.5.0] - 2026-10-26
+### Security
+- Fixed possible high CPU/memory usage in JPEG, WebP, AVIF and SVG parsers.
+
+### Changed
+- Rewrote all parsers as shared FSMs.
+- Removed `stream-parser` dependency.
+- Added limits on image variants and item locations in the AVIF parser.
+
+
 ## [7.4.0] - 2026-08-14
 ### Security
 - Fixed possible DoS in SVG parser.
@@ -238,6 +248,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First release.
 
 
+[7.5.0]: https://github.com/nodeca/probe-image-size/compare/7.4.0...7.5.0
 [7.4.0]: https://github.com/nodeca/probe-image-size/compare/7.3.0...7.4.0
 [7.3.0]: https://github.com/nodeca/probe-image-size/compare/7.2.3...7.3.0
 [7.2.3]: https://github.com/nodeca/probe-image-size/compare/7.2.2...7.2.3
