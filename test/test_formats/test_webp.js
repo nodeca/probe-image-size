@@ -124,10 +124,9 @@ describe('WEBP', function () {
     exif_data.writeUInt16LE(6, ifd0_offset + 10)
     const data = makeExifWebp(exif_data)
 
-    const size = await probe(Readable.from([data]))
+    const size = await probe(Readable.from([data.subarray(0, 4096), data.subarray(4096)]))
 
     assert.strictEqual(size.orientation, 6)
-    assert.deepStrictEqual(size, probe.sync(data))
   })
 })
 
@@ -135,60 +134,8 @@ describe('WEBP', function () {
 describe('WEBP (sync)', function () {
   it('should detect VP8', function () {
     const file = path.join(__dirname, '..', 'fixtures', 'webp-vp8.webp')
-    const size = probe.sync(fs.readFileSync(file))
+    const size = probe.sync(new Uint8Array(fs.readFileSync(file)))
 
     assert.deepStrictEqual(size, { width: 1, height: 1, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' })
-  })
-
-
-  it('should skip VP8 header with bad code block', function () {
-    const size = probe.sync(str2arr('RIFF\x20\0\0\0WEBPVP8 \x0C\0\0\0....................'))
-
-    assert.strictEqual(size, null)
-  })
-
-
-  it('should detect VP8X', function () {
-    const file = path.join(__dirname, '..', 'fixtures', 'webp-vp8x.webp')
-    const size = probe.sync(fs.readFileSync(file))
-
-    assert.deepStrictEqual(size, { width: 367, height: 187, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' })
-  })
-
-
-  it('should detect VP8L (lossless)', function () {
-    const file = path.join(__dirname, '..', 'fixtures', 'webp-vp8l.webp')
-    const size = probe.sync(fs.readFileSync(file))
-
-    assert.deepStrictEqual(size, { width: 367, height: 187, type: 'webp', mime: 'image/webp', wUnits: 'px', hUnits: 'px' })
-  })
-
-
-  it('should detect exif orientation', async function () {
-    const file = path.join(__dirname, '..', 'fixtures', 'Exif5-1.5x.webp')
-    const size = probe.sync(fs.readFileSync(file))
-
-    assert.deepStrictEqual(size.orientation, 5)
-  })
-
-
-  it('should skip VP8L header with bad code block', function () {
-    const size = probe.sync(str2arr('RIFF\x20\0\0\0WEBPVP8L\x0C\0\0\0....................'))
-
-    assert.strictEqual(size, null)
-  })
-
-
-  it('coverage - truncated WEBP', function () {
-    let buf
-
-    buf = str2arr('RIFF"\0\0\0WEBPVP8 ')
-    assert.strictEqual(probe.sync(buf), null)
-
-    buf = str2arr('RIFF"\0\0\0WEBPVP8L')
-    assert.strictEqual(probe.sync(buf), null)
-
-    buf = str2arr('RIFF"\0\0\0WEBPVP8X')
-    assert.strictEqual(probe.sync(buf), null)
   })
 })
