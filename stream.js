@@ -21,7 +21,7 @@ module.exports = function probeStream (src, keepOpen) {
     var last_error
 
     function parserEnd (err) {
-      var idx = alive_parsers.indexOf[this]
+      var idx = alive_parsers.indexOf(this)
 
       /* istanbul ignore if */
       if (idx < 0) return
