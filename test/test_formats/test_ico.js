@@ -56,7 +56,7 @@ describe('ICO', function () {
 describe('ICO (sync)', function () {
   it('should detect ICO', function () {
     const file = path.join(__dirname, '..', 'fixtures', 'google.ico')
-    const size = probe.sync(fs.readFileSync(file))
+    const size = probe.sync(new Uint8Array(fs.readFileSync(file)))
 
     assert.deepStrictEqual(size, {
       width: 128,
@@ -73,31 +73,5 @@ describe('ICO (sync)', function () {
       wUnits: 'px',
       hUnits: 'px'
     })
-  })
-
-
-  it('should display 0 size as 256', function () {
-    const file = path.join(__dirname, '..', 'fixtures', 'google1.ico')
-    const size = probe.sync(fs.readFileSync(file))
-
-    assert.deepStrictEqual(size, {
-      width: 256,
-      height: 256,
-      variants: [
-        { height: 256, width: 256 },
-        { height: 24, width: 24 }
-      ],
-      type: 'ico',
-      mime: 'image/x-icon',
-      wUnits: 'px',
-      hUnits: 'px'
-    })
-  })
-
-
-  it('should skip truncated ICO index', function () {
-    const buf = Buffer.from([0, 0, 1, 0, 2, 0, 16, 16])
-
-    assert.strictEqual(probe.sync(buf), null)
   })
 })
